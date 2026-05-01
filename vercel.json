@@ -1,0 +1,55 @@
+{
+  "cleanUrls": true,
+  "redirects": [
+    { "source": "/index.html", "destination": "/", "permanent": true },
+    { "source": "/about.html", "destination": "/about", "permanent": true },
+    { "source": "/books.html", "destination": "/books", "permanent": true },
+    { "source": "/movies.html", "destination": "/movies", "permanent": true },
+    { "source": "/photos.html", "destination": "/photos", "permanent": true },
+    { "source": "/videos.html", "destination": "/videos", "permanent": true },
+    { "source": "/training.html", "destination": "/training", "permanent": true },
+    { "source": "/tools.html", "destination": "/tools", "permanent": true },
+    { "source": "/portfolio.html", "destination": "/portfolio", "permanent": true },
+    { "source": "/writing/index.html", "destination": "/writing", "permanent": true },
+    { "source": "/writing/post.html", "destination": "/writing/post", "permanent": true },
+    { "source": "/admin/index.html", "destination": "/admin", "permanent": true },
+    { "source": "/index", "destination": "/", "permanent": true }
+  ],
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/about", "destination": "/about.html" },
+    { "source": "/books", "destination": "/books.html" },
+    { "source": "/movies", "destination": "/movies.html" },
+    { "source": "/photos", "destination": "/photos.html" },
+    { "source": "/videos", "destination": "/videos.html" },
+    { "source": "/training", "destination": "/training.html" },
+    { "source": "/tools", "destination": "/tools.html" },
+    { "source": "/portfolio", "destination": "/portfolio.html" },
+    { "source": "/writing", "destination": "/writing/index.html" },
+    { "source": "/writing/post", "destination": "/writing/post.html" },
+    { "source": "/admin", "destination": "/admin/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Embedder-Policy", "value": "credentialless" }
+      ]
+    }
+  ],
+  "functions": {
+    "api/upload.js": {
+      "maxDuration": 60,
+      "memory": 1024
+    },
+    "api/upload-direct.js": {
+      "maxDuration": 60,
+      "memory": 1024
+    },
+    "api/convert.js": {
+      "maxDuration": 60,
+      "memory": 1024
+    }
+  }
+}

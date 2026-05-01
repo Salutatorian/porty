@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Writing · The Greater Engine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Inter:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles.css" />
+    <script>
+      (function(){var k='greater-engine-theme';try{var t=localStorage.getItem(k);if(t==='dark'||t==='light'||t==='reading')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
+    </script>
+  </head>
+  <body>
+    <div class="site-shell">
+      <aside class="sidebar">
+        <a href="/admin" class="sidebar-admin" title="Admin" aria-label="Admin"><svg class="sidebar-admin-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66z"/></svg></a>
+        <a href="/" class="brand">
+          <span class="brand-mark">the</span>
+          <span class="brand-name">greater engine</span>
+        </a>
+
+        <nav class="nav">
+          <a href="/" class="nav-link">home</a>
+          <a href="/portfolio" class="nav-link">portfolio</a>
+          <a href="/about" class="nav-link">about</a>
+          <a href="/writing" class="nav-link active">writing</a>
+          <div class="nav-dropdown">
+            <span class="nav-dropdown-trigger">library</span>
+            <div class="nav-dropdown-menu">
+              <a href="/books" class="nav-link">books</a>
+              <a href="/movies" class="nav-link">movies</a>
+            </div>
+          </div>
+          <a href="/books" class="nav-link nav-link--mobile-only">books</a>
+          <a href="/movies" class="nav-link nav-link--mobile-only">movies</a>
+          <div class="nav-dropdown">
+            <span class="nav-dropdown-trigger">media</span>
+            <div class="nav-dropdown-menu">
+              <a href="/photos" class="nav-link">photos</a>
+              <a href="/videos" class="nav-link">videos</a>
+            </div>
+          </div>
+          <a href="/photos" class="nav-link nav-link--mobile-only">photos</a>
+          <a href="/videos" class="nav-link nav-link--mobile-only">videos</a>
+          <div class="nav-dropdown">
+            <span class="nav-dropdown-trigger">tools</span>
+            <div class="nav-dropdown-menu">
+              <a href="/tools" class="nav-link">photo converter</a>
+            </div>
+          </div>
+          <a href="/tools" class="nav-link nav-link--mobile-only">photo converter</a>
+          <a href="/training" class="nav-link">training</a>
+        </nav>
+
+        <div class="sidebar-music">
+          <div class="music-player">
+            <div class="music-controls">
+              <button type="button" class="music-prev" aria-label="Previous track"></button>
+              <div class="music-art-wrap">
+                <div class="music-art" id="music-art">
+                  <img src="" alt="" id="music-art-img" class="music-art-img" />
+                  <button type="button" class="music-play" id="music-play" aria-label="Play" data-state="paused"></button>
+                </div>
+              </div>
+              <button type="button" class="music-next" aria-label="Next track"></button>
+            </div>
+            <p class="music-title" id="music-title">—</p>
+            <div class="music-volume-wrap">
+              <input type="range" id="music-volume" class="music-volume" min="0" max="100" value="10" aria-label="Volume" />
+            </div>
+          </div>
+          <audio id="music-audio" preload="metadata"></audio>
+        </div>
+
+        <div class="sidebar-footer">
+          <p class="sidebar-tagline">built for distance, not speed.</p>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="header-actions">
+          <div class="socials">
+            <a href="https://github.com/Salutatorian" target="_blank" rel="noopener noreferrer" aria-label="GitHub" class="social-link"><svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg></a>
+            <a href="https://www.linkedin.com/in/joshua-waldo-8b8023394/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="social-link"><svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
+            <a href="https://www.instagram.com/joshuaawaldo/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="social-link"><svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>
+            <a href="https://www.strava.com/athletes/73302983" target="_blank" rel="noopener noreferrer" aria-label="Strava" class="social-link"><svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 4.6 2.635-4.6h4.907l-6.107 10.172-2.301 3.828-2.301-3.828-6.107-10.172h4.908l2.629 4.6z"/></svg></a>
+            <a href="../resume.pdf" target="_blank" rel="noopener noreferrer" aria-label="Resume" class="social-link social-link--resume" title="View resume"><svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11zm-2-9H8v2h8v-2zm0 4H8v2h8v-2zm-4-8H8v2h4V7z"/></svg></a>
+          </div>
+          <button type="button" class="theme-toggle" aria-label="Toggle dark mode">
+            <span class="theme-icon sun" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z"/></svg></span>
+            <span class="theme-icon moon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z"/></svg></span>
+          </button>
+          <button type="button" class="mobile-menu-btn" aria-label="Open menu" aria-expanded="false">
+            <span class="mobile-menu-icon"></span>
+          </button>
+        </header>
+
+        <nav class="mobile-nav" aria-hidden="true">
+          <div class="mobile-nav-header">
+            <a href="/" class="mobile-nav-brand">
+              <span class="mobile-nav-brand-mark">the</span>
+              <span class="mobile-nav-brand-name">greater engine</span>
+            </a>
+            <button type="button" class="mobile-nav-close" aria-label="Close menu">×</button>
+          </div>
+          <div class="mobile-nav-links">
+            <button type="button" class="mobile-nav-link mobile-nav-search" aria-label="Search">search</button>
+            <a href="/" class="mobile-nav-link">home</a>
+            <a href="/portfolio" class="mobile-nav-link">portfolio</a>
+            <a href="/about" class="mobile-nav-link">about</a>
+            <a href="/writing" class="mobile-nav-link">writing</a>
+            <a href="/books" class="mobile-nav-link">books</a>
+            <a href="/movies" class="mobile-nav-link">movies</a>
+            <a href="/photos" class="mobile-nav-link">photos</a>
+            <a href="/videos" class="mobile-nav-link">videos</a>
+            <a href="/tools" class="mobile-nav-link">photo converter</a>
+            <a href="/training" class="mobile-nav-link">training</a>
+            <a href="/admin" class="mobile-nav-link">admin</a>
+          </div>
+          <div class="mobile-nav-socials">
+            <a href="https://github.com/Salutatorian" target="_blank" rel="noopener noreferrer" aria-label="GitHub" class="social-link"><svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg></a>
+            <a href="https://www.linkedin.com/in/joshua-waldo-8b8023394/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="social-link"><svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
+            <a href="https://www.instagram.com/joshuaawaldo/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="social-link"><svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>
+            <a href="https://www.strava.com/athletes/73302983" target="_blank" rel="noopener noreferrer" aria-label="Strava" class="social-link"><svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 4.6 2.635-4.6h4.907l-6.107 10.172-2.301 3.828-2.301-3.828-6.107-10.172h4.908l2.629 4.6z"/></svg></a>
+            <a href="../resume.pdf" target="_blank" rel="noopener noreferrer" aria-label="Resume" class="social-link social-link--resume" title="View resume"><svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11zm-2-9H8v2h8v-2zm0 4H8v2h8v-2zm-4-8H8v2h4V7z"/></svg></a>
+          </div>
+        </nav>
+
+        <article class="page post" id="post-article">
+          <p class="post-meta" id="post-meta">Loading…</p>
+          <h1 class="post-title" id="post-title">—</h1>
+          <div class="post-audio-wrap" id="post-audio-wrap" hidden>
+            <div class="post-audio-card">
+              <p class="post-audio-label">Listen while you read</p>
+              <p class="post-audio-trim-hint" id="post-audio-trim-hint" hidden></p>
+              <div class="post-audio-player">
+                <button type="button" class="post-audio-play" id="post-audio-play" aria-label="Play">
+                  <svg class="post-audio-ico post-audio-ico-play" width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                  <svg class="post-audio-ico post-audio-ico-pause" width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+                <div class="post-audio-progress-outer">
+                  <div class="post-audio-progress" id="post-audio-progress" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                    <div class="post-audio-progress-track" aria-hidden="true"></div>
+                    <div class="post-audio-progress-fill" id="post-audio-progress-fill"></div>
+                  </div>
+                </div>
+                <span class="post-audio-time" id="post-audio-time">0000 / —</span>
+                <div class="post-audio-vol-inline">
+                  <span class="post-audio-vol-icon" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                  </span>
+                  <input type="range" id="post-audio-volume" class="post-audio-volume" min="0" max="1" step="0.05" value="0.8" aria-label="Volume" />
+                </div>
+              </div>
+              <audio id="post-audio" preload="metadata" src="" class="post-audio-native"></audio>
+            </div>
+          </div>
+          <div class="post-body" id="post-body"></div>
+          <p class="post-back"><a href="/writing">← back to writing</a></p>
+        </article>
+      </main>
+    </div>
+
+    <script src="../script.js"></script>
+    <script src="../dock-nav.js"></script>
+    <script src="../app-router.js"></script>
+    <script src="../page-ripple.js"></script>
+    <script src="../command-palette.js"></script>
+    <script src="../music-player.js"></script>
+    <script src="../js/time-format.js"></script>
+    <script>
+      (function(){
+        var params = new URLSearchParams(window.location.search || "");
+        var slug = params.get("slug");
+        if (!slug) {
+          document.getElementById("post-meta").textContent = "";
+          document.getElementById("post-title").textContent = "Post not found";
+          document.getElementById("post-body").innerHTML = "<p>No post specified. <a href=\"/writing\">Back to writing</a>.</p>";
+          return;
+        }
+        var base = document.querySelector("base");
+        var root = (base && base.href) ? new URL(base.href).origin : "";
+        fetch((root || "") + "/api/writings?slug=" + encodeURIComponent(slug))
+          .then(function(r){
+            if (!r.ok) throw new Error("Not found");
+            return r.json();
+          })
+          .then(function(p){
+            document.title = (p.title || "Post") + " · Writing · The Greater Engine";
+            var timeMeta = p.time || "";
+            if (typeof normalizeClockTimeToHHMM === "function" && timeMeta) {
+              timeMeta = normalizeClockTimeToHHMM(timeMeta) || timeMeta;
+            }
+            var meta = (p.date || "") + " · " + timeMeta + " · " + (p.category || "");
+            document.getElementById("post-meta").textContent = meta;
+            document.getElementById("post-title").textContent = p.title || "—";
+            var wrap = document.getElementById("post-audio-wrap");
+            var aud = document.getElementById("post-audio");
+            var trimHint = document.getElementById("post-audio-trim-hint");
+            if (wrap && aud && p.audioUrl) {
+              aud.src = p.audioUrl;
+              wrap.removeAttribute("hidden");
+              var volSlider = document.getElementById("post-audio-volume");
+              var playBtn = document.getElementById("post-audio-play");
+              var progressEl = document.getElementById("post-audio-progress");
+              var progressFill = document.getElementById("post-audio-progress-fill");
+              var timeEl = document.getElementById("post-audio-time");
+              var startSec = typeof p.audioStartSec === "number" && isFinite(p.audioStartSec) && p.audioStartSec >= 0 ? p.audioStartSec : 0;
+              var endSec = typeof p.audioEndSec === "number" && isFinite(p.audioEndSec) && p.audioEndSec > 0 ? p.audioEndSec : null;
+
+              function fmtT(x) {
+                return typeof formatDurationSecCompact === "function" ? formatDurationSecCompact(x) : "0000";
+              }
+
+              function clipEndResolved() {
+                if (!isFinite(aud.duration) || aud.duration <= 0) return null;
+                if (endSec != null) return Math.min(endSec, aud.duration);
+                return aud.duration;
+              }
+
+              function clipStartResolved() {
+                return Math.max(0, startSec);
+              }
+
+              function applyVolumeFromUi() {
+                var v = 0.8;
+                if (volSlider) {
+                  var parsed = parseFloat(volSlider.value);
+                  if (isFinite(parsed)) v = Math.max(0, Math.min(1, parsed));
+                }
+                aud.volume = v;
+              }
+              var savedVol = null;
+              try {
+                savedVol = localStorage.getItem("post_audio_volume");
+              } catch (e) {}
+              if (volSlider && savedVol != null && !isNaN(parseFloat(savedVol))) {
+                volSlider.value = String(Math.max(0, Math.min(1, parseFloat(savedVol))));
+              }
+              applyVolumeFromUi();
+              if (volSlider) {
+                volSlider.addEventListener("input", function () {
+                  applyVolumeFromUi();
+                  try {
+                    localStorage.setItem("post_audio_volume", volSlider.value);
+                  } catch (e) {}
+                });
+              }
+
+              function updatePlayerUi() {
+                var cs = clipStartResolved();
+                var ce = clipEndResolved();
+                if (timeEl) {
+                  timeEl.textContent = fmtT(aud.currentTime) + " / " + (ce != null ? fmtT(ce) : "—");
+                }
+                if (!progressFill || ce == null) {
+                  if (progressFill) progressFill.style.width = "0%";
+                  return;
+                }
+                var range = ce - cs;
+                if (range <= 0) {
+                  progressFill.style.width = "0%";
+                  return;
+                }
+                var p = (aud.currentTime - cs) / range;
+                p = Math.max(0, Math.min(1, p));
+                progressFill.style.width = p * 100 + "%";
+                if (progressEl) progressEl.setAttribute("aria-valuenow", String(Math.round(p * 100)));
+              }
+
+              function syncPlayButton() {
+                if (!playBtn) return;
+                var on = !aud.paused;
+                playBtn.classList.toggle("is-playing", on);
+                playBtn.setAttribute("aria-label", on ? "Pause" : "Play");
+              }
+
+              function seekAtClientX(clientX) {
+                var ce = clipEndResolved();
+                var cs = clipStartResolved();
+                if (ce == null || !progressEl) return;
+                var range = ce - cs;
+                if (range <= 0) return;
+                var rect = progressEl.getBoundingClientRect();
+                var frac = (clientX - rect.left) / rect.width;
+                frac = Math.max(0, Math.min(1, frac));
+                var t = cs + frac * range;
+                try {
+                  aud.currentTime = t;
+                } catch (e) {}
+              }
+
+              if (playBtn) {
+                playBtn.addEventListener("click", function () {
+                  if (aud.paused) {
+                    aud.play().catch(function () {});
+                  } else {
+                    aud.pause();
+                  }
+                });
+              }
+              aud.addEventListener("play", syncPlayButton);
+              aud.addEventListener("pause", syncPlayButton);
+              syncPlayButton();
+
+              if (progressEl) {
+                progressEl.addEventListener("click", function (e) {
+                  seekAtClientX(e.clientX);
+                });
+                progressEl.addEventListener("keydown", function (e) {
+                  var ce = clipEndResolved();
+                  var cs = clipStartResolved();
+                  if (ce == null) return;
+                  var range = ce - cs;
+                  if (range <= 0) return;
+                  var step = range / 20;
+                  if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+                    e.preventDefault();
+                    try {
+                      aud.currentTime = Math.max(cs, aud.currentTime - step);
+                    } catch (err) {}
+                  } else if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+                    e.preventDefault();
+                    try {
+                      aud.currentTime = Math.min(ce, aud.currentTime + step);
+                    } catch (err) {}
+                  }
+                });
+              }
+
+              if (trimHint) {
+                if (startSec > 0 || endSec != null) {
+                  var h = startSec > 0 && endSec != null ? "Clip " + fmtT(startSec) + "–" + fmtT(endSec)
+                    : startSec > 0 ? "Starts at " + fmtT(startSec)
+                    : endSec != null ? "Plays until " + fmtT(endSec)
+                    : "";
+                  trimHint.textContent = h;
+                  trimHint.removeAttribute("hidden");
+                } else {
+                  trimHint.textContent = "";
+                  trimHint.setAttribute("hidden", "");
+                }
+              }
+
+              function applyTrimBounds() {
+                if (endSec != null && isFinite(aud.duration) && endSec > aud.duration) {
+                  endSec = aud.duration;
+                }
+                if (startSec > 0) {
+                  try { aud.currentTime = startSec; } catch (e) {}
+                }
+                updatePlayerUi();
+              }
+
+              aud.addEventListener("loadedmetadata", applyTrimBounds);
+              aud.addEventListener("seeked", function () {
+                if (aud.currentTime < startSec - 0.02) {
+                  try { aud.currentTime = startSec; } catch (e) {}
+                }
+                if (endSec != null && isFinite(aud.duration) && aud.currentTime > Math.min(endSec, aud.duration) + 0.02) {
+                  try { aud.currentTime = Math.min(endSec, aud.duration); } catch (e) {}
+                }
+                updatePlayerUi();
+              });
+
+              aud.addEventListener("play", function () {
+                if (endSec != null && aud.currentTime >= endSec - 0.12) {
+                  try { aud.currentTime = startSec; } catch (e) {}
+                } else if (aud.currentTime < startSec - 0.08 || (endSec != null && aud.currentTime > (isFinite(aud.duration) ? Math.min(endSec, aud.duration) : endSec) + 0.02)) {
+                  try { aud.currentTime = startSec; } catch (e) {}
+                }
+              });
+              aud.addEventListener("timeupdate", function () {
+                if (endSec != null) {
+                  var cap = isFinite(aud.duration) ? Math.min(endSec, aud.duration) : endSec;
+                  if (aud.currentTime >= cap - 0.08) {
+                    aud.pause();
+                    try { aud.currentTime = cap; } catch (e) {}
+                  }
+                }
+                updatePlayerUi();
+              });
+            } else if (wrap) {
+              wrap.setAttribute("hidden", "");
+              if (trimHint) { trimHint.textContent = ""; trimHint.setAttribute("hidden", ""); }
+              if (aud) { aud.removeAttribute("src"); aud.load(); }
+            }
+            var body = p.body || p.excerpt || "";
+            var bodyEl = document.getElementById("post-body");
+            if (body && body.indexOf("<") !== -1) {
+              bodyEl.innerHTML = body;
+            } else {
+              bodyEl.innerHTML = "<p>" + escapeHtml(body).replace(/\n\n/g, "</p><p>").replace(/\n/g, "<br>") + "</p>";
+            }
+          })
+          .catch(function(){
+            document.getElementById("post-meta").textContent = "";
+            document.getElementById("post-title").textContent = "Post not found";
+            document.getElementById("post-body").innerHTML = "<p>This post could not be loaded. <a href=\"/writing\">Back to writing</a>.</p>";
+          });
+        function escapeHtml(s){
+          var d = document.createElement("div");
+          d.textContent = s;
+          return d.innerHTML;
+        }
+      })();
+    </script>
+  </body>
+</html>

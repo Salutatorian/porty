@@ -1,0 +1,3300 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Admin · The Greater Engine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Inter:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../styles.css" />
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet" />
+    <style>
+      /* ---- admin shell ---- */
+      .admin-page {
+        max-width: 1200px; margin: 0 auto; padding: 48px 32px;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        min-height: 100vh;
+      }
+
+      /* ---- admin header ---- */
+      .admin-header {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--border);
+      }
+      .admin-header-left { display: flex; flex-direction: column; gap: 2px; }
+      .admin-header-right { display: flex; align-items: center; gap: 12px; }
+      .admin-back { font-size: 13px; margin-bottom: 8px; }
+      .admin-back a {
+        color: var(--text-muted); text-decoration: none; transition: color 0.15s ease;
+        display: inline-flex; align-items: center; gap: 6px;
+      }
+      .admin-back a:hover { color: var(--text); }
+      .admin-page h1 { font-size: 1.75rem; margin: 0; font-weight: 700; letter-spacing: -0.03em; }
+      .admin-tagline {
+        font-size: 11px; font-weight: 500; text-transform: uppercase;
+        letter-spacing: 0.15em; color: var(--text-muted); opacity: 0.6; margin: 4px 0 0;
+      }
+
+      /* ---- theme toggle (admin) ---- */
+      .admin-theme-toggle {
+        width: 40px; height: 40px; border-radius: 10px;
+        border: 1px solid var(--border); background: var(--bg-alt);
+        color: var(--text-muted); cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: color 0.2s, border-color 0.2s, background 0.2s;
+        padding: 0; min-height: 40px;
+      }
+      .admin-theme-toggle:hover {
+        color: var(--text); border-color: var(--text-muted);
+        transform: none; box-shadow: none;
+      }
+      .admin-theme-toggle svg { width: 18px; height: 18px; }
+      .admin-theme-toggle .admin-sun { display: flex; }
+      .admin-theme-toggle .admin-moon { display: none; }
+      [data-theme="dark"] .admin-theme-toggle .admin-sun { display: none; }
+      [data-theme="dark"] .admin-theme-toggle .admin-moon { display: flex; }
+      [data-theme="reading"] .admin-theme-toggle .admin-sun { display: none; }
+      [data-theme="reading"] .admin-theme-toggle .admin-moon { display: flex; }
+
+      /* ---- layouts ---- */
+      .admin-writings-layout,
+      .admin-projects-layout,
+      .admin-photos-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+      /* Prevent grid blowout: min-content from wide children (e.g. canvas) must not expand the column */
+      .admin-writings-layout > div,
+      .admin-projects-layout > div,
+      .admin-photos-layout > div { min-width: 0; }
+      @media (max-width: 900px) {
+        .admin-writings-layout,
+        .admin-projects-layout,
+        .admin-photos-layout { grid-template-columns: 1fr; }
+      }
+
+      /* ---- form panel cards ---- */
+      .admin-projects-layout > div:first-child,
+      .admin-writings-layout > div:first-child,
+      .admin-photos-layout > div:first-child {
+        background: var(--bg-alt); border: 1px solid var(--border);
+        border-radius: 12px; padding: 24px;
+      }
+
+      /* ---- typography ---- */
+      .admin-page h2 {
+        font-size: 0.85rem; margin: 32px 0 12px; color: var(--text);
+        font-weight: 600; letter-spacing: -0.01em;
+      }
+      .admin-page label {
+        display: block; font-size: 12px; margin-bottom: 6px;
+        color: var(--text-muted); font-weight: 500; letter-spacing: 0.03em;
+        text-transform: uppercase;
+      }
+
+      /* ---- inputs ---- */
+      .admin-page input, .admin-page select, .admin-page textarea {
+        width: 100%; padding: 10px 14px; margin-bottom: 16px;
+        border: 1px solid var(--border); border-radius: 10px;
+        background: var(--bg); color: var(--text);
+        font-size: 14px; box-sizing: border-box; font-family: inherit;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+      .admin-page input:focus, .admin-page select:focus, .admin-page textarea:focus {
+        outline: none; border-color: var(--text-muted);
+        box-shadow: 0 0 0 3px rgba(128, 128, 128, 0.08);
+      }
+      .admin-page input::placeholder, .admin-page textarea::placeholder {
+        color: var(--text-muted); opacity: 0.5;
+      }
+      .admin-page input[type="file"] { padding: 10px; }
+      .admin-page textarea { min-height: 80px; resize: vertical; }
+
+      /* ---- buttons ---- */
+      .admin-page button {
+        padding: 10px 22px; background: var(--text); color: var(--bg);
+        border: none; border-radius: 10px; font-weight: 600; cursor: pointer;
+        font-family: inherit; font-size: 13px; letter-spacing: 0.01em;
+        min-height: 44px; -webkit-tap-highlight-color: transparent;
+        transition: opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+      }
+      .admin-page button:hover { opacity: 0.88; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+      .admin-page button:active { transform: translateY(0); box-shadow: none; }
+      .admin-page button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+      /* ---- logout ---- */
+      .admin-logout { position: absolute; top: 48px; right: 32px; }
+      .admin-logout button {
+        background: transparent; color: var(--text-muted); font-size: 12px;
+        padding: 6px 14px; min-height: 34px; border: 1px solid var(--border); border-radius: 8px;
+      }
+      .admin-logout button:hover { color: #dc2626; border-color: #dc2626; background: transparent; transform: none; box-shadow: none; }
+
+      /* ---- messages ---- */
+      .admin-page .msg { margin-top: 12px; font-size: 13px; font-weight: 500; }
+      .admin-page .msg.err { color: #dc2626; }
+      .admin-page .msg.ok { color: #16a34a; }
+
+      /* ---- writing audio waveform trimmer ---- */
+      .audio-trim-panel {
+        margin: 0 0 16px;
+        min-width: 0;
+        max-width: 100%;
+      }
+      .audio-trim-panel[hidden] { display: none !important; }
+      .audio-trim-heading {
+        display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600;
+        text-transform: none; letter-spacing: 0.02em; color: var(--text); margin-bottom: 10px;
+      }
+      .audio-trim-heading-icon {
+        flex-shrink: 0; color: var(--text-muted); opacity: 0.85;
+      }
+      .audio-trim-hint {
+        font-size: 11px; color: var(--text-muted); line-height: 1.45; margin: -4px 0 10px;
+      }
+      .audio-trim-track {
+        position: relative; height: 96px; width: 100%; max-width: 100%; min-width: 0;
+        box-sizing: border-box;
+        border-radius: 12px; overflow: hidden;
+        border: 1px solid var(--border); background: var(--bg); cursor: default;
+        user-select: none; touch-action: none;
+      }
+      .audio-trim-waveform {
+        display: block; width: 100%; max-width: 100%; height: 100%; vertical-align: top;
+        box-sizing: border-box;
+      }
+      .audio-trim-shade {
+        position: absolute; top: 0; bottom: 0; pointer-events: none;
+        background: rgba(0, 0, 0, 0.5);
+      }
+      .audio-trim-shade-left { left: 0; }
+      .audio-trim-shade-right { right: 0; }
+      .audio-trim-keep {
+        position: absolute; top: 0; bottom: 0; pointer-events: auto;
+        cursor: pointer;
+        background: rgba(34, 197, 94, 0.14);
+        border-left: 1px solid rgba(34, 197, 94, 0.35);
+        border-right: 1px solid rgba(34, 197, 94, 0.35);
+        box-sizing: border-box;
+      }
+      .audio-trim-scrub-head {
+        position: absolute; top: 0; bottom: 0; left: 0; width: 0; z-index: 4;
+        pointer-events: none; margin-left: -1px;
+      }
+      .audio-trim-scrub-head::after {
+        content: ""; position: absolute; left: 0; top: 8px; bottom: 10px; width: 2px; margin-left: -1px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 1px;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2), 0 1px 4px rgba(0, 0, 0, 0.25);
+      }
+      .audio-trim-handle {
+        position: absolute; top: 0; bottom: 0; width: 12px; margin-left: -6px; z-index: 6;
+        cursor: ew-resize; padding: 0; border: none; background: transparent;
+        min-height: 0;
+      }
+      .audio-trim-handle::before {
+        content: ""; position: absolute; top: 0; bottom: 0; left: 50%; transform: translateX(-50%);
+        width: 5px; border-radius: 3px;
+        background: linear-gradient(180deg, rgba(55,55,55,0.95) 0%, rgba(30,30,30,0.98) 100%);
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12);
+      }
+      .audio-trim-handle:hover::before { filter: brightness(1.08); }
+      .audio-trim-handle::after {
+        content: ""; position: absolute; top: 5px; left: 50%; transform: translateX(-50%);
+        width: 9px; height: 11px;
+        background: linear-gradient(180deg, #4ade80 0%, #22c55e 90%);
+        clip-path: polygon(50% 0%, 100% 40%, 75% 100%, 25% 100%, 0% 40%);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        border: none;
+      }
+      .audio-trim-handle:focus { outline: 2px solid var(--text-muted); outline-offset: 2px; }
+      .audio-trim-duration-total {
+        position: absolute; bottom: 6px; right: 8px; font-size: 11px; font-variant-numeric: tabular-nums;
+        color: var(--text-muted); pointer-events: none; z-index: 3;
+      }
+      .audio-trim-readout {
+        margin: 10px 0 0; font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums;
+      }
+      .audio-trim-preview {
+        display: flex; align-items: center; gap: 12px 16px; flex-wrap: wrap;
+        margin-top: 12px;
+      }
+      .audio-trim-preview-vol-wrap {
+        display: flex; align-items: center; gap: 8px;
+        flex: 1 1 200px;
+        min-width: min(100%, 220px);
+      }
+      .audio-trim-preview-vol-label {
+        font-size: 11px; font-weight: 500; color: var(--text-muted);
+        white-space: nowrap;
+      }
+      .audio-trim-panel .audio-trim-preview-vol {
+        flex: 1; min-width: 80px; max-width: 200px; height: 6px; margin-bottom: 0;
+        cursor: pointer; accent-color: var(--text-muted);
+      }
+      .audio-trim-panel .audio-trim-preview-btn {
+        margin-bottom: 0;
+        padding: 8px 18px; min-height: 40px; font-size: 13px; font-weight: 600;
+        background: var(--bg-alt); color: var(--text);
+        border: 1px solid var(--border); border-radius: 10px;
+        cursor: pointer; font-family: inherit;
+        transition: opacity 0.15s ease, transform 0.15s ease;
+      }
+      .audio-trim-panel .audio-trim-preview-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+      .audio-trim-panel .audio-trim-preview-btn[aria-pressed="true"] {
+        background: var(--text); color: var(--bg); border-color: var(--text);
+      }
+      .audio-trim-preview-note {
+        font-size: 11px; color: var(--text-muted); line-height: 1.4; max-width: 280px;
+      }
+      .audio-trim-fallback { margin-top: 12px; }
+      .audio-trim-fallback summary { cursor: pointer; font-size: 12px; color: var(--text-muted); }
+      .audio-trim-fallback[open] summary { margin-bottom: 8px; }
+
+      /* ---- OTP login demo ---- */
+      .admin-login {
+        margin: 0 auto 32px; max-width: 430px; text-align: left;
+        padding: 0; background: transparent;
+      }
+      .admin-login-card {
+        border-radius: 28px; padding: 28px;
+        background: #050505; color: #f7f7f7;
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 26px 80px rgba(0,0,0,0.25);
+      }
+      .admin-login label { color: rgba(255,255,255,0.62); text-align: left; }
+      .admin-login input {
+        margin-bottom: 16px; background: #101010; color: #fff;
+        border-color: rgba(255,255,255,0.14);
+      }
+      .admin-login input:focus {
+        border-color: rgba(255,255,255,0.42);
+        box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
+      }
+      .admin-login button { width: 100%; background: #f7f7f7; color: #080808; }
+      .admin-login button:hover { opacity: 1; background: #fff; }
+      .admin-login-step[hidden] { display: none !important; }
+      .otp-art {
+        width: 116px; height: 116px; border-radius: 50%; margin: 0 auto 22px;
+        display: grid; place-items: center; position: relative;
+        background: radial-gradient(circle at 32% 24%, #fff 0 8%, #d8ecff 9% 28%, #6aa9ff 29% 56%, #16345e 57% 100%);
+        box-shadow: inset 0 0 0 9px rgba(255,255,255,0.08), 0 14px 44px rgba(77,154,255,0.22);
+      }
+      .otp-art::after {
+        content: ""; width: 38px; height: 24px; border-left: 6px solid #fff; border-bottom: 6px solid #fff;
+        transform: rotate(-45deg) translate(2px, -3px); border-radius: 3px;
+      }
+      .otp-title {
+        margin: 0 0 8px; text-align: center; font-size: 28px;
+        letter-spacing: -0.04em; line-height: 1.05;
+      }
+      .otp-helper {
+        margin: 0 0 22px; text-align: center; color: rgba(255,255,255,0.58);
+        font-size: 14px; line-height: 1.55;
+      }
+      .otp-email-row {
+        margin: -8px 0 18px; text-align: center; font-size: 13px;
+        color: rgba(255,255,255,0.72);
+      }
+      .otp-code-row {
+        display: flex; justify-content: center; gap: 8px; margin-bottom: 16px;
+      }
+      .admin-page .otp-input {
+        width: 48px; height: 54px; margin: 0; padding: 0;
+        text-align: center; font-size: 24px; font-weight: 700;
+        border-radius: 16px; background: #121212; color: #fff;
+      }
+      .otp-dots {
+        display: flex; justify-content: center; gap: 8px; margin-bottom: 18px;
+      }
+      .otp-dots span {
+        width: 6px; height: 6px; border-radius: 999px; background: rgba(255,255,255,0.24);
+      }
+      .otp-help {
+        display: flex; justify-content: center; gap: 6px; margin-top: 18px;
+        font-size: 13px; color: rgba(255,255,255,0.54);
+      }
+      .otp-help a { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+      .otp-verified {
+        text-align: center; padding-top: 4px;
+      }
+      .otp-verified[hidden] { display: none !important; }
+      .admin-login.is-shaking .otp-code-row { animation: otp-shake 0.28s ease; }
+      @keyframes otp-shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-8px); }
+        75% { transform: translateX(8px); }
+      }
+      .admin-form { display: none; }
+      .admin-form.visible { display: block; }
+
+      /* ---- nav tabs ---- */
+      .admin-nav-row {
+        display: flex; flex-wrap: wrap; align-items: center;
+        gap: 12px 16px; margin-bottom: 32px;
+      }
+      .admin-nav-row .admin-tabs--segmented {
+        margin-bottom: 0; flex: 1; min-width: min(100%, 280px);
+      }
+      .admin-media-subtabs-bar { display: none; align-items: center; flex-shrink: 0; }
+      .admin-media-subtabs-bar.is-visible { display: flex; }
+
+      .admin-page .admin-tabs--segmented,
+      .admin-page .admin-project-subtabs--segmented,
+      .admin-page .admin-media-subtabs--segmented {
+        display: inline-flex; flex-wrap: nowrap;
+        border: 1px solid var(--border); border-radius: 10px;
+        overflow: hidden; background: var(--bg-alt); padding: 3px;
+        gap: 2px;
+      }
+      .admin-page .admin-project-subtabs--segmented { margin-bottom: 20px; }
+
+      .admin-page .admin-tabs--segmented button.admin-tab,
+      .admin-page .admin-project-subtabs--segmented button.admin-project-subtab,
+      .admin-page .admin-media-subtabs--segmented button.admin-media-subtab {
+        border: none; border-radius: 8px; margin: 0; min-height: 36px;
+        padding: 6px 16px; background: transparent; color: var(--text-muted);
+        font-size: 13px; font-weight: 500; cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+      }
+      .admin-page .admin-project-subtabs--segmented button.admin-project-subtab {
+        font-size: 12px; padding: 6px 14px;
+      }
+      .admin-page .admin-tabs--segmented button.admin-tab { padding: 6px 18px; }
+
+      /* remove old dividers between tabs */
+      .admin-page .admin-tabs--segmented button.admin-tab:not(:last-child),
+      .admin-page .admin-project-subtabs--segmented button.admin-project-subtab:not(:last-child),
+      .admin-page .admin-media-subtabs--segmented button.admin-media-subtab:not(:last-child) {
+        border-right: none;
+      }
+
+      .admin-page .admin-tabs--segmented button.admin-tab:hover:not(.active),
+      .admin-page .admin-project-subtabs--segmented button.admin-project-subtab:hover:not(.active),
+      .admin-page .admin-media-subtabs--segmented button.admin-media-subtab:hover:not(.active) {
+        color: var(--text); background: var(--bg);
+      }
+      .admin-page .admin-tabs--segmented button.admin-tab.active,
+      .admin-page .admin-project-subtabs--segmented button.admin-project-subtab.active,
+      .admin-page .admin-media-subtabs--segmented button.admin-media-subtab.active {
+        background: var(--text); color: var(--bg);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.15); border-radius: 8px;
+      }
+      .admin-page .admin-tabs--segmented button.admin-tab.active:hover,
+      .admin-page .admin-project-subtabs--segmented button.admin-project-subtab.active:hover,
+      .admin-page .admin-media-subtabs--segmented button.admin-media-subtab.active:hover {
+        opacity: 0.95; color: var(--bg);
+      }
+
+      @media (max-width: 560px) {
+        .admin-nav-row { flex-direction: column; align-items: stretch; }
+        .admin-nav-row .admin-tabs--segmented { width: 100%; }
+        .admin-page .admin-tabs--segmented button.admin-tab {
+          flex: 1; min-width: 0; padding: 6px 8px; font-size: 12px;
+        }
+        .admin-media-subtabs-bar.is-visible { width: 100%; }
+        .admin-page .admin-media-subtabs--segmented { width: 100%; }
+        .admin-page .admin-media-subtabs--segmented button.admin-media-subtab { flex: 1; text-align: center; }
+        .admin-page .admin-project-subtabs--segmented { width: 100%; }
+        .admin-page .admin-project-subtabs--segmented button.admin-project-subtab { flex: 1; text-align: center; }
+      }
+
+      /* ---- panes ---- */
+      .admin-pane { display: none; }
+      .admin-pane.active { display: block; animation: admin-fade-in 0.3s ease; }
+      @keyframes admin-fade-in {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      /* ---- pane headings ---- */
+      .admin-pane .admin-projects-layout > div > h2:first-child,
+      .admin-pane .admin-writings-layout > div > h2:first-child,
+      .admin-pane .admin-photos-layout > div > h2:first-child { margin-top: 0; }
+
+      .admin-page .project-item,
+      .admin-page .photo-item,
+      .admin-page .video-item,
+      .admin-page .writing-item { border-radius: 10px; }
+
+      /* ---- media subpanes ---- */
+      .admin-media-subpane { display: none; }
+      .admin-media-subpane.active { display: block; }
+
+      /* ---- photo/video grids ---- */
+      .photos-list,
+      .videos-list {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 16px; margin-bottom: 16px;
+      }
+      .photo-item {
+        border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+        background: var(--bg-subtle, var(--bg));
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.25s ease;
+      }
+      .photo-item:hover { border-color: var(--text-muted); box-shadow: 0 8px 24px rgba(0,0,0,0.08); transform: translateY(-3px); }
+      .photo-item img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+      .video-item {
+        border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+        background: var(--bg-subtle, var(--bg));
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.25s ease;
+      }
+      .video-item:hover { border-color: var(--text-muted); box-shadow: 0 8px 24px rgba(0,0,0,0.08); transform: translateY(-3px); }
+      .video-item video { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: #0a0a0a; }
+
+      .photo-item-info { padding: 10px 12px; font-size: 12px; color: var(--text-muted); }
+      .photo-item-title { font-weight: 600; color: var(--text); margin-bottom: 2px; }
+
+      /* ---- action buttons (edit/delete/checkoff) ---- */
+      .photo-item .delete-btn {
+        margin-top: 6px; padding: 8px 14px; font-size: 11px; min-height: 36px;
+        background: transparent; color: #dc2626; border: 1px solid #dc2626;
+        border-radius: 8px; cursor: pointer; -webkit-tap-highlight-color: transparent; font-weight: 600;
+      }
+      .photo-item .delete-btn:hover { background: #dc2626; color: #fff; }
+      .photo-item .edit-btn {
+        margin-top: 6px; margin-right: 6px; padding: 8px 14px; font-size: 11px; min-height: 36px;
+        background: transparent; color: var(--text-muted); border: 1px solid var(--border);
+        border-radius: 8px; cursor: pointer; -webkit-tap-highlight-color: transparent; font-weight: 600;
+      }
+      .photo-item .edit-btn:hover { border-color: var(--text-muted); color: var(--text); background: transparent; }
+
+      .photo-item-edit { display: none; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+      .photo-item-edit.active { display: block; }
+      .photo-item-edit input, .photo-item-edit select, .photo-item-edit textarea { padding: 6px 8px; margin-bottom: 8px; font-size: 12px; }
+
+      /* ---- writings list ---- */
+      .writings-list { margin-bottom: 16px; }
+      .writing-item {
+        border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px;
+        margin-bottom: 10px; background: var(--bg-subtle, var(--bg));
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+      .writing-item:hover { border-color: var(--text-muted); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+      .writing-item-title { font-weight: 600; color: var(--text); margin-bottom: 4px; }
+      .writing-item-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+      .writing-item .edit-btn, .writing-item .delete-btn {
+        margin-right: 6px; margin-top: 4px; padding: 6px 12px; font-size: 11px;
+        border-radius: 8px; cursor: pointer; -webkit-tap-highlight-color: transparent;
+        min-height: 34px; font-weight: 600;
+      }
+      .writing-item .edit-btn { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+      .writing-item .edit-btn:hover { border-color: var(--text-muted); color: var(--text); }
+      .writing-item .delete-btn { background: transparent; color: #dc2626; border: 1px solid #dc2626; }
+      .writing-item .delete-btn:hover { background: #dc2626; color: #fff; }
+      .writing-item-edit { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+      .writing-item-edit.active { display: block; }
+      .writing-item-edit label { font-size: 11px; }
+      .writing-item-edit input, .writing-item-edit textarea, .writing-item-edit select { padding: 6px 8px; margin-bottom: 8px; font-size: 13px; }
+
+      /* ---- quill editor ---- */
+      .ql-editor { min-height: 140px; font-size: 14px; }
+      .ql-container { border-radius: 0 0 10px 10px; border-color: var(--border); background: var(--bg); }
+      .ql-toolbar {
+        border-radius: 10px 10px 0 0; background: var(--bg-alt);
+        border-color: var(--border); display: flex; align-items: center;
+        flex-wrap: wrap; padding: 10px 12px;
+      }
+      .ql-toolbar .ql-formats { display: inline-flex; align-items: center; gap: 6px; margin-right: 20px; margin-bottom: 0; }
+      .ql-toolbar .ql-formats:last-child { margin-right: 0; }
+      .ql-toolbar button, .ql-toolbar .ql-picker {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 28px; height: 28px; min-width: 28px; min-height: 28px;
+        padding: 0; margin: 0; border: none; border-radius: 6px; cursor: pointer;
+      }
+      .ql-toolbar button:hover, .ql-toolbar .ql-picker:hover { background: var(--border); }
+      .ql-toolbar button svg { width: 18px; height: 18px; }
+      .ql-toolbar .ql-picker .ql-picker-label { padding: 0 4px; }
+      .ql-toolbar [data-tooltip] { position: relative; }
+      .ql-toolbar [data-tooltip]::after {
+        content: attr(data-tooltip);
+        position: absolute; left: 50%; bottom: 100%;
+        transform: translateX(-50%) translateY(-4px);
+        padding: 6px 10px; background: var(--text); color: var(--bg);
+        font-size: 12px; font-weight: 500; white-space: nowrap;
+        border-radius: 6px; opacity: 0; visibility: hidden;
+        transition: opacity 0.15s, visibility 0.15s;
+        pointer-events: none; z-index: 100;
+      }
+      .ql-toolbar [data-tooltip]:hover::after { opacity: 1; visibility: visible; }
+      .ql-toolbar .ql-stroke { stroke: var(--text-muted); }
+      .ql-toolbar .ql-fill { fill: var(--text-muted); }
+      .ql-toolbar .ql-picker { color: var(--text-muted); }
+      .ql-editor { color: var(--text); }
+      .editor-wrap { margin-bottom: 16px; }
+      .writing-item-edit .ql-editor { min-height: 120px; }
+
+      /* ---- projects list ---- */
+      .projects-list { margin-bottom: 16px; }
+      .projects-section { margin-bottom: 24px; }
+      .projects-section:last-child { margin-bottom: 0; }
+      .projects-section-title {
+        font-size: 11px; font-weight: 600; text-transform: uppercase;
+        letter-spacing: 0.08em; color: var(--text-muted);
+        margin-bottom: 10px; padding-bottom: 4px;
+      }
+      .project-item {
+        border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px;
+        margin-bottom: 10px; background: var(--bg-subtle, var(--bg));
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+      .project-item:hover { border-color: var(--text-muted); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+      .project-item-title { font-weight: 600; color: var(--text); margin-bottom: 2px; }
+      .project-item-dates { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+      .project-item .edit-btn, .project-item .delete-btn, .project-item .checkoff-btn {
+        margin-right: 6px; margin-top: 4px; padding: 6px 12px; font-size: 11px;
+        border-radius: 8px; cursor: pointer; -webkit-tap-highlight-color: transparent;
+        min-height: 34px; font-weight: 600;
+      }
+      .project-item .checkoff-btn { background: transparent; color: #16a34a; border: 1px solid #16a34a; }
+      .project-item .checkoff-btn:hover { background: #16a34a; color: #fff; }
+      .project-item .edit-btn { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+      .project-item .edit-btn:hover { border-color: var(--text-muted); color: var(--text); }
+      .project-item .delete-btn { background: transparent; color: #dc2626; border: 1px solid #dc2626; }
+      .project-item .delete-btn:hover { background: #dc2626; color: #fff; }
+      .project-item-edit { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+      .project-item-edit.active { display: block; }
+      .project-item-edit label { font-size: 11px; }
+      .project-item-edit input, .project-item-edit textarea, .project-item-edit select { padding: 6px 8px; margin-bottom: 8px; font-size: 13px; }
+      .project-item-edit .ql-editor { min-height: 120px; font-size: 14px; }
+
+      /* ---- mobile ---- */
+      @media (max-width: 480px) {
+        .admin-page { padding: 24px 16px; padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+        .admin-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+        .admin-header-right { width: 100%; justify-content: space-between; }
+        .admin-logout { position: static; }
+        .admin-page input, .admin-page select, .admin-page textarea { font-size: 16px; }
+        .admin-projects-layout > div:first-child,
+        .admin-writings-layout > div:first-child,
+        .admin-photos-layout > div:first-child { padding: 16px; border-radius: 10px; }
+        .photos-list, .videos-list { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .admin-login { padding: 24px 20px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="admin-page">
+      <div class="admin-header">
+        <div class="admin-header-left">
+          <p class="admin-back"><a href="/">← back to site</a></p>
+          <h1>Admin</h1>
+          <p class="admin-tagline">manage content</p>
+        </div>
+        <div class="admin-header-right">
+          <div class="admin-logout" id="admin-logout-wrap" style="display:none">
+            <button type="button" id="logout-btn">Log out</button>
+          </div>
+          <button type="button" class="admin-theme-toggle" id="admin-theme-toggle" aria-label="Toggle theme">
+            <span class="admin-sun" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z"/></svg></span>
+            <span class="admin-moon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z"/></svg></span>
+          </button>
+        </div>
+      </div>
+
+      <div id="login-form" class="admin-login">
+        <div class="admin-login-card">
+          <div id="otp-email-step" class="admin-login-step">
+            <div class="otp-art" aria-hidden="true"></div>
+            <h2 class="otp-title">Admin access</h2>
+            <p class="otp-helper">Enter an email to start the demo OTP flow. No email is sent; use the configured demo code on the next screen.</p>
+            <label for="admin-email">Email</label>
+            <input type="email" id="admin-email" placeholder="you@example.com" autocomplete="email" />
+            <button type="button" id="otp-email-btn">Send demo code</button>
+            <p class="msg" id="login-msg"></p>
+          </div>
+          <div id="otp-code-step" class="admin-login-step" hidden>
+            <div class="otp-art" aria-hidden="true"></div>
+            <h2 class="otp-title">Enter the code</h2>
+            <p class="otp-helper">Use the 5-digit demo code to verify this admin session.</p>
+            <p class="otp-email-row" id="otp-email-display"></p>
+            <div class="otp-code-row" id="otp-code-row" aria-label="One-time passcode">
+              <input class="otp-input" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 1" />
+              <input class="otp-input" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 2" />
+              <input class="otp-input" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 3" />
+              <input class="otp-input" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 4" />
+              <input class="otp-input" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 5" />
+            </div>
+            <div class="otp-dots" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+            <button type="button" id="otp-verify-btn">Verify</button>
+            <p class="msg" id="otp-msg"></p>
+            <p class="otp-help">Need Help? <a href="mailto:joshuaawaldo@gmail.com">Contact us</a></p>
+          </div>
+          <div id="otp-verified" class="otp-verified" hidden>
+            <div class="otp-art" aria-hidden="true"></div>
+            <h2 class="otp-title">Verified</h2>
+            <p class="otp-helper">Demo code accepted. Enter the existing admin password once so content saves still use the protected API.</p>
+            <label for="admin-password-after-otp">Admin password</label>
+            <input type="password" id="admin-password-after-otp" placeholder="Existing admin password" autocomplete="current-password" />
+            <button type="button" id="admin-password-unlock-btn">Open dashboard</button>
+            <p class="msg" id="admin-password-msg"></p>
+          </div>
+        </div>
+      </div>
+
+      <div id="admin-forms" class="admin-form">
+        <div class="admin-nav-row">
+        <div class="admin-tabs admin-tabs--segmented" role="tablist">
+          <button type="button" class="admin-tab active" role="tab" data-pane="life" aria-selected="true">Life</button>
+          <button type="button" class="admin-tab" role="tab" data-pane="portfolio" aria-selected="false">Portfolio</button>
+          <button type="button" class="admin-tab" role="tab" data-pane="media" aria-selected="false">Media</button>
+          <button type="button" class="admin-tab" role="tab" data-pane="writings" aria-selected="false">Writings</button>
+        </div>
+        <div id="admin-media-subtabs-bar" class="admin-media-subtabs-bar" aria-hidden="true">
+          <div class="admin-media-subtabs admin-media-subtabs--segmented" role="tablist" aria-label="Photos or videos">
+            <button type="button" class="admin-media-subtab active" role="tab" aria-selected="true" data-media-sub="photos">Photos</button>
+            <button type="button" class="admin-media-subtab" role="tab" aria-selected="false" data-media-sub="videos">Videos</button>
+          </div>
+        </div>
+        </div>
+        <div id="pane-life" class="admin-pane active">
+        <div class="admin-projects-layout">
+        <div>
+        <h2>Add life project</h2>
+        <p style="color: var(--text-muted); font-size: 13px; margin: -8px 0 16px;">Shown on home under <strong>life</strong>.</p>
+        <form id="life-project-form" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore>
+          <label for="life-proj-title">Title</label>
+          <input type="text" autocomplete="off" id="life-proj-title" required />
+          <label for="life-proj-desc-editor">Description</label>
+          <div class="editor-wrap"><div id="life-proj-desc-editor"></div></div>
+          <label for="life-proj-status">Status</label>
+          <select id="life-proj-status">
+            <option value="now">now</option>
+            <option value="future">future</option>
+            <option value="done">done</option>
+          </select>
+          <label for="life-proj-start-date">Start date (month year)</label>
+          <input type="month" autocomplete="off" id="life-proj-start-date" />
+          <label for="life-proj-end-date">End date (month year, for done only)</label>
+          <input type="month" autocomplete="off" id="life-proj-end-date" />
+          <button type="submit" id="life-proj-submit">Add life project</button>
+          <p class="msg" id="life-proj-msg"></p>
+        </form>
+        </div>
+        <div>
+        <h2>Edit or delete life projects</h2>
+        <p style="color: var(--text-muted); font-size: 13px; margin: -8px 0 16px;">Update or remove life projects (home page). Use <strong>Done</strong> to see completed items.</p>
+        <div class="admin-project-subtabs admin-project-subtabs--segmented" role="tablist" aria-label="Filter life projects by status" data-project-pane="life">
+          <button type="button" class="admin-project-subtab active" role="tab" aria-selected="true" data-project-pane="life" data-filter="now">Now</button>
+          <button type="button" class="admin-project-subtab" role="tab" aria-selected="false" data-project-pane="life" data-filter="future">Future</button>
+          <button type="button" class="admin-project-subtab" role="tab" aria-selected="false" data-project-pane="life" data-filter="done">Done</button>
+        </div>
+        <div id="life-projects-list" class="projects-list"></div>
+        <p class="msg" id="life-projects-msg"></p>
+        </div>
+        </div>
+        </div>
+        <div id="pane-portfolio" class="admin-pane">
+        <div class="admin-projects-layout">
+        <div>
+        <h2>Add portfolio project</h2>
+        <p style="color: var(--text-muted); font-size: 13px; margin: -8px 0 16px;">Shown on <strong>portfolio</strong> (code builds, demos).</p>
+        <form id="portfolio-project-form" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore>
+          <label for="port-proj-title">Title</label>
+          <input type="text" autocomplete="off" id="port-proj-title" required />
+          <label for="port-proj-desc-editor">Description</label>
+          <div class="editor-wrap"><div id="port-proj-desc-editor"></div></div>
+          <label for="port-proj-status">Status</label>
+          <select id="port-proj-status">
+            <option value="now">now</option>
+            <option value="future">future</option>
+            <option value="done">done</option>
+          </select>
+          <label for="port-proj-image">Screenshot (optional)</label>
+          <input type="file" id="port-proj-image" accept="image/*" />
+          <label for="port-proj-video">Video/GIF demo (optional)</label>
+          <input type="file" id="port-proj-video" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov" />
+          <label for="port-proj-start-date">Start date (month year)</label>
+          <input type="month" autocomplete="off" id="port-proj-start-date" />
+          <label for="port-proj-end-date">End date (month year, for done only)</label>
+          <input type="month" autocomplete="off" id="port-proj-end-date" />
+          <button type="submit" id="port-proj-submit">Add portfolio project</button>
+          <p class="msg" id="port-proj-msg"></p>
+        </form>
+        </div>
+        <div>
+        <h2>Edit or delete portfolio projects</h2>
+        <p style="color: var(--text-muted); font-size: 13px; margin: -8px 0 16px;">Update or remove code/portfolio entries. Use <strong>Done</strong> for completed builds.</p>
+        <div class="admin-project-subtabs admin-project-subtabs--segmented" role="tablist" aria-label="Filter portfolio projects by status" data-project-pane="portfolio">
+          <button type="button" class="admin-project-subtab active" role="tab" aria-selected="true" data-project-pane="portfolio" data-filter="now">Now</button>
+          <button type="button" class="admin-project-subtab" role="tab" aria-selected="false" data-project-pane="portfolio" data-filter="future">Future</button>
+          <button type="button" class="admin-project-subtab" role="tab" aria-selected="false" data-project-pane="portfolio" data-filter="done">Done</button>
+        </div>
+        <div id="portfolio-projects-list" class="projects-list"></div>
+        <p class="msg" id="portfolio-projects-msg"></p>
+        </div>
+        </div>
+        </div>
+        <div id="pane-media" class="admin-pane">
+        <div id="admin-media-photos" class="admin-media-subpane active">
+        <div class="admin-photos-layout">
+        <div>
+        <h2>Add photo</h2>
+        <form id="photo-form" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore>
+          <label for="photo-file">Image (required)</label>
+          <input type="file" id="photo-file" accept="image/*,.arw,.ARW,.sr2,.SR2,.srf,.SRF,.raw,.dng,.DNG" required />
+          <label for="photo-title">Title</label>
+          <input type="text" autocomplete="off" id="photo-title" placeholder="e.g. harukas 300" required />
+          <label for="photo-location">Location</label>
+          <input type="text" autocomplete="off" id="photo-location" placeholder="e.g. Osaka, Tokyo" />
+          <label for="photo-date">Date</label>
+          <input type="text" autocomplete="off" id="photo-date" placeholder="e.g. 01/07/26" />
+          <label for="photo-time">Time</label>
+          <input type="text" autocomplete="off" id="photo-time" placeholder="e.g. 1732" />
+          <label for="photo-caption">Caption</label>
+          <input type="text" autocomplete="off" id="photo-caption" placeholder="Optional" />
+          <label for="photo-category">Category</label>
+          <select id="photo-category">
+            <option value="polaroids">polaroids</option>
+            <option value="film">film</option>
+            <option value="digital">digital</option>
+          </select>
+          <button type="submit" id="photo-submit">Add photo</button>
+          <p class="msg" id="photo-msg"></p>
+        </form>
+        </div>
+        <div>
+        <h2>Edit or delete photos</h2>
+        <p style="color: var(--text-muted); font-size: 13px; margin: -8px 0 16px;">Edit metadata or <strong>replace the image file</strong>; delete removes the entry from the gallery (old files stay in Blob storage).</p>
+        <div id="photos-list" class="photos-list"></div>
+        <p class="msg" id="delete-msg"></p>
+        </div>
+        </div>
+        </div>
+        <div id="admin-media-videos" class="admin-media-subpane">
+        <div class="admin-photos-layout">
+        <div>
+        <h2>Add video</h2>
+        <form id="video-form" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore>
+          <label for="video-file">Video file (required)</label>
+          <input type="file" id="video-file" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov" required />
+          <p style="color: var(--text-muted); font-size: 12px; margin: -8px 0 16px; line-height: 1.45;">MP4 (H.264 + AAC) or WebM works best. If Chrome won’t play a clip but Firefox does, the upload may have been stored as the wrong type (common with Windows screen recordings). <strong>Replace the file</strong> on this entry so it re-uploads with a proper <code>video/mp4</code> type. Large files upload directly to storage (R2 or Blob).</p>
+          <label for="video-title">Title</label>
+          <input type="text" autocomplete="off" id="video-title" placeholder="e.g. Japan montage" required />
+          <label for="video-desc-editor">Description</label>
+          <div class="editor-wrap"><div id="video-desc-editor"></div></div>
+          <button type="submit" id="video-submit">Add video</button>
+          <p class="msg" id="video-msg"></p>
+        </form>
+        </div>
+        <div>
+        <h2>Edit or delete videos</h2>
+        <p style="color: var(--text-muted); font-size: 13px; margin: -8px 0 16px;">Edit title, description, or <strong>replace the file</strong>. Delete removes the listing only (Blob objects are not auto-deleted).</p>
+        <div id="videos-list" class="videos-list"></div>
+        <p class="msg" id="video-delete-msg"></p>
+        </div>
+        </div>
+        </div>
+        </div>
+        <div id="pane-writings" class="admin-pane">
+        <div class="admin-writings-layout">
+        <div>
+        <h2>New writing</h2>
+        <p style="color: var(--text-muted); font-size: 13px; margin: -8px 0 16px;">Type your post below. Use the toolbar for bold, italic, links, and photos. No code—just write.</p>
+        <form id="writing-form" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore>
+          <label for="writing-title">Title</label>
+          <input type="text" autocomplete="off" id="writing-title" placeholder="e.g. Booting up the greater engine" required />
+          <label for="writing-date">Date</label>
+          <input type="text" autocomplete="off" id="writing-date" placeholder="e.g. MAR 15, 2026" />
+          <label for="writing-time">Time</label>
+          <input type="text" autocomplete="off" id="writing-time" placeholder="e.g. 2041 (24h)" />
+          <label for="writing-category">Category</label>
+          <select id="writing-category">
+            <option value="learning">Learning</option>
+            <option value="getting started">Getting started</option>
+            <option value="reflections">Reflections</option>
+            <option value="updates">Updates</option>
+            <option value="other">Other</option>
+          </select>
+          <label for="writing-audio">Companion audio (optional)</label>
+          <input type="file" id="writing-audio" accept="audio/mpeg,audio/mp3,audio/wav,audio/x-wav,.mp3,.wav" />
+          <p style="color: var(--text-muted); font-size: 12px; margin: -8px 0 12px; line-height: 1.45;">MP3 or WAV — drag the green handles to choose what plays, or use the whole track.</p>
+          <div id="writing-audio-trimmer" class="audio-trim-panel" hidden>
+            <div class="audio-trim-heading">
+              <svg class="audio-trim-heading-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M4 7V4h3M4 17v3h3M20 7V4h-3M20 17v3h-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M9 9h6v6H9V9z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              </svg>
+              Select the part to trim
+            </div>
+            <p class="audio-trim-hint">Click the green range to set where preview starts (white line). Drag handles to trim.</p>
+            <div class="audio-trim-track" id="writing-audio-trim-track">
+              <canvas class="audio-trim-waveform" id="writing-audio-waveform" width="1" height="96"></canvas>
+              <div class="audio-trim-shade audio-trim-shade-left" id="writing-audio-shade-left"></div>
+              <div class="audio-trim-shade audio-trim-shade-right" id="writing-audio-shade-right"></div>
+              <div class="audio-trim-keep" id="writing-audio-keep" title="Click to set preview start"></div>
+              <div class="audio-trim-scrub-head" id="writing-audio-scrub-head" aria-hidden="true"></div>
+              <button type="button" class="audio-trim-handle audio-trim-handle-start" id="writing-audio-handle-start" aria-label="Trim start"></button>
+              <button type="button" class="audio-trim-handle audio-trim-handle-end" id="writing-audio-handle-end" aria-label="Trim end"></button>
+              <span class="audio-trim-duration-total" id="writing-audio-duration-total"></span>
+            </div>
+            <p class="audio-trim-readout" id="writing-audio-trim-readout"></p>
+            <div class="audio-trim-preview">
+              <button type="button" class="audio-trim-preview-btn" id="writing-audio-preview-btn" aria-pressed="false">Play preview</button>
+              <div class="audio-trim-preview-vol-wrap">
+                <label class="audio-trim-preview-vol-label" for="writing-audio-preview-vol">Preview volume</label>
+                <input type="range" id="writing-audio-preview-vol" class="audio-trim-preview-vol" min="0" max="1" step="0.05" value="0.65" aria-label="Preview volume" />
+              </div>
+              <span class="audio-trim-preview-note">White line follows playback. Click green to set start.</span>
+            </div>
+          </div>
+          <details class="audio-trim-fallback">
+            <summary>Fine-tune with typed times</summary>
+            <label for="writing-audio-start" style="margin-top:8px">From</label>
+            <input type="text" autocomplete="off" id="writing-audio-start" placeholder="sec, m:ss, or MMSS" />
+            <label for="writing-audio-end">Until</label>
+            <input type="text" autocomplete="off" id="writing-audio-end" placeholder="blank = end of file" />
+            <p style="color: var(--text-muted); font-size: 12px; margin: -8px 0 0; line-height: 1.45;">Overrides the waveform if filled.</p>
+          </details>
+          <label>Your post</label>
+          <div class="editor-wrap"><div id="writing-editor"></div></div>
+          <button type="submit" id="writing-submit">Publish</button>
+          <p class="msg" id="writing-msg"></p>
+        </form>
+        </div>
+        <div>
+        <h2>Edit or delete writings</h2>
+        <p style="color: var(--text-muted); font-size: 13px; margin: -8px 0 16px;">Update or remove existing posts.</p>
+        <div id="writings-list" class="writings-list"></div>
+        <p class="msg" id="writings-msg"></p>
+        </div>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+    <script src="../js/time-format.js"></script>
+    <script type="module">
+      (function(){
+        var STORAGE_KEY = "admin_pw";
+        var DEMO_OTP_CODE = "12345";
+        var DEMO_ADMIN_PASSWORD = "";
+        var pw = "";
+        try { pw = sessionStorage.getItem(STORAGE_KEY) || ""; } catch (e) {}
+        var loginForm = document.getElementById("login-form");
+        var adminForms = document.getElementById("admin-forms");
+        var emailStep = document.getElementById("otp-email-step");
+        var codeStep = document.getElementById("otp-code-step");
+        var verifiedStep = document.getElementById("otp-verified");
+        var emailInput = document.getElementById("admin-email");
+        var emailBtn = document.getElementById("otp-email-btn");
+        var emailDisplay = document.getElementById("otp-email-display");
+        var otpInputs = Array.prototype.slice.call(document.querySelectorAll(".otp-input"));
+        var otpVerifyBtn = document.getElementById("otp-verify-btn");
+        var passwordAfterOtp = document.getElementById("admin-password-after-otp");
+        var passwordUnlockBtn = document.getElementById("admin-password-unlock-btn");
+        var passwordMsg = document.getElementById("admin-password-msg");
+        var loginMsg = document.getElementById("login-msg");
+        var otpMsg = document.getElementById("otp-msg");
+        var logoutBtn = document.getElementById("logout-btn");
+        var inactivityTimer = null;
+        var INACTIVITY_MS = 4 * 60 * 1000;
+        var VIDEO_MAX_BYTES = 1024 * 1024 * 1024;
+
+        function showMsg(el, text, ok) {
+          el.textContent = text;
+          el.className = "msg " + (ok ? "ok" : "err");
+        }
+
+        function doLogout() {
+          pw = "";
+          try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {}
+          if (inactivityTimer) clearTimeout(inactivityTimer);
+          inactivityTimer = null;
+          window.location.href = "/";
+        }
+
+        function resetInactivityTimer() {
+          if (!pw) return;
+          if (inactivityTimer) clearTimeout(inactivityTimer);
+          inactivityTimer = setTimeout(function() {
+            doLogout();
+          }, INACTIVITY_MS);
+        }
+
+        function revealAdmin() {
+          if (verifiedStep) verifiedStep.hidden = false;
+          if (emailStep) emailStep.hidden = true;
+          if (codeStep) codeStep.hidden = true;
+          var storedPw = "";
+          try { storedPw = sessionStorage.getItem(STORAGE_KEY) || ""; } catch (e) {}
+          if (storedPw || DEMO_ADMIN_PASSWORD) {
+            pw = storedPw || DEMO_ADMIN_PASSWORD;
+            openDashboard();
+            return;
+          }
+          setTimeout(function() {
+            if (passwordAfterOtp) passwordAfterOtp.focus();
+          }, 120);
+        }
+
+        function openDashboard() {
+          if (!pw) return;
+          try { sessionStorage.setItem(STORAGE_KEY, pw); } catch (e) {}
+          loginForm.style.display = "none";
+          adminForms.classList.add("visible");
+          var logoutWrap = document.getElementById("admin-logout-wrap");
+          if (logoutWrap) logoutWrap.style.display = "";
+          loadPhotosForDelete();
+          loadVideosForManage();
+          loadWritingsForManage();
+          loadLifeProjectsForManage();
+          syncProjectSubtabUI("life");
+          loadPortfolioProjectsForManage();
+          syncProjectSubtabUI("portfolio");
+          initLifeDescQuill();
+          resetInactivityTimer();
+        }
+
+        function clearOtp() {
+          otpInputs.forEach(function(input){ input.value = ""; });
+          if (otpInputs[0]) otpInputs[0].focus();
+        }
+
+        function currentOtp() {
+          return otpInputs.map(function(input){ return input.value; }).join("");
+        }
+
+        function verifyOtp() {
+          if (!otpMsg) return;
+          otpMsg.textContent = "";
+          if (currentOtp() === DEMO_OTP_CODE) {
+            showMsg(otpMsg, "Code verified.", true);
+            revealAdmin();
+            return;
+          }
+          showMsg(otpMsg, "Invalid demo code. Try " + DEMO_OTP_CODE + ".", false);
+          if (loginForm) {
+            loginForm.classList.remove("is-shaking");
+            void loginForm.offsetWidth;
+            loginForm.classList.add("is-shaking");
+          }
+          clearOtp();
+        }
+
+        if (emailBtn) {
+          emailBtn.addEventListener("click", function() {
+            var email = emailInput ? emailInput.value.trim() : "";
+            loginMsg.textContent = "";
+            if (!email || email.indexOf("@") < 1) {
+              showMsg(loginMsg, "Enter an email address to continue.", false);
+              return;
+            }
+            if (emailDisplay) emailDisplay.textContent = email;
+            if (emailStep) emailStep.hidden = true;
+            if (codeStep) codeStep.hidden = false;
+            clearOtp();
+          });
+        }
+
+        if (emailInput) {
+          emailInput.addEventListener("keydown", function(ev) {
+            if (ev.key === "Enter" && emailBtn) {
+              ev.preventDefault();
+              emailBtn.click();
+            }
+          });
+        }
+
+        otpInputs.forEach(function(input, idx) {
+          input.addEventListener("input", function() {
+            input.value = input.value.replace(/\D/g, "").slice(0, 1);
+            if (input.value && otpInputs[idx + 1]) otpInputs[idx + 1].focus();
+            if (currentOtp().length === DEMO_OTP_CODE.length) verifyOtp();
+          });
+          input.addEventListener("keydown", function(ev) {
+            if (ev.key === "Backspace" && !input.value && otpInputs[idx - 1]) {
+              otpInputs[idx - 1].focus();
+            }
+            if (ev.key === "Enter") {
+              ev.preventDefault();
+              verifyOtp();
+            }
+          });
+          input.addEventListener("paste", function(ev) {
+            var text = (ev.clipboardData || window.clipboardData).getData("text").replace(/\D/g, "").slice(0, DEMO_OTP_CODE.length);
+            if (!text) return;
+            ev.preventDefault();
+            otpInputs.forEach(function(el, i){ el.value = text[i] || ""; });
+            if (text.length === DEMO_OTP_CODE.length) verifyOtp();
+            else if (otpInputs[text.length]) otpInputs[text.length].focus();
+          });
+        });
+
+        if (otpVerifyBtn) {
+          otpVerifyBtn.addEventListener("click", verifyOtp);
+        }
+
+        function unlockWithPassword() {
+          if (!passwordAfterOtp || !passwordMsg) return;
+          var nextPw = passwordAfterOtp.value.trim();
+          passwordMsg.textContent = "";
+          if (!nextPw) {
+            showMsg(passwordMsg, "Enter the existing admin password to save content.", false);
+            return;
+          }
+          fetch("/api/auth", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password: nextPw })
+          })
+            .then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+            .then(function(result){
+              if (!result.ok || !result.data.ok) {
+                showMsg(passwordMsg, result.data.error || "Invalid admin password.", false);
+                passwordAfterOtp.focus();
+                return;
+              }
+              pw = nextPw;
+              showMsg(passwordMsg, "Admin password accepted.", true);
+              openDashboard();
+            })
+            .catch(function(){
+              showMsg(passwordMsg, "Could not reach server. Run locally (npm run dev) or deploy to Vercel.", false);
+            });
+        }
+
+        if (passwordUnlockBtn) {
+          passwordUnlockBtn.addEventListener("click", unlockWithPassword);
+        }
+
+        if (passwordAfterOtp) {
+          passwordAfterOtp.addEventListener("keydown", function(ev) {
+            if (ev.key === "Enter") {
+              ev.preventDefault();
+              unlockWithPassword();
+            }
+          });
+        }
+
+        if (logoutBtn) logoutBtn.addEventListener("click", doLogout);
+
+        // ---- admin theme toggle ----
+        var THEME_KEY = "greater-engine-theme";
+        function getAdminTheme() {
+          try { var t = localStorage.getItem(THEME_KEY); return (t === "dark" || t === "light" || t === "reading") ? t : null; } catch(e) { return null; }
+        }
+        function applyAdminTheme(t) { document.documentElement.setAttribute("data-theme", t); }
+        var adminToggle = document.getElementById("admin-theme-toggle");
+        if (adminToggle) {
+          adminToggle.addEventListener("click", function() {
+            var cur = document.documentElement.getAttribute("data-theme") || "light";
+            var next = cur === "dark" ? "reading" : cur === "reading" ? "light" : "dark";
+            applyAdminTheme(next);
+            try { localStorage.setItem(THEME_KEY, next); } catch(e) {}
+          });
+        }
+        // apply stored theme on load
+        var stored = getAdminTheme();
+        if (stored) applyAdminTheme(stored);
+
+        ["click", "keydown", "scroll", "touchstart"].forEach(function(evt) {
+          document.addEventListener(evt, resetInactivityTimer, { passive: true });
+        });
+
+        document.querySelectorAll(".admin-tab").forEach(function(btn) {
+          btn.addEventListener("click", function() {
+            var pane = this.getAttribute("data-pane");
+            document.querySelectorAll(".admin-tab").forEach(function(b) { b.classList.remove("active"); b.setAttribute("aria-selected", "false"); });
+            document.querySelectorAll(".admin-pane").forEach(function(p) { p.classList.remove("active"); });
+            this.classList.add("active");
+            this.setAttribute("aria-selected", "true");
+            var el = document.getElementById("pane-" + pane);
+            if (el) el.classList.add("active");
+            var mediaBar = document.getElementById("admin-media-subtabs-bar");
+            if (mediaBar) {
+              if (pane === "media") {
+                mediaBar.classList.add("is-visible");
+                mediaBar.setAttribute("aria-hidden", "false");
+              } else {
+                mediaBar.classList.remove("is-visible");
+                mediaBar.setAttribute("aria-hidden", "true");
+              }
+            }
+            if (pane === "life") {
+              loadLifeProjectsForManage();
+              syncProjectSubtabUI("life");
+              initLifeDescQuill();
+            }
+            if (pane === "portfolio") {
+              loadPortfolioProjectsForManage();
+              syncProjectSubtabUI("portfolio");
+              initPortfolioDescQuill();
+            }
+            if (pane === "media") {
+              loadPhotosForDelete();
+              loadVideosForManage();
+              initVideoDescQuill();
+            }
+            if (pane === "writings") {
+              initWritingQuill();
+              loadWritingsForManage();
+              var d = document.getElementById("writing-date");
+              var t = document.getElementById("writing-time");
+              if (d && !d.value) {
+                var now = new Date();
+                var months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+                d.value = months[now.getMonth()] + " " + now.getDate() + ", " + now.getFullYear();
+              }
+              if (t && !t.value) {
+                var n = new Date();
+                t.value = String(n.getHours()).padStart(2, "0") + String(n.getMinutes()).padStart(2, "0");
+              }
+            }
+          });
+        });
+
+        document.querySelectorAll(".admin-media-subtab").forEach(function (subBtn) {
+          subBtn.addEventListener("click", function () {
+            var sub = subBtn.getAttribute("data-media-sub");
+            document.querySelectorAll(".admin-media-subtab").forEach(function (b) {
+              b.classList.remove("active");
+              b.setAttribute("aria-selected", "false");
+            });
+            subBtn.classList.add("active");
+            subBtn.setAttribute("aria-selected", "true");
+            document.querySelectorAll(".admin-media-subpane").forEach(function (p) { p.classList.remove("active"); });
+            var subPane = document.getElementById("admin-media-" + sub);
+            if (subPane) subPane.classList.add("active");
+            if (sub === "photos") loadPhotosForDelete();
+            if (sub === "videos") {
+              loadVideosForManage();
+              initVideoDescQuill();
+            }
+          });
+        });
+
+        var projectStatusFilter = { life: "now", portfolio: "now" };
+        function syncProjectSubtabUI(pane) {
+          var wrap = document.querySelector('.admin-project-subtabs[data-project-pane="' + pane + '"]');
+          if (!wrap) return;
+          var cur = projectStatusFilter[pane];
+          wrap.querySelectorAll(".admin-project-subtab").forEach(function (b) {
+            var on = b.getAttribute("data-filter") === cur;
+            b.classList.toggle("active", on);
+            b.setAttribute("aria-selected", on ? "true" : "false");
+          });
+        }
+        document.querySelectorAll(".admin-project-subtab").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var pane = btn.getAttribute("data-project-pane");
+            var f = btn.getAttribute("data-filter");
+            if (!pane || !f || !["now", "future", "done"].includes(f)) return;
+            projectStatusFilter[pane] = f;
+            syncProjectSubtabUI(pane);
+            if (pane === "life") loadLifeProjectsForManage();
+            if (pane === "portfolio") loadPortfolioProjectsForManage();
+          });
+        });
+
+        var writingQuill = null;
+        var lifeDescQuill = null;
+        var portfolioDescQuill = null;
+        var videoDescQuill = null;
+        var quillTooltipLabels = { bold: "Bold", italic: "Italic", underline: "Underline", ordered: "Numbered list", bullet: "Bullet list", link: "Insert link", image: "Insert image", clean: "Clear formatting" };
+        function addQuillTooltips(quill) {
+          if (!quill || !quill.container) return;
+          var toolbar = quill.container.previousElementSibling;
+          if (!toolbar || !toolbar.classList.contains("ql-toolbar")) return;
+          var classTitles = { "ql-bold": "Bold", "ql-italic": "Italic", "ql-underline": "Underline", "ql-link": "Insert link", "ql-image": "Insert image", "ql-clean": "Clear formatting" };
+          toolbar.querySelectorAll("button").forEach(function(btn) {
+            var label = btn.getAttribute("data-value") && quillTooltipLabels[btn.getAttribute("data-value")];
+            if (!label) {
+              for (var c in classTitles) { if (btn.classList.contains(c)) { label = classTitles[c]; break; } }
+            }
+            if (label) {
+              btn.setAttribute("title", label);
+              btn.setAttribute("data-tooltip", label);
+              btn.setAttribute("aria-label", label);
+            }
+          });
+          toolbar.querySelectorAll(".ql-picker").forEach(function(picker) {
+            if (picker.classList.contains("ql-header")) return;
+            if (/list/.test(picker.className)) {
+              picker.setAttribute("title", "List options");
+              picker.setAttribute("data-tooltip", "List options");
+              picker.setAttribute("aria-label", "List options");
+            }
+          });
+        }
+        function initWritingQuill() {
+          if (writingQuill) return;
+          var el = document.getElementById("writing-editor");
+          if (!el || typeof Quill === "undefined") return;
+          writingQuill = new Quill("#writing-editor", {
+            theme: "snow",
+            placeholder: "Just type your thoughts. Use the toolbar for bold, italic, links, and photos.",
+            modules: {
+              clipboard: {
+                matchers: [
+                  ["IMG", function(node, delta) {
+                    if (node.src && String(node.src).indexOf("data:") === 0) {
+                      var D = Quill.import("delta");
+                      return new D();
+                    }
+                  }]
+                ]
+              },
+              toolbar: {
+                container: [
+                  ["bold", "italic", "underline"],
+                  [{ "list": "ordered" }, { "list": "bullet" }],
+                  ["link"],
+                  ["image"],
+                  ["clean"]
+                ],
+                handlers: {
+                  image: function() {
+                    var input = document.createElement("input");
+                    input.type = "file";
+                    input.accept = "image/*";
+                    input.onchange = function() {
+                      var file = input.files[0];
+                      if (!file) return;
+                      uploadFileViaPresigned(file).then(function(url) {
+                        var range = writingQuill.getSelection(true);
+                        writingQuill.insertEmbed(range.index, "image", url);
+                        writingQuill.setSelection(range.index + 1);
+                      }).catch(function(err) {
+                        alert("Upload failed: " + (err.message || "Try again"));
+                      });
+                    };
+                    input.click();
+                  }
+                }
+              }
+            }
+          });
+          addQuillTooltips(writingQuill);
+        }
+
+        function makeProjectQuillImageHandler(getQuill) {
+          return function () {
+            var input = document.createElement("input");
+            input.type = "file";
+            input.accept = "image/*";
+            input.onchange = function () {
+              var file = input.files[0];
+              if (!file) return;
+              uploadFileToBlob(file)
+                .then(function (r) {
+                  var url = typeof r === "string" ? r : (r.url || r);
+                  var q = getQuill();
+                  if (!q) return;
+                  var range = q.getSelection(true);
+                  q.insertEmbed(range.index, "image", url);
+                  q.setSelection(range.index + 1);
+                })
+                .catch(function (err) {
+                  alert("Upload failed: " + (err.message || "Try again"));
+                });
+            };
+            input.click();
+          };
+        }
+
+        function projectDescQuillOptions(getQuill) {
+          return {
+            theme: "snow",
+            placeholder: "Use the toolbar for bold, italic, lists, links, and images.",
+            modules: {
+              clipboard: {
+                matchers: [
+                  [
+                    "IMG",
+                    function (node, delta) {
+                      if (node.src && String(node.src).indexOf("data:") === 0) {
+                        var D = Quill.import("delta");
+                        return new D();
+                      }
+                    }
+                  ]
+                ]
+              },
+              toolbar: {
+                container: [
+                  ["bold", "italic", "underline"],
+                  [{ list: "ordered" }, { list: "bullet" }],
+                  ["link"],
+                  ["image"],
+                  ["clean"]
+                ],
+                handlers: {
+                  image: makeProjectQuillImageHandler(getQuill)
+                }
+              }
+            }
+          };
+        }
+
+        function initLifeDescQuill() {
+          if (lifeDescQuill) return;
+          var el = document.getElementById("life-proj-desc-editor");
+          if (!el || typeof Quill === "undefined") return;
+          lifeDescQuill = new Quill("#life-proj-desc-editor", projectDescQuillOptions(function () { return lifeDescQuill; }));
+          addQuillTooltips(lifeDescQuill);
+        }
+
+        function initPortfolioDescQuill() {
+          if (portfolioDescQuill) return;
+          var el = document.getElementById("port-proj-desc-editor");
+          if (!el || typeof Quill === "undefined") return;
+          portfolioDescQuill = new Quill("#port-proj-desc-editor", projectDescQuillOptions(function () { return portfolioDescQuill; }));
+          addQuillTooltips(portfolioDescQuill);
+        }
+
+        function initVideoDescQuill() {
+          if (videoDescQuill) return;
+          var el = document.getElementById("video-desc-editor");
+          if (!el || typeof Quill === "undefined") return;
+          videoDescQuill = new Quill("#video-desc-editor", projectDescQuillOptions(function () { return videoDescQuill; }));
+          addQuillTooltips(videoDescQuill);
+        }
+
+        function parseWritingAudioTime(str) {
+          str = String(str || "").trim();
+          if (!str) return null;
+          var hms = str.match(/^(\d+):(\d{1,2}):(\d{1,2}(?:\.\d+)?)$/);
+          if (hms) {
+            var sec = parseInt(hms[1], 10) * 3600 + parseInt(hms[2], 10) * 60 + parseFloat(hms[3]);
+            return Number.isFinite(sec) && sec >= 0 ? sec : NaN;
+          }
+          var hm = str.match(/^(\d+):(\d{1,2}(?:\.\d+)?)$/);
+          if (hm) {
+            var sec2 = parseInt(hm[1], 10) * 60 + parseFloat(hm[2]);
+            return Number.isFinite(sec2) && sec2 >= 0 ? sec2 : NaN;
+          }
+          if (/^\d+$/.test(str)) {
+            if (str.length === 6) {
+              var H = parseInt(str.slice(0, 2), 10);
+              var M = parseInt(str.slice(2, 4), 10);
+              var S = parseInt(str.slice(4, 6), 10);
+              if (M < 60 && S < 60) return H * 3600 + M * 60 + S;
+              return NaN;
+            }
+            if (str.length === 4) {
+              var MM = parseInt(str.slice(0, 2), 10);
+              var SS = parseInt(str.slice(2, 4), 10);
+              if (SS < 60) return MM * 60 + SS;
+              return NaN;
+            }
+            var n = parseFloat(str);
+            return Number.isFinite(n) && n >= 0 ? n : NaN;
+          }
+          if (/^\d+\.\d+$/.test(str)) {
+            var nf = parseFloat(str);
+            return Number.isFinite(nf) && nf >= 0 ? nf : NaN;
+          }
+          return NaN;
+        }
+
+        var adminAudioCtx = null;
+        function getAdminAudioContext() {
+          if (!adminAudioCtx || adminAudioCtx.state === "closed") {
+            adminAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          }
+          return adminAudioCtx;
+        }
+
+        function formatAudioTimeSimple(sec) {
+          if (typeof formatDurationSecCompact === "function") return formatDurationSecCompact(sec);
+          if (!isFinite(sec) || sec < 0) return "0000";
+          var h = Math.floor(sec / 3600);
+          var m = Math.floor((sec % 3600) / 60);
+          var s = Math.floor(sec % 60);
+          if (h > 0) {
+            return String(h).padStart(2, "0") + String(m).padStart(2, "0") + String(s).padStart(2, "0");
+          }
+          return String(m).padStart(2, "0") + String(s).padStart(2, "0");
+        }
+
+        function drawWaveformOnCanvas(ctx, audioBuffer, width, height) {
+          var ch = audioBuffer.getChannelData(0);
+          var len = ch.length;
+          var step = Math.max(1, Math.ceil(len / width));
+          var bg = ctx.createLinearGradient(0, 0, 0, height);
+          bg.addColorStop(0, "rgba(120,120,120,0.4)");
+          bg.addColorStop(0.5, "rgba(90,90,90,0.15)");
+          bg.addColorStop(1, "rgba(55,55,55,0.45)");
+          ctx.fillStyle = bg;
+          ctx.fillRect(0, 0, width, height);
+          var peaks = [];
+          ctx.fillStyle = "rgba(65,65,65,0.95)";
+          for (var x = 0; x < width; x++) {
+            var min = 1;
+            var max = -1;
+            var start = Math.floor((x / width) * len);
+            var end = Math.min(start + step, len);
+            for (var i = start; i < end; i++) {
+              var v = ch[i];
+              if (v < min) min = v;
+              if (v > max) max = v;
+            }
+            peaks.push({ min: min, max: max });
+            var y1 = (1 - max) * height * 0.4 + height * 0.08;
+            var y2 = (1 - min) * height * 0.4 + height * 0.08;
+            ctx.fillRect(x, y1, 1, Math.max(1.2, y2 - y1));
+          }
+          /* Light mirrored “shadow” under the waveform (reference-style) */
+          ctx.globalAlpha = 0.2;
+          ctx.fillStyle = "rgba(35,35,35,0.9)";
+          for (var x = 0; x < width; x++) {
+            var pk = peaks[x];
+            var y1 = (1 - pk.max) * height * 0.4 + height * 0.08;
+            var y2 = (1 - pk.min) * height * 0.4 + height * 0.08;
+            var bh = Math.max(1.2, y2 - y1);
+            ctx.fillRect(x, height - y2, 1, bh * 0.6);
+          }
+          ctx.globalAlpha = 1;
+        }
+
+        function mountAudioTrimmer(panelEl, audioBuffer, opts) {
+          opts = opts || {};
+          var duration = audioBuffer.duration;
+          if (!isFinite(duration) || duration <= 0) duration = 1;
+          var minGap = Math.max(0.35 / duration, 0.00015);
+          var startFrac = 0;
+          var endFrac = 1;
+          if (opts.startSec != null && isFinite(opts.startSec)) {
+            startFrac = Math.max(0, Math.min(1, Number(opts.startSec) / duration));
+          }
+          if (opts.endSec != null && isFinite(opts.endSec)) {
+            endFrac = Math.max(0, Math.min(1, Number(opts.endSec) / duration));
+          }
+          if (endFrac <= startFrac) endFrac = Math.min(1, startFrac + minGap);
+          if (endFrac - startFrac < minGap) {
+            if (startFrac + minGap <= 1) endFrac = startFrac + minGap;
+            else startFrac = Math.max(0, endFrac - minGap);
+          }
+
+          var scrubFrac = startFrac;
+
+          var track = panelEl.querySelector(".audio-trim-track");
+          var canvas = panelEl.querySelector(".audio-trim-waveform");
+          var shadeL = panelEl.querySelector(".audio-trim-shade-left");
+          var shadeR = panelEl.querySelector(".audio-trim-shade-right");
+          var keep = panelEl.querySelector(".audio-trim-keep");
+          var hStart = panelEl.querySelector(".audio-trim-handle-start");
+          var hEnd = panelEl.querySelector(".audio-trim-handle-end");
+          var readout = panelEl.querySelector(".audio-trim-readout");
+          var totalEl = panelEl.querySelector(".audio-trim-duration-total");
+          var scrubHead = panelEl.querySelector(".audio-trim-scrub-head");
+          if (!track || !canvas || !shadeL || !shadeR || !keep || !hStart || !hEnd) {
+            return {
+              relayout: function() {},
+              getTrimSeconds: function() { return { start: null, end: null }; },
+              destroy: function() {}
+            };
+          }
+
+          var dragging = null;
+          var previewBtn = panelEl.querySelector(".audio-trim-preview-btn");
+          var previewVol = panelEl.querySelector(".audio-trim-preview-vol");
+          var previewSource = null;
+          var previewGain = null;
+          var playingPreview = false;
+          var previewRafId = null;
+          var previewStartContextTime = 0;
+          var previewBufferOffsetSec = 0;
+          var previewPlayLenSec = 0;
+
+          function getPreviewVolume() {
+            var v = 0.65;
+            if (previewVol) {
+              var p = parseFloat(previewVol.value);
+              if (isFinite(p)) v = Math.max(0, Math.min(1, p));
+            }
+            return v;
+          }
+
+          try {
+            var sv = typeof localStorage !== "undefined" ? localStorage.getItem("admin_preview_volume") : null;
+            if (sv != null && previewVol && !isNaN(parseFloat(sv))) {
+              previewVol.value = String(Math.max(0, Math.min(1, parseFloat(sv))));
+            }
+          } catch (ls) {}
+          if (previewVol) {
+            previewVol.addEventListener("input", function() {
+              try {
+                if (typeof localStorage !== "undefined") localStorage.setItem("admin_preview_volume", previewVol.value);
+              } catch (ls2) {}
+              if (previewGain) previewGain.gain.value = getPreviewVolume();
+            });
+          }
+
+          function tickPreviewPlayhead() {
+            if (!playingPreview || !scrubHead) return;
+            var ctx = getAdminAudioContext();
+            var elapsed = ctx.currentTime - previewStartContextTime;
+            var posSec = previewBufferOffsetSec + elapsed;
+            var frac = posSec / duration;
+            if (frac > endFrac) frac = endFrac;
+            if (frac < scrubFrac) frac = scrubFrac;
+            scrubHead.style.left = frac * 100 + "%";
+            if (elapsed < previewPlayLenSec - 0.02) {
+              previewRafId = requestAnimationFrame(tickPreviewPlayhead);
+            }
+          }
+
+          function stopPreview() {
+            if (previewRafId != null) {
+              cancelAnimationFrame(previewRafId);
+              previewRafId = null;
+            }
+            if (previewSource) {
+              try {
+                previewSource.onended = null;
+                previewSource.stop(0);
+              } catch (e) {}
+              try {
+                previewSource.disconnect();
+              } catch (e2) {}
+              previewSource = null;
+            }
+            if (previewGain) {
+              try {
+                previewGain.disconnect();
+              } catch (g) {}
+              previewGain = null;
+            }
+            playingPreview = false;
+            if (previewBtn) {
+              previewBtn.textContent = "Play preview";
+              previewBtn.setAttribute("aria-pressed", "false");
+            }
+            updateUI();
+          }
+
+          function startPreview() {
+            stopPreview();
+            var offset = scrubFrac * duration;
+            var playLen = (endFrac - scrubFrac) * duration;
+            if (!isFinite(playLen) || playLen < 0.001) return;
+            var ctx = getAdminAudioContext();
+            ctx.resume().then(function() {
+              var src = ctx.createBufferSource();
+              src.buffer = audioBuffer;
+              previewGain = ctx.createGain();
+              previewGain.gain.value = getPreviewVolume();
+              src.connect(previewGain);
+              previewGain.connect(ctx.destination);
+              var ended = false;
+              src.onended = function() {
+                if (ended) return;
+                ended = true;
+                stopPreview();
+              };
+              try {
+                previewStartContextTime = ctx.currentTime;
+                previewBufferOffsetSec = offset;
+                previewPlayLenSec = playLen;
+                src.start(0, offset, playLen);
+                previewSource = src;
+                playingPreview = true;
+                if (previewBtn) {
+                  previewBtn.textContent = "Stop";
+                  previewBtn.setAttribute("aria-pressed", "true");
+                }
+                if (scrubHead) scrubHead.style.left = scrubFrac * 100 + "%";
+                previewRafId = requestAnimationFrame(tickPreviewPlayhead);
+              } catch (err) {
+                stopPreview();
+              }
+            }).catch(function() {
+              stopPreview();
+            });
+          }
+
+          function onPreviewClick(e) {
+            e.preventDefault();
+            if (playingPreview) stopPreview();
+            else startPreview();
+          }
+
+          if (previewBtn) previewBtn.addEventListener("click", onPreviewClick);
+
+          function layoutCanvas() {
+            var ch = 96;
+            var rect = track.getBoundingClientRect();
+            var w = Math.floor(rect.width);
+            if (w < 2 && track.parentElement) {
+              w = Math.floor(track.parentElement.getBoundingClientRect().width);
+            }
+            if (track.parentElement) {
+              var pw = Math.floor(track.parentElement.getBoundingClientRect().width);
+              if (pw > 0) w = Math.min(w, pw);
+            }
+            var cw = Math.max(120, w);
+            if (!isFinite(cw) || cw > 16000) cw = Math.min(1200, typeof window !== "undefined" ? window.innerWidth - 48 : 800);
+            var dpr = window.devicePixelRatio || 1;
+            canvas.width = cw * dpr;
+            canvas.height = ch * dpr;
+            canvas.style.width = cw + "px";
+            canvas.style.height = ch + "px";
+            var ctx = canvas.getContext("2d");
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            drawWaveformOnCanvas(ctx, audioBuffer, cw, ch);
+          }
+
+          function updateUI() {
+            shadeL.style.width = startFrac * 100 + "%";
+            shadeR.style.width = (1 - endFrac) * 100 + "%";
+            keep.style.left = startFrac * 100 + "%";
+            keep.style.width = (endFrac - startFrac) * 100 + "%";
+            hStart.style.left = startFrac * 100 + "%";
+            hEnd.style.left = endFrac * 100 + "%";
+            scrubFrac = Math.max(startFrac, Math.min(endFrac, scrubFrac));
+            if (scrubHead && !playingPreview) {
+              scrubHead.style.left = scrubFrac * 100 + "%";
+            }
+            var sSec = startFrac * duration;
+            var eSec = endFrac * duration;
+            if (readout) {
+              readout.textContent =
+                formatAudioTimeSimple(sSec) +
+                " → " +
+                (endFrac >= 0.998 ? "end of track (" + formatAudioTimeSimple(duration) + ")" : formatAudioTimeSimple(eSec));
+            }
+            if (totalEl) totalEl.textContent = formatAudioTimeSimple(duration);
+          }
+
+          function fracFromClientX(clientX) {
+            var rect = track.getBoundingClientRect();
+            var x = (clientX - rect.left) / rect.width;
+            return Math.max(0, Math.min(1, x));
+          }
+
+          function onKeepClick(e) {
+            e.preventDefault();
+            stopPreview();
+            var f = fracFromClientX(e.clientX);
+            scrubFrac = Math.max(startFrac, Math.min(endFrac, f));
+            updateUI();
+          }
+
+          function onMove(e) {
+            if (!dragging) return;
+            var f = fracFromClientX(e.clientX);
+            if (dragging === "start") {
+              startFrac = Math.max(0, Math.min(f, endFrac - minGap));
+            } else {
+              endFrac = Math.min(1, Math.max(f, startFrac + minGap));
+            }
+            updateUI();
+          }
+
+          function onUp() {
+            dragging = null;
+            window.removeEventListener("mousemove", onMove);
+            window.removeEventListener("mouseup", onUp);
+            window.removeEventListener("touchmove", onMoveT);
+            window.removeEventListener("touchend", onUp);
+            window.removeEventListener("touchcancel", onUp);
+          }
+
+          function onMoveT(e) {
+            if (!e.touches || !e.touches[0]) return;
+            onMove({ clientX: e.touches[0].clientX });
+          }
+
+          function onDown(which, e) {
+            e.preventDefault();
+            stopPreview();
+            dragging = which;
+            window.addEventListener("mousemove", onMove);
+            window.addEventListener("mouseup", onUp);
+            window.addEventListener("touchmove", onMoveT, { passive: false });
+            window.addEventListener("touchend", onUp);
+            window.addEventListener("touchcancel", onUp);
+          }
+
+          function onStartMouse(e) { onDown("start", e); }
+          function onEndMouse(e) { onDown("end", e); }
+          function onStartTouch(e) { onDown("start", e); }
+          function onEndTouch(e) { onDown("end", e); }
+
+          hStart.addEventListener("mousedown", onStartMouse);
+          hEnd.addEventListener("mousedown", onEndMouse);
+          hStart.addEventListener("touchstart", onStartTouch, { passive: false });
+          hEnd.addEventListener("touchstart", onEndTouch, { passive: false });
+
+          keep.addEventListener("click", onKeepClick);
+
+          layoutCanvas();
+          updateUI();
+          var ro = new ResizeObserver(function() {
+            layoutCanvas();
+            updateUI();
+          });
+          ro.observe(track);
+
+          return {
+            relayout: function() {
+              layoutCanvas();
+              updateUI();
+            },
+            getTrimSeconds: function() {
+              if (startFrac <= 0.002 && endFrac >= 0.998) return { start: null, end: null };
+              return {
+                start: startFrac <= 0.002 ? null : startFrac * duration,
+                end: endFrac >= 0.998 ? null : endFrac * duration
+              };
+            },
+            destroy: function() {
+              dragging = null;
+              stopPreview();
+              if (previewBtn) previewBtn.removeEventListener("click", onPreviewClick);
+              keep.removeEventListener("click", onKeepClick);
+              ro.disconnect();
+              window.removeEventListener("mousemove", onMove);
+              window.removeEventListener("mouseup", onUp);
+              window.removeEventListener("touchmove", onMoveT);
+              window.removeEventListener("touchend", onUp);
+              window.removeEventListener("touchcancel", onUp);
+              hStart.removeEventListener("mousedown", onStartMouse);
+              hEnd.removeEventListener("mousedown", onEndMouse);
+              hStart.removeEventListener("touchstart", onStartTouch);
+              hEnd.removeEventListener("touchstart", onEndTouch);
+            }
+          };
+        }
+
+        function destroyEditAudioTrimmer(editPane) {
+          if (editPane._audioTrimController) {
+            editPane._audioTrimController.destroy();
+            editPane._audioTrimController = null;
+          }
+          editPane._audioTrimFromUrl = null;
+        }
+
+        function tryLoadEditAudioTrimmer(editPane, w) {
+          var fileIn = editPane.querySelector(".edit-audio-file");
+          var hasNewFile = fileIn && fileIn.files && fileIn.files[0];
+          if (hasNewFile) return;
+          var hidden = editPane.querySelector(".edit-audio-url");
+          var url = hidden && hidden.value ? String(hidden.value).trim() : "";
+          var panel = editPane.querySelector(".edit-audio-trimmer");
+          if (!url) {
+            destroyEditAudioTrimmer(editPane);
+            if (panel) panel.setAttribute("hidden", "");
+            return;
+          }
+          if (editPane._audioTrimFromUrl === url && editPane._audioTrimController) {
+            if (panel) panel.removeAttribute("hidden");
+            requestAnimationFrame(function() {
+              if (editPane._audioTrimController && editPane._audioTrimController.relayout) {
+                editPane._audioTrimController.relayout();
+              }
+            });
+            return;
+          }
+          if (!panel) return;
+          destroyEditAudioTrimmer(editPane);
+          fetch(url)
+            .then(function(r) {
+              if (!r.ok) throw new Error("fetch");
+              return r.arrayBuffer();
+            })
+            .then(function(buf) {
+              return getAdminAudioContext().decodeAudioData(buf.slice(0));
+            })
+            .then(function(buffer) {
+              var ss = w.audioStartSec != null && w.audioStartSec !== "" ? Number(w.audioStartSec) : null;
+              var es = w.audioEndSec != null && w.audioEndSec !== "" ? Number(w.audioEndSec) : null;
+              editPane._audioTrimController = mountAudioTrimmer(panel, buffer, {
+                startSec: ss,
+                endSec: es
+              });
+              editPane._audioTrimFromUrl = url;
+              panel.removeAttribute("hidden");
+              requestAnimationFrame(function() {
+                if (editPane._audioTrimController && editPane._audioTrimController.relayout) {
+                  editPane._audioTrimController.relayout();
+                }
+              });
+            })
+            .catch(function() {
+              destroyEditAudioTrimmer(editPane);
+              if (panel) panel.setAttribute("hidden", "");
+            });
+        }
+
+        var writingFormAudioTrim = null;
+
+        function hideWritingNewAudioTrimmer() {
+          var panel = document.getElementById("writing-audio-trimmer");
+          if (writingFormAudioTrim) {
+            writingFormAudioTrim.destroy();
+            writingFormAudioTrim = null;
+          }
+          if (panel) panel.setAttribute("hidden", "");
+        }
+
+        function showWritingNewAudioTrimmer(audioBuffer) {
+          hideWritingNewAudioTrimmer();
+          var panel = document.getElementById("writing-audio-trimmer");
+          if (!panel) return;
+          writingFormAudioTrim = mountAudioTrimmer(panel, audioBuffer, {});
+          panel.removeAttribute("hidden");
+          requestAnimationFrame(function() {
+            if (writingFormAudioTrim && writingFormAudioTrim.relayout) writingFormAudioTrim.relayout();
+          });
+        }
+
+        var writingAudioFileInput = document.getElementById("writing-audio");
+        if (writingAudioFileInput) {
+          writingAudioFileInput.addEventListener("change", function() {
+            var f = this.files[0];
+            if (!f) {
+              hideWritingNewAudioTrimmer();
+              return;
+            }
+            f.arrayBuffer()
+              .then(function(buf) {
+                return getAdminAudioContext().decodeAudioData(buf.slice(0));
+              })
+              .then(function(buffer) {
+                showWritingNewAudioTrimmer(buffer);
+              })
+              .catch(function() {
+                hideWritingNewAudioTrimmer();
+              });
+          });
+        }
+
+        var wf = document.getElementById("writing-form");
+        if (wf) wf.addEventListener("submit", function(e) {
+          e.preventDefault();
+          var btn = document.getElementById("writing-submit");
+          var msg = document.getElementById("writing-msg");
+          var title = document.getElementById("writing-title").value.trim();
+          var dateEl = document.getElementById("writing-date");
+          var catEl = document.getElementById("writing-category");
+          var date = dateEl ? dateEl.value.trim() : "";
+          var time = document.getElementById("writing-time").value.trim() || "1021";
+          if (typeof normalizeClockTimeToHHMM === "function") {
+            var nt = normalizeClockTimeToHHMM(time);
+            if (nt) time = nt;
+          }
+          var category = catEl ? catEl.value : "learning";
+          if (!date) {
+            var now = new Date();
+            var months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+            date = months[now.getMonth()] + " " + now.getDate() + ", " + now.getFullYear();
+          }
+          var body = writingQuill ? writingQuill.root.innerHTML : "";
+          if (!title) { showMsg(msg, "Title is required.", false); return; }
+          var audioInput = document.getElementById("writing-audio");
+          var audioFile = audioInput && audioInput.files[0];
+          var startEl = document.getElementById("writing-audio-start");
+          var endEl = document.getElementById("writing-audio-end");
+          var startRaw = startEl ? startEl.value : "";
+          var endRaw = endEl ? endEl.value : "";
+          var trimStart = null;
+          var trimEnd = null;
+          if (startRaw.trim() || endRaw.trim()) {
+            trimStart = startRaw.trim() ? parseWritingAudioTime(startRaw) : null;
+            trimEnd = endRaw.trim() ? parseWritingAudioTime(endRaw) : null;
+            if (startRaw.trim() && !Number.isFinite(trimStart)) {
+              showMsg(msg, "Invalid “play from” time. Use seconds (90), m:ss (1:30), or MMSS (0130).", false);
+              return;
+            }
+            if (endRaw.trim() && !Number.isFinite(trimEnd)) {
+              showMsg(msg, "Invalid “until” time. Use seconds, m:ss, or MMSS.", false);
+              return;
+            }
+            if (trimStart != null && trimEnd != null && trimEnd <= trimStart) {
+              showMsg(msg, "“Until” must be after “from”.", false);
+              return;
+            }
+          } else if (audioFile && writingFormAudioTrim) {
+            var tw = writingFormAudioTrim.getTrimSeconds();
+            trimStart = tw.start;
+            trimEnd = tw.end;
+          }
+          btn.disabled = true;
+          msg.textContent = "";
+
+          function postWriting(audioUrl) {
+            var payload = { password: pw, title: title, date: date, time: time, category: category, body: body };
+            if (audioUrl) {
+              payload.audioUrl = audioUrl;
+              if (trimStart != null) payload.audioStartSec = trimStart;
+              if (trimEnd != null) payload.audioEndSec = trimEnd;
+            }
+            return fetch("/api/writings", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            }).then(function(r) { return r.json(); });
+          }
+
+          var publishPromise = audioFile
+            ? uploadFileToBlob(audioFile).then(function(url) { return postWriting(url); })
+            : postWriting();
+
+          publishPromise.then(function(data) {
+            btn.disabled = false;
+            if (data.ok) {
+              showMsg(msg, "Published! View it on the writing page.", true);
+              loadWritingsForManage();
+              document.getElementById("writing-title").value = "";
+              document.getElementById("writing-date").value = "";
+              document.getElementById("writing-time").value = "";
+              document.getElementById("writing-category").value = "learning";
+              if (audioInput) audioInput.value = "";
+              hideWritingNewAudioTrimmer();
+              if (startEl) startEl.value = "";
+              if (endEl) endEl.value = "";
+              if (writingQuill) writingQuill.root.innerHTML = "";
+            } else {
+              showMsg(msg, data.error || "Failed to publish", false);
+            }
+          }).catch(function(err) {
+            btn.disabled = false;
+            var m = err && err.message ? err.message : "";
+            if (m) showMsg(msg, m, false);
+            else showMsg(msg, "Could not reach server. Run locally (npm run dev) or deploy to Vercel.", false);
+          });
+        });
+
+        if (pw) {
+          openDashboard();
+        }
+
+        function loadPhotosForDelete() {
+          var list = document.getElementById("photos-list");
+          var deleteMsg = document.getElementById("delete-msg");
+          list.innerHTML = "";
+          deleteMsg.textContent = "";
+          fetch("/api/photos?_t=" + Date.now()).then(function(r){ return r.json(); }).then(function(photos){
+            if (!Array.isArray(photos) || photos.length === 0) {
+              list.innerHTML = "<p style=\"color: var(--text-muted); font-size: 14px;\">No photos yet.</p>";
+              return;
+            }
+            photos.forEach(function(p){
+              var div = document.createElement("div");
+              div.className = "photo-item";
+              var img = document.createElement("img");
+              img.src = p.src || "";
+              img.alt = p.alt || "";
+              img.loading = "lazy";
+              div.appendChild(img);
+              var info = document.createElement("div");
+              info.className = "photo-item-info";
+              var titleEl = document.createElement("div");
+              titleEl.className = "photo-item-title";
+              titleEl.textContent = p.title || "Untitled";
+              info.appendChild(titleEl);
+              info.appendChild(document.createTextNode(p.category || ""));
+              div.appendChild(info);
+              var btnWrap = document.createElement("div");
+              btnWrap.className = "photo-item-info";
+              btnWrap.style.display = "flex";
+              btnWrap.style.flexWrap = "wrap";
+              btnWrap.style.gap = "6px";
+              var editBtn = document.createElement("button");
+              editBtn.type = "button";
+              editBtn.className = "edit-btn";
+              editBtn.setAttribute("data-id", p.id || "");
+              editBtn.textContent = "Edit";
+              var editPane = document.createElement("div");
+              editPane.className = "photo-item-edit";
+              var metaParts = (p.meta || "").split(/\s{2,}/);
+              var editLocation = (metaParts[0] || "").replace(/"/g, "&quot;");
+              var editDate = (p.date || metaParts[1] || "").replace(/"/g, "&quot;");
+              var editTimeRaw0 = p.time || metaParts[2] || "";
+              var editTimeNorm0 = typeof normalizeClockTimeToHHMM === "function" ? (normalizeClockTimeToHHMM(editTimeRaw0) || editTimeRaw0) : editTimeRaw0;
+              var editTime = editTimeNorm0.replace(/"/g, "&quot;");
+              editPane.innerHTML = "<label>Title</label><input type=\"text\" autocomplete=\"off\" class=\"edit-title\" value=\"" + (p.title || "").replace(/"/g, "&quot;") + "\">" +
+                "<label>Location</label><input type=\"text\" autocomplete=\"off\" class=\"edit-location\" placeholder=\"e.g. Kyoto, Japan\" value=\"" + editLocation + "\">" +
+                "<label>Date</label><input type=\"text\" autocomplete=\"off\" class=\"edit-date\" placeholder=\"e.g. 01/07/26\" value=\"" + editDate + "\">" +
+                "<label>Time</label><input type=\"text\" autocomplete=\"off\" class=\"edit-time\" placeholder=\"e.g. 1732\" value=\"" + editTime + "\">" +
+                "<label>Category</label><select class=\"edit-category\"><option value=\"polaroids\"" + (p.category === "polaroids" ? " selected" : "") + ">polaroids</option><option value=\"film\"" + (p.category === "film" ? " selected" : "") + ">film</option><option value=\"digital\"" + (p.category === "digital" ? " selected" : "") + ">digital</option></select>" +
+                "<label>Replace image</label><input type=\"file\" class=\"edit-replace-file\" accept=\"image/*,.arw,.ARW,.sr2,.SR2,.srf,.SRF,.raw,.dng,.DNG\" style=\"margin-bottom:4px\">" +
+                "<p style=\"font-size:11px;color:var(--text-muted);margin:-4px 0 10px;line-height:1.35\">Upload a new file to fix a broken image or swap the photo. Leave empty to keep the current image.</p>" +
+                "<button type=\"button\" class=\"save-edit-btn\">Save</button>";
+              img.addEventListener("error", function onImgErr() {
+                img.removeEventListener("error", onImgErr);
+                img.alt = "Image failed to load — use Edit → Replace image";
+              });
+              editBtn.addEventListener("click", function() {
+                editPane.classList.toggle("active");
+              });
+              editPane.querySelector(".save-edit-btn").addEventListener("click", function() {
+                var saveBtn = editPane.querySelector(".save-edit-btn");
+                var replaceFile = editPane.querySelector(".edit-replace-file").files[0] || null;
+
+                function applyPayload(blobUrl) {
+                  var title = editPane.querySelector(".edit-title").value.trim();
+                  var loc = editPane.querySelector(".edit-location").value.trim();
+                  var date = editPane.querySelector(".edit-date").value.trim();
+                  var timeRaw = editPane.querySelector(".edit-time").value.trim();
+                  var time = typeof normalizeClockTimeToHHMM === "function" ? (normalizeClockTimeToHHMM(timeRaw) || timeRaw) : timeRaw;
+                  var metaP = [loc, date, time].filter(Boolean);
+                  var payload = {
+                    id: p.id,
+                    password: pw,
+                    title: title,
+                    date: date,
+                    time: time,
+                    meta: metaP.join("  "),
+                    category: editPane.querySelector(".edit-category").value
+                  };
+                  if (blobUrl) {
+                    payload.src = blobUrl;
+                    payload.alt = title + (loc ? " - " + loc : "");
+                  }
+                  return fetch("/api/photos", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                      saveBtn.disabled = false;
+                      saveBtn.textContent = "Save";
+                      if (data.ok) {
+                        titleEl.textContent = title || "Untitled";
+                        if (blobUrl) {
+                          img.src = blobUrl;
+                          img.removeAttribute("srcset");
+                        }
+                        editPane.querySelector(".edit-replace-file").value = "";
+                        editPane.classList.remove("active");
+                        showMsg(deleteMsg, blobUrl ? "Photo and image updated." : "Photo updated.", true);
+                      } else {
+                        showMsg(deleteMsg, data.error || "Failed", false);
+                      }
+                    })
+                    .catch(function() {
+                      saveBtn.disabled = false;
+                      saveBtn.textContent = "Save";
+                      showMsg(deleteMsg, "Request failed.", false);
+                    });
+                }
+
+                saveBtn.disabled = true;
+                saveBtn.textContent = "Saving…";
+
+                if (replaceFile) {
+                  if (replaceFile.size > 50 * 1024 * 1024) {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = "Save";
+                    showMsg(deleteMsg, "Image must be under 50 MB.", false);
+                    return;
+                  }
+                  uploadFileToBlob(replaceFile).then(applyPayload).catch(function() {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = "Save";
+                    showMsg(deleteMsg, "Upload failed.", false);
+                  });
+                } else {
+                  applyPayload(null);
+                }
+              });
+              btnWrap.appendChild(editBtn);
+              var btn = document.createElement("button");
+              btn.type = "button";
+              btn.className = "delete-btn";
+              btn.setAttribute("data-id", p.id || "");
+              btn.textContent = "Delete";
+              btnWrap.appendChild(btn);
+              div.appendChild(btnWrap);
+              div.appendChild(editPane);
+              btn.addEventListener("click", function(){
+                var id = this.getAttribute("data-id");
+                if (!confirm("Delete this photo?")) return;
+                var delBtn = this;
+                delBtn.disabled = true;
+                fetch("/api/photos", {
+                  method: "DELETE",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ id: id, password: pw })
+                }).then(function(r){ return r.json(); }).then(function(data){
+                  if (data.ok) {
+                    showMsg(deleteMsg, "Photo deleted.", true);
+                    loadPhotosForDelete();
+                  } else {
+                    showMsg(deleteMsg, data.error || "Failed", false);
+                    delBtn.disabled = false;
+                  }
+                }).catch(function(){
+                  showMsg(deleteMsg, "Request failed.", false);
+                  delBtn.disabled = false;
+                });
+              });
+              list.appendChild(div);
+            });
+          }).catch(function(){
+            list.innerHTML = "<p style=\"color: var(--text-muted); font-size: 14px;\">Could not load photos.</p>";
+          });
+        }
+
+        function loadVideosForManage() {
+          var list = document.getElementById("videos-list");
+          var deleteMsg = document.getElementById("video-delete-msg");
+          if (!list) return;
+          list.innerHTML = "";
+          if (deleteMsg) deleteMsg.textContent = "";
+          fetch("/api/videos?_t=" + Date.now() + "&sort=newest")
+            .then(function (r) { return r.json(); })
+            .then(function (videos) {
+              if (!Array.isArray(videos) || videos.length === 0) {
+                list.innerHTML = "<p style=\"color: var(--text-muted); font-size: 14px;\">No videos yet.</p>";
+                return;
+              }
+              videos.forEach(function (v) {
+                var div = document.createElement("div");
+                div.className = "video-item";
+                var vid = document.createElement("video");
+                vid.src = v.src || "";
+                vid.controls = true;
+                vid.preload = "metadata";
+                vid.setAttribute("playsinline", "");
+                div.appendChild(vid);
+                var info = document.createElement("div");
+                info.className = "photo-item-info";
+                var titleEl = document.createElement("div");
+                titleEl.className = "photo-item-title";
+                titleEl.textContent = v.title || "Untitled";
+                info.appendChild(titleEl);
+                div.appendChild(info);
+                var btnWrap = document.createElement("div");
+                btnWrap.className = "photo-item-info";
+                btnWrap.style.display = "flex";
+                btnWrap.style.flexWrap = "wrap";
+                btnWrap.style.gap = "6px";
+                var editBtn = document.createElement("button");
+                editBtn.type = "button";
+                editBtn.className = "edit-btn";
+                editBtn.textContent = "Edit";
+                var editPane = document.createElement("div");
+                editPane.className = "photo-item-edit";
+                function escQ(s) {
+                  return String(s || "").replace(/"/g, "&quot;");
+                }
+                var vDescHostId = "video-edit-desc-" + String(v.id).replace(/[^a-zA-Z0-9_-]/g, "_");
+                editPane.innerHTML =
+                  "<label>Title</label><input type=\"text\" autocomplete=\"off\" class=\"edit-v-title\" value=\"" + escQ(v.title) + "\">" +
+                  "<label>Description</label><div class=\"editor-wrap\"><div id=\"" + vDescHostId + "\" class=\"video-edit-desc-quill-host\"></div></div>" +
+                  "<label>Replace video file</label><input type=\"file\" class=\"edit-v-replace-file\" accept=\"video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov\" style=\"margin-bottom:4px\">" +
+                  "<p style=\"font-size:11px;color:var(--text-muted);margin:-4px 0 10px;line-height:1.35\">Leave empty to keep the current file. Large uploads can take several minutes.</p>" +
+                  "<button type=\"button\" class=\"save-v-edit-btn\">Save</button>";
+                editBtn.addEventListener("click", function () {
+                  editPane.classList.toggle("active");
+                  if (!editPane.classList.contains("active") || editPane._vDescQuill || typeof Quill === "undefined") return;
+                  var host = editPane.querySelector(".video-edit-desc-quill-host");
+                  if (!host) return;
+                  var q = new Quill("#" + host.id, projectDescQuillOptions(function () { return editPane._vDescQuill; }));
+                  editPane._vDescQuill = q;
+                  q.root.innerHTML = v.description || "";
+                  addQuillTooltips(q);
+                });
+                editPane.querySelector(".save-v-edit-btn").addEventListener("click", function () {
+                  var saveBtn = editPane.querySelector(".save-v-edit-btn");
+                  var replaceFile = editPane.querySelector(".edit-v-replace-file").files[0] || null;
+                  function applyPayload(blobUrl) {
+                    var title = editPane.querySelector(".edit-v-title").value.trim();
+                    var description = editPane._vDescQuill ? editPane._vDescQuill.root.innerHTML.trim() : (v.description || "");
+                    var payload = { id: v.id, password: pw, title: title, description: description };
+                    if (blobUrl) payload.src = blobUrl;
+                    return fetch("/api/videos", {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(payload)
+                    })
+                      .then(function (r) { return r.json(); })
+                      .then(function (data) {
+                        saveBtn.disabled = false;
+                        saveBtn.textContent = "Save";
+                        if (data.ok) {
+                          titleEl.textContent = title || "Untitled";
+                          if (blobUrl) vid.src = blobUrl;
+                          editPane.querySelector(".edit-v-replace-file").value = "";
+                          editPane.classList.remove("active");
+                          showMsg(deleteMsg, blobUrl ? "Video updated (new file)." : "Video updated.", true);
+                        } else {
+                          showMsg(deleteMsg, data.error || "Failed", false);
+                        }
+                      })
+                      .catch(function () {
+                        saveBtn.disabled = false;
+                        saveBtn.textContent = "Save";
+                        showMsg(deleteMsg, "Request failed.", false);
+                      });
+                  }
+                  saveBtn.disabled = true;
+                  saveBtn.textContent = "Saving…";
+                  if (replaceFile) {
+                    if (replaceFile.size > VIDEO_MAX_BYTES) {
+                      saveBtn.disabled = false;
+                      saveBtn.textContent = "Save";
+                      showMsg(deleteMsg, "Video must be under 1 GB.", false);
+                      return;
+                    }
+                    uploadFileToBlob(replaceFile)
+                      .then(applyPayload)
+                      .catch(function () {
+                        saveBtn.disabled = false;
+                        saveBtn.textContent = "Save";
+                        showMsg(deleteMsg, "Upload failed.", false);
+                      });
+                  } else {
+                    applyPayload(null);
+                  }
+                });
+                btnWrap.appendChild(editBtn);
+                var del = document.createElement("button");
+                del.type = "button";
+                del.className = "delete-btn";
+                del.textContent = "Delete";
+                del.addEventListener("click", function () {
+                  if (!confirm("Delete this video from the site?")) return;
+                  var delBtn = del;
+                  delBtn.disabled = true;
+                  fetch("/api/videos", {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id: v.id, password: pw })
+                  })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                      if (data.ok) {
+                        showMsg(deleteMsg, "Video removed from gallery.", true);
+                        loadVideosForManage();
+                      } else {
+                        showMsg(deleteMsg, data.error || "Failed", false);
+                        delBtn.disabled = false;
+                      }
+                    })
+                    .catch(function () {
+                      showMsg(deleteMsg, "Request failed.", false);
+                      delBtn.disabled = false;
+                    });
+                });
+                btnWrap.appendChild(del);
+                div.appendChild(btnWrap);
+                div.appendChild(editPane);
+                list.appendChild(div);
+              });
+            })
+            .catch(function () {
+              list.innerHTML = "<p style=\"color: var(--text-muted); font-size: 14px;\">Could not load videos.</p>";
+            });
+        }
+
+        function loadWritingsForManage() {
+          var list = document.getElementById("writings-list");
+          var msgEl = document.getElementById("writings-msg");
+          if (!list) return;
+          list.innerHTML = "";
+          if (msgEl) msgEl.textContent = "";
+          fetch("/api/writings?_t=" + Date.now()).then(function(r){ return r.json(); }).then(function(writings){
+            if (!Array.isArray(writings) || writings.length === 0) {
+              list.innerHTML = "<p style=\"color: var(--text-muted); font-size: 14px;\">No writings yet.</p>";
+              return;
+            }
+            writings.forEach(function(w){
+              function escAttr(s) {
+                return String(s || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+              }
+              var div = document.createElement("div");
+              div.className = "writing-item";
+              var titleEl = document.createElement("div");
+              titleEl.className = "writing-item-title";
+              titleEl.textContent = w.title || "Untitled";
+              var metaEl = document.createElement("div");
+              metaEl.className = "writing-item-meta";
+              metaEl.textContent = (w.date || "") + " · " + (w.time || "") + " · " + (w.category || "") + (w.audioUrl ? " · audio" : "");
+              var editBtn = document.createElement("button");
+              editBtn.type = "button";
+              editBtn.className = "edit-btn";
+              editBtn.textContent = "Edit";
+              var editPane = document.createElement("div");
+              editPane.className = "writing-item-edit";
+              var catOpts = ["learning","getting started","reflections","updates","other"].map(function(c){
+                return "<option value=\"" + c + "\"" + (w.category === c ? " selected" : "") + ">" + c.charAt(0).toUpperCase() + c.slice(1) + "</option>";
+              }).join("");
+              var audioCurrentHtml = w.audioUrl
+                ? "<p class=\"edit-audio-current\" style=\"font-size:12px;margin:-4px 0 6px;color:var(--text-muted)\"><a href=\"" + escAttr(w.audioUrl) + "\" target=\"_blank\" rel=\"noopener noreferrer\">Open current audio</a> · <button type=\"button\" class=\"edit-audio-remove\" style=\"background:none;border:none;color:var(--text-muted);cursor:pointer;text-decoration:underline;padding:0;font:inherit\">Remove</button></p>"
+                : "<p class=\"edit-audio-current\" style=\"font-size:12px;margin:-4px 0 6px;color:var(--text-muted)\">No companion audio.</p>";
+              var wTimeRaw = w.time || "";
+              var wTimeDisp = typeof normalizeClockTimeToHHMM === "function" ? (normalizeClockTimeToHHMM(wTimeRaw) || wTimeRaw) : wTimeRaw;
+              editPane.innerHTML = "<label>Title</label><input type=\"text\" autocomplete=\"off\" class=\"edit-title\" value=\"" + (w.title || "").replace(/"/g, "&quot;") + "\">" +
+                "<label>Date</label><input type=\"text\" autocomplete=\"off\" class=\"edit-date\" value=\"" + (w.date || "").replace(/"/g, "&quot;") + "\">" +
+                "<label>Time</label><input type=\"text\" autocomplete=\"off\" class=\"edit-time\" placeholder=\"e.g. 2041\" value=\"" + wTimeDisp.replace(/"/g, "&quot;") + "\">" +
+                "<label>Category</label><select class=\"edit-category\">" + catOpts + "</select>" +
+                "<label>Companion audio (optional)</label>" +
+                "<input type=\"hidden\" class=\"edit-audio-url\" value=\"" + escAttr(w.audioUrl) + "\">" +
+                audioCurrentHtml +
+                "<input type=\"file\" class=\"edit-audio-file\" accept=\"audio/mpeg,audio/mp3,audio/wav,audio/x-wav,.mp3,.wav\" style=\"margin-bottom:8px\">" +
+                "<div class=\"audio-trim-panel edit-audio-trimmer\" hidden>" +
+                "<div class=\"audio-trim-heading\"><svg class=\"audio-trim-heading-icon\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"M4 7V4h3M4 17v3h3M20 7V4h-3M20 17v3h-3\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><path d=\"M9 9h6v6H9V9z\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linejoin=\"round\"/></svg> Select the part to trim</div>" +
+                "<p class=\"audio-trim-hint\">Click the green range to set where preview starts (white line). Drag handles to trim.</p>" +
+                "<div class=\"audio-trim-track\">" +
+                "<canvas class=\"audio-trim-waveform\" width=\"1\" height=\"96\"></canvas>" +
+                "<div class=\"audio-trim-shade audio-trim-shade-left\"></div>" +
+                "<div class=\"audio-trim-shade audio-trim-shade-right\"></div>" +
+                "<div class=\"audio-trim-keep\" title=\"Click to set preview start\"></div>" +
+                "<div class=\"audio-trim-scrub-head\" aria-hidden=\"true\"></div>" +
+                "<button type=\"button\" class=\"audio-trim-handle audio-trim-handle-start\" aria-label=\"Trim start\"></button>" +
+                "<button type=\"button\" class=\"audio-trim-handle audio-trim-handle-end\" aria-label=\"Trim end\"></button>" +
+                "<span class=\"audio-trim-duration-total\"></span>" +
+                "</div>" +
+                "<p class=\"audio-trim-readout\"></p>" +
+                "<div class=\"audio-trim-preview\">" +
+                "<button type=\"button\" class=\"audio-trim-preview-btn\" aria-pressed=\"false\">Play preview</button>" +
+                "<div class=\"audio-trim-preview-vol-wrap\">" +
+                "<span class=\"audio-trim-preview-vol-label\">Preview volume</span>" +
+                "<input type=\"range\" class=\"audio-trim-preview-vol\" min=\"0\" max=\"1\" step=\"0.05\" value=\"0.65\" aria-label=\"Preview volume\" />" +
+                "</div>" +
+                "<span class=\"audio-trim-preview-note\">White line follows playback. Click green to set start.</span>" +
+                "</div>" +
+                "</div>" +
+                "<details class=\"audio-trim-fallback\">" +
+                "<summary>Fine-tune with typed times</summary>" +
+                "<label style=\"margin-top:8px;display:block\">From</label>" +
+                "<input type=\"text\" autocomplete=\"off\" class=\"edit-audio-start\" placeholder=\"sec, m:ss, or MMSS\" />" +
+                "<label style=\"display:block\">Until</label>" +
+                "<input type=\"text\" autocomplete=\"off\" class=\"edit-audio-end\" placeholder=\"blank = end of file\" />" +
+                "<p style=\"color:var(--text-muted);font-size:12px;margin:-8px 0 0;line-height:1.45\">Overrides the waveform if filled.</p>" +
+                "</details>" +
+                "<label>Body</label><div class=\"edit-body-wrap\"><div class=\"edit-body-editor\"></div></div>" +
+                "<button type=\"button\" class=\"save-edit-btn\">Save</button>";
+              var delBtn = document.createElement("button");
+              delBtn.type = "button";
+              delBtn.className = "delete-btn";
+              delBtn.textContent = "Delete";
+              div.appendChild(titleEl);
+              div.appendChild(metaEl);
+              div.appendChild(editBtn);
+              div.appendChild(delBtn);
+              div.appendChild(editPane);
+              list.appendChild(div);
+              var editorEl = editPane.querySelector(".edit-body-editor");
+              var editQuill = new Quill(editorEl, {
+                theme: "snow",
+                modules: {
+                  clipboard: {
+                    matchers: [
+                      ["IMG", function(node, delta) {
+                        if (node.src && String(node.src).indexOf("data:") === 0) {
+                          var D = Quill.import("delta");
+                          return new D();
+                        }
+                      }]
+                    ]
+                  },
+                  toolbar: {
+                    container: [["bold","italic","underline"],["link"],["image"],["clean"]],
+                    handlers: {
+                      image: function() {
+                        var input = document.createElement("input");
+                        input.type = "file";
+                        input.accept = "image/*";
+                        input.onchange = function() {
+                          var file = input.files[0];
+                          if (!file) return;
+                          uploadFileViaPresigned(file).then(function(url) {
+                            var range = editQuill.getSelection(true);
+                            editQuill.insertEmbed(range.index, "image", url);
+                            editQuill.setSelection(range.index + 1);
+                          }).catch(function(err) { alert("Upload failed: " + (err.message || "Try again")); });
+                        };
+                        input.click();
+                      }
+                    }
+                  }
+                }
+              });
+              editQuill.root.innerHTML = w.body || w.excerpt || "";
+              editPane._quill = editQuill;
+              addQuillTooltips(editQuill);
+              editBtn.addEventListener("click", function() {
+                editPane.classList.toggle("active");
+                if (editPane.classList.contains("active")) tryLoadEditAudioTrimmer(editPane, w);
+              });
+              var removeAudioBtn = editPane.querySelector(".edit-audio-remove");
+              if (removeAudioBtn) removeAudioBtn.addEventListener("click", function() {
+                destroyEditAudioTrimmer(editPane);
+                var trimPanel = editPane.querySelector(".edit-audio-trimmer");
+                if (trimPanel) trimPanel.setAttribute("hidden", "");
+                var h = editPane.querySelector(".edit-audio-url");
+                if (h) h.value = "";
+                var f = editPane.querySelector(".edit-audio-file");
+                if (f) f.value = "";
+                var st = editPane.querySelector(".edit-audio-start");
+                var en = editPane.querySelector(".edit-audio-end");
+                if (st) st.value = "";
+                if (en) en.value = "";
+                var cur = editPane.querySelector(".edit-audio-current");
+                if (cur) cur.textContent = "Audio will be removed when you save.";
+              });
+              var editAudioFileIn = editPane.querySelector(".edit-audio-file");
+              if (editAudioFileIn) editAudioFileIn.addEventListener("change", function() {
+                var f = this.files[0];
+                var panel = editPane.querySelector(".edit-audio-trimmer");
+                destroyEditAudioTrimmer(editPane);
+                if (!f) {
+                  if (panel) panel.setAttribute("hidden", "");
+                  tryLoadEditAudioTrimmer(editPane, w);
+                  return;
+                }
+                if (!panel) return;
+                f.arrayBuffer()
+                  .then(function(buf) {
+                    return getAdminAudioContext().decodeAudioData(buf.slice(0));
+                  })
+                  .then(function(buffer) {
+                    editPane._audioTrimController = mountAudioTrimmer(panel, buffer, {});
+                    editPane._audioTrimFromUrl = null;
+                    panel.removeAttribute("hidden");
+                    requestAnimationFrame(function() {
+                      if (editPane._audioTrimController && editPane._audioTrimController.relayout) {
+                        editPane._audioTrimController.relayout();
+                      }
+                    });
+                  })
+                  .catch(function() {
+                    if (panel) panel.setAttribute("hidden", "");
+                  });
+              });
+              editPane.querySelector(".save-edit-btn").addEventListener("click", function() {
+                var saveBtn = editPane.querySelector(".save-edit-btn");
+                var timeEditRaw = editPane.querySelector(".edit-time").value.trim();
+                var timeEdit = typeof normalizeClockTimeToHHMM === "function" ? (normalizeClockTimeToHHMM(timeEditRaw) || timeEditRaw) : timeEditRaw;
+                var payload = { id: w.id, password: pw, title: editPane.querySelector(".edit-title").value.trim(), date: editPane.querySelector(".edit-date").value.trim(), time: timeEdit, category: editPane.querySelector(".edit-category").value, body: editPane._quill ? editPane._quill.root.innerHTML : "" };
+                payload.excerpt = payload.body;
+                var audioFile = editPane.querySelector(".edit-audio-file").files[0];
+                var audioHidden = editPane.querySelector(".edit-audio-url");
+                var editStart = editPane.querySelector(".edit-audio-start");
+                var editEnd = editPane.querySelector(".edit-audio-end");
+                var sr = editStart ? editStart.value : "";
+                var er = editEnd ? editEnd.value : "";
+                var ts;
+                var te;
+                var hasAudioTarget = !!(audioFile || (audioHidden && audioHidden.value && String(audioHidden.value).trim()));
+                if (sr.trim() || er.trim()) {
+                  ts = sr.trim() ? parseWritingAudioTime(sr) : null;
+                  te = er.trim() ? parseWritingAudioTime(er) : null;
+                  if (sr.trim() && !Number.isFinite(ts)) {
+                    if (msgEl) showMsg(msgEl, "Invalid “play from” time.", false);
+                    return;
+                  }
+                  if (er.trim() && !Number.isFinite(te)) {
+                    if (msgEl) showMsg(msgEl, "Invalid “until” time.", false);
+                    return;
+                  }
+                  if (ts != null && te != null && te <= ts) {
+                    if (msgEl) showMsg(msgEl, "“Until” must be after “from”.", false);
+                    return;
+                  }
+                } else if (hasAudioTarget && editPane._audioTrimController) {
+                  var tr = editPane._audioTrimController.getTrimSeconds();
+                  ts = tr.start;
+                  te = tr.end;
+                } else if (hasAudioTarget) {
+                  ts = w.audioStartSec != null && w.audioStartSec !== "" ? Number(w.audioStartSec) : null;
+                  te = w.audioEndSec != null && w.audioEndSec !== "" ? Number(w.audioEndSec) : null;
+                } else {
+                  ts = null;
+                  te = null;
+                }
+                payload.audioStartSec = ts != null ? ts : null;
+                payload.audioEndSec = te != null ? te : null;
+                function patchWithAudioUrl(url) {
+                  payload.audioUrl = url;
+                  return fetch("/api/writings", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+                    .then(function(r){ return r.json(); });
+                }
+                saveBtn.disabled = true;
+                var done = audioFile
+                  ? uploadFileToBlob(audioFile).then(function(url) { return patchWithAudioUrl(url); })
+                  : patchWithAudioUrl((audioHidden && audioHidden.value) ? audioHidden.value.trim() : "");
+                done.then(function(data){
+                  saveBtn.disabled = false;
+                  if (data.ok) {
+                    titleEl.textContent = payload.title || "Untitled";
+                    var hasAu = !!(payload.audioUrl && String(payload.audioUrl).trim());
+                    metaEl.textContent = payload.date + " · " + payload.time + " · " + payload.category + (hasAu ? " · audio" : "");
+                    editPane.classList.remove("active");
+                    if (msgEl) showMsg(msgEl, "Updated.", true);
+                    w.audioUrl = hasAu ? payload.audioUrl : null;
+                    w.audioStartSec = hasAu && payload.audioStartSec != null ? payload.audioStartSec : null;
+                    w.audioEndSec = hasAu && payload.audioEndSec != null ? payload.audioEndSec : null;
+                  } else { if (msgEl) showMsg(msgEl, data.error || "Failed", false); }
+                }).catch(function(err){
+                  saveBtn.disabled = false;
+                  if (msgEl) showMsg(msgEl, (err && err.message) || "Request failed.", false);
+                });
+              });
+              delBtn.addEventListener("click", function(){
+                if (!confirm("Delete this writing?")) return;
+                delBtn.disabled = true;
+                fetch("/api/writings", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: w.id, password: pw }) })
+                  .then(function(r){ return r.json(); })
+                  .then(function(data){
+                    if (data.ok) { if (msgEl) showMsg(msgEl, "Deleted.", true); loadWritingsForManage(); }
+                    else { if (msgEl) showMsg(msgEl, data.error || "Failed", false); delBtn.disabled = false; }
+                  })
+                  .catch(function(){ if (msgEl) showMsg(msgEl, "Request failed.", false); delBtn.disabled = false; });
+              });
+            });
+          }).catch(function(){
+            list.innerHTML = "<p style=\"color: var(--text-muted); font-size: 14px;\">Could not load writings.</p>";
+          });
+        }
+
+        function formatProjectDateRange(p) {
+          var s = p.startDate, e = p.endDate;
+          if (p.status === "future") return "pending – pending";
+          if (p.status === "now") {
+            if (!s) return "— – present";
+            var parts = s.split("-");
+            var mon = parts[1] ? ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][parseInt(parts[1],10)-1] : "";
+            return (mon ? mon + " " + (parts[0]||"") : s) + " – present";
+          }
+          if (p.status === "done") {
+            if (!s && !e) return "— – —";
+            function fmt(ym) {
+              if (!ym) return "—";
+              var parts = String(ym).split("-");
+              var mon = parts[1] ? ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][parseInt(parts[1],10)-1] : "";
+              return mon ? mon + " " + (parts[0]||"") : ym;
+            }
+            return fmt(s) + " – " + fmt(e);
+          }
+          return "—";
+        }
+
+        function loadProjectsList(opts) {
+          var list = document.getElementById(opts.listId);
+          var msgEl = document.getElementById(opts.msgId);
+          if (!list) return;
+          var fixedType = opts.fixedType;
+          var emptyLabel = opts.emptyLabel || "No projects yet.";
+          function reload() { loadProjectsList(opts); }
+
+          list.innerHTML = "";
+          if (msgEl) msgEl.textContent = "";
+          fetch("/api/projects?_t=" + Date.now()).then(function(r){ return r.json(); }).then(function(projects){
+            if (!Array.isArray(projects)) projects = [];
+            var filtered = projects.filter(function(p){
+              if (fixedType === "code") return p.type === "code";
+              return (p.type || "life") === "life";
+            });
+            if (filtered.length === 0) {
+              list.innerHTML = "<p style=\"color: var(--text-muted); font-size: 14px;\">" + emptyLabel + "</p>";
+              return;
+            }
+
+            var byStatus = { now: [], future: [], done: [] };
+            filtered.forEach(function(p){
+              var s = String(p.status || "now").toLowerCase();
+              if (s !== "now" && s !== "future" && s !== "done") s = "now";
+              byStatus[s].push(p);
+            });
+
+            var filterKey = opts.filterKey;
+            var statusFilter = filterKey ? (projectStatusFilter[filterKey] || "now") : "now";
+            var emptyByStatus = {
+              now: "No projects in Now. Switch to Done to see completed items.",
+              future: "No upcoming projects in Future.",
+              done: "No completed projects yet. Use Mark done on the Now tab, or set status to done in Edit."
+            };
+            var items = byStatus[statusFilter];
+            if (!items || items.length === 0) {
+              list.innerHTML = "<p style=\"color: var(--text-muted); font-size: 14px; line-height: 1.5;\">" + emptyByStatus[statusFilter] + "</p>";
+              return;
+            }
+
+            var section = document.createElement("div");
+            section.className = "projects-section";
+
+            items.forEach(function(p){
+              var ps = String(p.status || "now").toLowerCase();
+              if (ps !== "now" && ps !== "future" && ps !== "done") ps = "now";
+                var div = document.createElement("div");
+                div.className = "project-item";
+                var titleEl = document.createElement("div");
+                titleEl.className = "project-item-title";
+                titleEl.textContent = p.title || "Untitled";
+                var datesEl = document.createElement("div");
+                datesEl.className = "project-item-dates";
+                datesEl.textContent = formatProjectDateRange(p);
+                var editBtn = document.createElement("button");
+                editBtn.type = "button";
+                editBtn.className = "edit-btn";
+                editBtn.textContent = "Edit";
+                var editPane = document.createElement("div");
+                editPane.className = "project-item-edit";
+
+                var mediaBlock = fixedType === "code"
+                  ? "<label>Screenshot</label><input type=\"file\" class=\"edit-image-file\" accept=\"image/*\" style=\"margin-bottom:4px\">" +
+                    "<input type=\"text\" autocomplete=\"off\" class=\"edit-image-url\" value=\"" + (p.imageUrl || "").replace(/"/g, "&quot;") + "\" placeholder=\"URL (auto-filled on upload)\">" +
+                    "<label>Video/GIF demo</label><input type=\"file\" class=\"edit-video-file\" accept=\"video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov\" style=\"margin-bottom:4px\">" +
+                    "<input type=\"text\" autocomplete=\"off\" class=\"edit-video-url\" value=\"" + (p.videoUrl || "").replace(/"/g, "&quot;") + "\" placeholder=\"URL (auto-filled on upload)\">"
+                  : "";
+
+                var descHostId = "project-desc-" + String(p.id).replace(/[^a-zA-Z0-9_-]/g, "_");
+                editPane.innerHTML = "<label>Title</label><input type=\"text\" autocomplete=\"off\" class=\"edit-title\" value=\"" + (p.title || "").replace(/"/g, "&quot;") + "\">" +
+                  "<label>Description</label><div class=\"editor-wrap\"><div id=\"" + descHostId + "\" class=\"project-desc-quill-host\"></div></div>" +
+                  "<label>Status</label><select class=\"edit-status\"><option value=\"now\"" + (ps === "now" ? " selected" : "") + ">now</option><option value=\"future\"" + (ps === "future" ? " selected" : "") + ">future</option><option value=\"done\"" + (ps === "done" ? " selected" : "") + ">done</option></select>" +
+                  mediaBlock +
+                  "<label>Start date (YYYY-MM)</label><input type=\"month\" autocomplete=\"off\" class=\"edit-start-date\" value=\"" + (p.startDate || "") + "\">" +
+                  "<label>End date (YYYY-MM)</label><input type=\"month\" autocomplete=\"off\" class=\"edit-end-date\" value=\"" + (p.endDate || "") + "\">" +
+                  "<button type=\"button\" class=\"save-edit-btn\">Save</button>";
+
+                editBtn.addEventListener("click", function() {
+                  editPane.classList.toggle("active");
+                  if (!editPane.classList.contains("active") || editPane._descQuill || typeof Quill === "undefined") return;
+                  var host = editPane.querySelector(".project-desc-quill-host");
+                  if (!host) return;
+                  var q = new Quill("#" + host.id, projectDescQuillOptions(function () { return editPane._descQuill; }));
+                  editPane._descQuill = q;
+                  q.root.innerHTML = p.description || "";
+                  addQuillTooltips(q);
+                });
+                editPane.querySelector(".save-edit-btn").addEventListener("click", function() {
+                  var saveBtn = editPane.querySelector(".save-edit-btn");
+                  saveBtn.disabled = true;
+                  saveBtn.textContent = "Saving…";
+
+                  function doSave() {
+                    var payload = {
+                      id: p.id,
+                      password: pw,
+                      title: editPane.querySelector(".edit-title").value.trim(),
+                      description: editPane._descQuill ? editPane._descQuill.root.innerHTML : (p.description || ""),
+                      status: editPane.querySelector(".edit-status").value,
+                      type: fixedType === "code" ? "code" : "life",
+                      startDate: editPane.querySelector(".edit-start-date").value || null,
+                      endDate: editPane.querySelector(".edit-end-date").value || null
+                    };
+                    if (fixedType === "code") {
+                      payload.imageUrl = editPane.querySelector(".edit-image-url").value.trim() || null;
+                      payload.videoUrl = editPane.querySelector(".edit-video-url").value.trim() || null;
+                    } else {
+                      payload.imageUrl = null;
+                      payload.videoUrl = null;
+                    }
+                    return fetch("/api/projects", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+                  }
+
+                  if (fixedType === "code") {
+                    var imgFile = editPane.querySelector(".edit-image-file").files[0] || null;
+                    var vidFile = editPane.querySelector(".edit-video-file").files[0] || null;
+                    var uploads = [];
+                    if (imgFile) uploads.push(uploadFileToBlob(imgFile).then(function(u){ editPane.querySelector(".edit-image-url").value = u; }));
+                    if (vidFile) uploads.push(uploadFileToBlob(vidFile).then(function(u){ editPane.querySelector(".edit-video-url").value = u; }));
+                    Promise.all(uploads).then(doSave).then(function(r){ return r.json(); })
+                      .then(function(data){
+                        saveBtn.disabled = false;
+                        saveBtn.textContent = "Save";
+                        if (data.ok) { reload(); if (msgEl) showMsg(msgEl, "Updated.", true); }
+                        else { if (msgEl) showMsg(msgEl, data.error || "Failed", false); }
+                      })
+                      .catch(function(){ saveBtn.disabled = false; saveBtn.textContent = "Save"; if (msgEl) showMsg(msgEl, "Upload or save failed.", false); });
+                  } else {
+                    doSave().then(function(r){ return r.json(); })
+                      .then(function(data){
+                        saveBtn.disabled = false;
+                        saveBtn.textContent = "Save";
+                        if (data.ok) { reload(); if (msgEl) showMsg(msgEl, "Updated.", true); }
+                        else { if (msgEl) showMsg(msgEl, data.error || "Failed", false); }
+                      })
+                      .catch(function(){ saveBtn.disabled = false; saveBtn.textContent = "Save"; if (msgEl) showMsg(msgEl, "Request failed.", false); });
+                  }
+                });
+
+                var checkoffBtn = null;
+                if (ps === "now" || ps === "future") {
+                  checkoffBtn = document.createElement("button");
+                  checkoffBtn.type = "button";
+                  checkoffBtn.className = "checkoff-btn";
+                  checkoffBtn.textContent = "Mark done";
+                  checkoffBtn.addEventListener("click", function(){
+                    if (!confirm("Mark this project as done? The list will switch to Done.")) return;
+                    checkoffBtn.disabled = true;
+                    fetch("/api/projects", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: p.id, password: pw, status: "done" }) })
+                      .then(function(r){ return r.json(); })
+                      .then(function(data){
+                        if (data.ok) {
+                          if (opts.filterKey) {
+                            projectStatusFilter[opts.filterKey] = "done";
+                            syncProjectSubtabUI(opts.filterKey);
+                          }
+                          if (msgEl) showMsg(msgEl, "Moved to done.", true);
+                          reload();
+                        } else { if (msgEl) showMsg(msgEl, data.error || "Failed", false); checkoffBtn.disabled = false; }
+                      })
+                      .catch(function(){ if (msgEl) showMsg(msgEl, "Request failed.", false); checkoffBtn.disabled = false; });
+                  });
+                }
+
+                var delBtn = document.createElement("button");
+                delBtn.type = "button";
+                delBtn.className = "delete-btn";
+                delBtn.textContent = "Delete";
+                delBtn.addEventListener("click", function(){
+                  if (!confirm("Delete this project?")) return;
+                  delBtn.disabled = true;
+                  fetch("/api/projects", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: p.id, password: pw }) })
+                    .then(function(r){ return r.json(); })
+                    .then(function(data){
+                      if (data.ok) { if (msgEl) showMsg(msgEl, "Deleted.", true); reload(); }
+                      else { if (msgEl) showMsg(msgEl, data.error || "Failed", false); delBtn.disabled = false; }
+                    })
+                    .catch(function(){ if (msgEl) showMsg(msgEl, "Request failed.", false); delBtn.disabled = false; });
+                });
+
+                div.appendChild(titleEl);
+                div.appendChild(datesEl);
+                if (checkoffBtn) div.appendChild(checkoffBtn);
+                div.appendChild(editBtn);
+                div.appendChild(delBtn);
+                div.appendChild(editPane);
+                section.appendChild(div);
+              });
+
+            list.appendChild(section);
+          }).catch(function(){
+            list.innerHTML = "<p style=\"color: var(--text-muted); font-size: 14px;\">Could not load projects.</p>";
+          });
+        }
+
+        function loadLifeProjectsForManage() {
+          loadProjectsList({
+            listId: "life-projects-list",
+            msgId: "life-projects-msg",
+            fixedType: "life",
+            filterKey: "life",
+            emptyLabel: "No life projects yet."
+          });
+        }
+
+        function loadPortfolioProjectsForManage() {
+          loadProjectsList({
+            listId: "portfolio-projects-list",
+            msgId: "portfolio-projects-msg",
+            fixedType: "code",
+            filterKey: "portfolio",
+            emptyLabel: "No portfolio projects yet."
+          });
+        }
+
+        var RAW_EXTS = ["arw","sr2","srf","dng","cr2","cr3","nef","orf","raf","rw2","pef","raw"];
+
+        function isRawFile(file) {
+          return RAW_EXTS.indexOf(file.name.split(".").pop().toLowerCase()) !== -1;
+        }
+
+        /** Windows often gives screen recordings an empty or octet-stream type; Chrome may refuse <video> while Firefox is lenient. */
+        function ensureBlobFileMime(file) {
+          if (!file || typeof file !== "object") return file;
+          var type = String(file.type || "").trim().toLowerCase();
+          if (type && type !== "application/octet-stream") return file;
+          var l = String(file.name || "").toLowerCase();
+          var guess = "";
+          if (l.endsWith(".mp4") || l.endsWith(".m4v")) guess = "video/mp4";
+          else if (l.endsWith(".webm")) guess = "video/webm";
+          else if (l.endsWith(".mov") || l.endsWith(".qt")) guess = "video/quicktime";
+          else if (l.endsWith(".jpg") || l.endsWith(".jpeg")) guess = "image/jpeg";
+          else if (l.endsWith(".png")) guess = "image/png";
+          else if (l.endsWith(".webp")) guess = "image/webp";
+          else if (l.endsWith(".gif")) guess = "image/gif";
+          else if (l.endsWith(".mp3")) guess = "audio/mpeg";
+          else if (l.endsWith(".wav")) guess = "audio/wav";
+          if (!guess) return file;
+          try {
+            return new File([file], file.name, { type: guess, lastModified: file.lastModified });
+          } catch (e) {
+            return file;
+          }
+        }
+
+        /** Same as server lib/r2-direct-upload.js (4 MiB — avoids Vercel 413 → presigned → CORS). */
+        var R2_DIRECT_MAX_BYTES = 4 * 1024 * 1024;
+
+        /** Same as server lib/r2-staging-upload.js (chunked same-origin, no R2 CORS). */
+        var R2_STAGED_MAX_BYTES = 15 * 1024 * 1024;
+
+        function storageUploadNetworkHint() {
+          return " Up to 4 MB: one POST to /api/upload. Up to 15 MB: chunked upload (same origin). If you see R2/CORS, redeploy latest code; do not rely on presigned PUT for photos under 15 MB.";
+        }
+
+        function runR2PresignedUpload(file) {
+          return fetch("/api/upload", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + pw,
+              "x-admin-password": pw
+            },
+            body: JSON.stringify({
+              filename: file.name,
+              contentType: file.type || "application/octet-stream",
+              size: file.size
+            })
+          }).then(function (r) {
+            return r.json().then(function (data) {
+              if (!r.ok) throw new Error(data.error || "Upload failed (server /api/upload).");
+              if (!data.uploadUrl || !data.url) throw new Error(data.error || "Invalid upload response");
+              return file.arrayBuffer().then(function (buf) {
+                return fetch(data.uploadUrl, { method: "PUT", body: buf });
+              }).then(function (putRes) {
+                if (!putRes.ok) throw new Error("Storage upload failed (HTTP " + putRes.status + ").");
+                return data.url;
+              }).catch(function (err) {
+                var m = String((err && err.message) || err || "");
+                if ((err && err.name === "TypeError") || /NetworkError|Failed to fetch|Load failed/i.test(m)) {
+                  throw new Error("Browser blocked upload to R2 (usually CORS)." + storageUploadNetworkHint());
+                }
+                throw err;
+              });
+            });
+          }).catch(function (err) {
+            var m = String((err && err.message) || err || "");
+            if ((err && err.name === "TypeError") || /NetworkError|Failed to fetch|Load failed/i.test(m)) {
+              if (m.indexOf("Browser blocked") === -1 && m.indexOf("Storage upload failed") === -1) {
+                throw new Error("Network error talking to /api/upload or storage." + storageUploadNetworkHint());
+              }
+            }
+            throw err;
+          });
+        }
+
+        function tryR2DirectUpload(file) {
+          return file.arrayBuffer().then(function (buf) {
+            return fetch("/api/upload", {
+              method: "POST",
+              headers: {
+                "Content-Type": file.type || "application/octet-stream",
+                "Authorization": "Bearer " + pw,
+                "x-admin-password": pw,
+                "x-upload-filename": encodeURIComponent(file.name)
+              },
+              body: buf
+            }).then(function (r) {
+              return r.text().then(function (text) {
+                var data = {};
+                try {
+                  data = text ? JSON.parse(text) : {};
+                } catch (parseErr) {
+                  var bad = new Error("Upload API returned non-JSON (redeploy so /api/upload handles binary R2 uploads).");
+                  bad.status = r.status;
+                  throw bad;
+                }
+                if (r.ok && data.url) return data.url;
+                var err = new Error(data.error || "Direct upload failed");
+                err.status = r.status;
+                throw err;
+              });
+            });
+          });
+        }
+
+        function tryR2StagedUpload(file) {
+          return fetch("/api/upload", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + pw,
+              "x-admin-password": pw
+            },
+            body: JSON.stringify({
+              action: "stagingInit",
+              filename: file.name,
+              contentType: file.type || "application/octet-stream",
+              fileSize: file.size
+            })
+          }).then(function (r) {
+            return r.text().then(function (text) {
+              var data = {};
+              try {
+                data = text ? JSON.parse(text) : {};
+              } catch (e) {
+                var pe = new Error("Staging init returned non-JSON");
+                pe.status = r.status;
+                throw pe;
+              }
+              if (!r.ok) {
+                var ie = new Error(data.error || "Staging init failed");
+                ie.status = r.status;
+                throw ie;
+              }
+              if (!data.token || typeof data.partCount !== "number" || !data.partSize) {
+                throw new Error("Invalid staging init response");
+              }
+              var token = data.token;
+              var partCount = data.partCount;
+              var partSize = data.partSize;
+              function sendPart(i) {
+                if (i >= partCount) {
+                  return fetch("/api/upload", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      "Authorization": "Bearer " + pw,
+                      "x-admin-password": pw
+                    },
+                    body: JSON.stringify({ action: "stagingComplete", token: token })
+                  }).then(function (r2) {
+                    return r2.text().then(function (t2) {
+                      var d2 = {};
+                      try {
+                        d2 = t2 ? JSON.parse(t2) : {};
+                      } catch (e2) {
+                        var p2 = new Error("Staging complete returned non-JSON");
+                        p2.status = r2.status;
+                        throw p2;
+                      }
+                      if (!r2.ok) {
+                        var e2 = new Error(d2.error || "Staging finalize failed");
+                        e2.status = r2.status;
+                        throw e2;
+                      }
+                      if (!d2.url) throw new Error("Invalid staging finalize response");
+                      return d2.url;
+                    });
+                  });
+                }
+                var start = i * partSize;
+                var end = Math.min(start + partSize, file.size);
+                var slice = file.slice(start, end);
+                return slice.arrayBuffer().then(function (buf) {
+                  return fetch("/api/upload", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/octet-stream",
+                      "Authorization": "Bearer " + pw,
+                      "x-admin-password": pw,
+                      "x-staging-token": token,
+                      "x-staging-part-index": String(i)
+                    },
+                    body: buf
+                  }).then(function (rp) {
+                    return rp.text().then(function (tp) {
+                      var dp = {};
+                      try {
+                        dp = tp ? JSON.parse(tp) : {};
+                      } catch (e3) {
+                        var p3 = new Error("Staging part returned non-JSON");
+                        p3.status = rp.status;
+                        throw p3;
+                      }
+                      if (!rp.ok) {
+                        var ep = new Error(dp.error || "Staging part upload failed");
+                        ep.status = rp.status;
+                        throw ep;
+                      }
+                      return sendPart(i + 1);
+                    });
+                  });
+                });
+              }
+              return sendPart(0);
+            });
+          });
+        }
+
+        function uploadFileViaPresigned(file) {
+          file = ensureBlobFileMime(file);
+          if (file.size <= R2_DIRECT_MAX_BYTES) {
+            return tryR2DirectUpload(file).catch(function (err) {
+              if (err.status === 401) throw err;
+              if (file.size <= R2_STAGED_MAX_BYTES) {
+                return tryR2StagedUpload(file);
+              }
+              return runR2PresignedUpload(file);
+            });
+          }
+          if (file.size <= R2_STAGED_MAX_BYTES) {
+            return tryR2StagedUpload(file);
+          }
+          return runR2PresignedUpload(file);
+        }
+
+        function uploadFileToBlob(file) {
+          file = ensureBlobFileMime(file);
+          return uploadFileViaPresigned(file).then(function (url) {
+            if (!isRawFile(file)) return url;
+            return fetch("/api/convert", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ rawUrl: url, password: pw })
+            }).then(function(r){ return r.json(); }).then(function(data){
+              if (data.ok && data.url) return data.url;
+              throw new Error(data.error || "RAW conversion failed");
+            });
+          });
+        }
+
+        document.getElementById("life-project-form").addEventListener("submit", function(e){
+          e.preventDefault();
+          var msg = document.getElementById("life-proj-msg");
+          var submitBtn = document.getElementById("life-proj-submit");
+          var status = document.getElementById("life-proj-status").value;
+          var startVal = document.getElementById("life-proj-start-date").value;
+          var endVal = document.getElementById("life-proj-end-date").value;
+
+          submitBtn.disabled = true;
+          showMsg(msg, "Saving…", true);
+
+          var payload = {
+            title: document.getElementById("life-proj-title").value.trim(),
+            description: lifeDescQuill ? lifeDescQuill.root.innerHTML : "",
+            status: status,
+            type: "life",
+            password: pw
+          };
+          if (status !== "future") payload.startDate = startVal || null;
+          if (status === "done") payload.endDate = endVal || null;
+
+          fetch("/api/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+            .then(function(r){ return r.json(); })
+            .then(function(data){
+              submitBtn.disabled = false;
+              if (data.ok) {
+                showMsg(msg, "Life project added.", true);
+                loadLifeProjectsForManage();
+                document.getElementById("life-project-form").reset();
+                if (lifeDescQuill) lifeDescQuill.root.innerHTML = "";
+              } else {
+                showMsg(msg, data.error || "Failed", false);
+              }
+            })
+            .catch(function(){
+              submitBtn.disabled = false;
+              showMsg(msg, "Request failed.", false);
+            });
+        });
+
+        document.getElementById("portfolio-project-form").addEventListener("submit", function(e){
+          e.preventDefault();
+          var msg = document.getElementById("port-proj-msg");
+          var submitBtn = document.getElementById("port-proj-submit");
+          var status = document.getElementById("port-proj-status").value;
+          var startVal = document.getElementById("port-proj-start-date").value;
+          var endVal = document.getElementById("port-proj-end-date").value;
+          var imageFile = document.getElementById("port-proj-image").files[0] || null;
+          var videoFile = document.getElementById("port-proj-video").files[0] || null;
+
+          submitBtn.disabled = true;
+          showMsg(msg, "Saving…", true);
+
+          var uploads = [];
+          var imageUrl = null, videoUrl = null;
+
+          if (imageFile) uploads.push(uploadFileToBlob(imageFile).then(function(u){ imageUrl = u; }));
+          if (videoFile) uploads.push(uploadFileToBlob(videoFile).then(function(u){ videoUrl = u; }));
+
+          Promise.all(uploads).then(function(){
+            var payload = {
+              title: document.getElementById("port-proj-title").value.trim(),
+              description: portfolioDescQuill ? portfolioDescQuill.root.innerHTML : "",
+              status: status,
+              type: "code",
+              password: pw
+            };
+            if (imageUrl) payload.imageUrl = imageUrl;
+            if (videoUrl) payload.videoUrl = videoUrl;
+            if (status !== "future") payload.startDate = startVal || null;
+            if (status === "done") payload.endDate = endVal || null;
+            return fetch("/api/projects", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+          }).then(function(r){ return r.json(); }).then(function(data){
+            submitBtn.disabled = false;
+            if (data.ok) {
+              showMsg(msg, "Portfolio project added.", true);
+              loadPortfolioProjectsForManage();
+              document.getElementById("portfolio-project-form").reset();
+              if (portfolioDescQuill) portfolioDescQuill.root.innerHTML = "";
+            } else {
+              showMsg(msg, data.error || "Failed", false);
+            }
+          }).catch(function(){
+            submitBtn.disabled = false;
+            showMsg(msg, "Request failed.", false);
+          });
+        });
+
+        function capitalizeWords(str) {
+          return String(str).replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+        }
+        ["photo-location"].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) el.addEventListener("input", function() {
+            var start = this.selectionStart, end = this.selectionEnd, val = this.value, newVal = capitalizeWords(val);
+            if (val !== newVal) { this.value = newVal; this.setSelectionRange(start, end); }
+          });
+        });
+
+        document.getElementById("photo-file").addEventListener("change", function(){
+          var file = this.files[0];
+          if (!file || !file.type.startsWith("image/")) return;
+          import("https://cdn.jsdelivr.net/npm/exifr@7/dist/lite.esm.mjs").then(function(m){ var exifr = m.default; return exifr.parse(file, { pick: ["DateTimeOriginal"] }); }).then(function(exif){
+            if (exif && exif.DateTimeOriginal) {
+              var d = exif.DateTimeOriginal;
+              if (d instanceof Date && !isNaN(d.getTime())) {
+                var mm = String(d.getMonth() + 1).padStart(2, "0");
+                var dd = String(d.getDate()).padStart(2, "0");
+                var yy = String(d.getFullYear()).slice(-2);
+                var hh = String(d.getHours()).padStart(2, "0");
+                var min = String(d.getMinutes()).padStart(2, "0");
+                document.getElementById("photo-date").value = mm + "/" + dd + "/" + yy;
+                document.getElementById("photo-time").value = hh + min;
+              }
+            }
+          }).catch(function(){});
+        });
+
+        document.getElementById("photo-form").addEventListener("submit", function(e){
+          e.preventDefault();
+          var msg = document.getElementById("photo-msg");
+          var submitBtn = document.getElementById("photo-submit");
+          var fileInput = document.getElementById("photo-file");
+          var file = fileInput.files[0];
+          if (!file) {
+            showMsg(msg, "Select an image first.", false);
+            return;
+          }
+          if (file.size > 50 * 1024 * 1024) {
+            showMsg(msg, "File must be under 50 MB.", false);
+            return;
+          }
+
+          submitBtn.disabled = true;
+          showMsg(msg, "Uploading…", true);
+
+          function parseJsonResponse(r) {
+            return r.text().then(function(t) {
+              if (!t) return {};
+              try { return JSON.parse(t); } catch (e) {
+                throw new Error("Server error. Try a smaller image or check your connection.");
+              }
+            });
+          }
+
+          var isRaw = isRawFile(file);
+
+          if (isRaw) showMsg(msg, "Uploading RAW file…", true);
+
+          uploadFileViaPresigned(file)
+          .then(function(blobUrl){
+            if (!isRaw) return blobUrl;
+            showMsg(msg, "Converting RAW to JPEG… this may take a moment.", true);
+            return fetch("/api/convert", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ rawUrl: blobUrl, password: pw })
+            }).then(function(r){ return r.json(); }).then(function(data){
+              if (data.ok && data.url) return data.url;
+              throw new Error(data.error || "RAW conversion failed");
+            });
+          })
+          .then(function(blobUrl){
+            var location = document.getElementById("photo-location").value.trim();
+            var date = document.getElementById("photo-date").value.trim();
+            var time = document.getElementById("photo-time").value.trim();
+            var metaParts = [location, date, time].filter(Boolean);
+            var meta = metaParts.join("  ");
+            var title = document.getElementById("photo-title").value.trim();
+            var payload = {
+              src: blobUrl,
+              alt: (title || "") + (location ? " - " + location : ""),
+              title: title,
+              meta: meta,
+              date: date,
+              time: time,
+              caption: document.getElementById("photo-caption").value.trim(),
+              category: document.getElementById("photo-category").value,
+              password: pw
+            };
+            return fetch("/api/photos", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+          })
+          .then(parseJsonResponse)
+          .then(function(data){
+            if (data.ok) {
+              showMsg(msg, "Photo added.", true);
+              document.getElementById("photo-form").reset();
+              fileInput.value = "";
+              loadPhotosForDelete();
+            } else {
+              showMsg(msg, data.error || "Failed", false);
+            }
+          })
+          .catch(function(err){
+            showMsg(msg, err.message || "Request failed.", false);
+          })
+          .finally(function(){
+            submitBtn.disabled = false;
+          });
+        });
+
+        document.getElementById("video-form").addEventListener("submit", function (e) {
+          e.preventDefault();
+          var msg = document.getElementById("video-msg");
+          var submitBtn = document.getElementById("video-submit");
+          var fileInput = document.getElementById("video-file");
+          var file = fileInput.files[0];
+          if (!file) {
+            showMsg(msg, "Select a video file first.", false);
+            return;
+          }
+          if (file.size > VIDEO_MAX_BYTES) {
+            showMsg(msg, "Video must be under 1 GB.", false);
+            return;
+          }
+          submitBtn.disabled = true;
+          showMsg(msg, "Uploading… (large files take time)", true);
+          uploadFileToBlob(file)
+            .then(function (blobUrl) {
+              var title = document.getElementById("video-title").value.trim();
+              var description = videoDescQuill ? videoDescQuill.root.innerHTML.trim() : "";
+              return fetch("/api/videos", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  password: pw,
+                  src: blobUrl,
+                  title: title,
+                  description: description
+                })
+              });
+            })
+            .then(function (r) {
+              return r.text().then(function (t) {
+                if (!t) return {};
+                try {
+                  return JSON.parse(t);
+                } catch (e2) {
+                  throw new Error("Server error.");
+                }
+              });
+            })
+            .then(function (data) {
+              if (data.ok) {
+                showMsg(msg, "Video added.", true);
+                document.getElementById("video-form").reset();
+                fileInput.value = "";
+                if (videoDescQuill) videoDescQuill.root.innerHTML = "";
+                loadVideosForManage();
+              } else {
+                showMsg(msg, data.error || "Failed", false);
+              }
+            })
+            .catch(function (err) {
+              showMsg(msg, (err && err.message) || "Upload or save failed.", false);
+            })
+            .finally(function () {
+              submitBtn.disabled = false;
+            });
+        });
+      })();
+    </script>
+  </body>
+</html>
