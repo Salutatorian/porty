@@ -1,6 +1,6 @@
 /**
  * POST /api/contact — send portfolio contact form via Resend.
- * Env: RESEND_API_KEY (required), CONTACT_TO_EMAIL, RESEND_FROM
+ * Env: RESEND_API_KEY (required). Optional: CONTACT_TO_EMAIL, RESEND_FROM
  */
 const { Resend } = require("resend");
 
@@ -59,8 +59,10 @@ module.exports = async (req, res) => {
   const subject = typeof raw.subject === "string" ? raw.subject.trim() : "";
   const message = typeof raw.message === "string" ? raw.message.trim() : "";
 
-  if (!name || !email || !subject || !message) {
-    res.status(400).json({ error: "Missing required fields" });
+  if (!name || !subject || !message) {
+    res.status(400).json({
+      error: "Name, subject, and message are required.",
+    });
     return;
   }
 
@@ -74,8 +76,7 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  if (!emailOk) {
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     res.status(400).json({ error: "Invalid email address" });
     return;
   }
@@ -90,17 +91,30 @@ module.exports = async (req, res) => {
   const to = process.env.CONTACT_TO_EMAIL || "contactjoshuawaldo@gmail.com";
   const from =
     process.env.RESEND_FROM ||
-    "Portfolio contact <onboarding@resend.dev>";
+    "Portfolio Contact <onboarding@resend.dev>";
+
+  const textBody =
+    "Name: " +
+    name +
+    "\nEmail: " +
+    (email || "Not provided") +
+    "\n\nMessage:\n" +
+    message;
+
+  const sendPayload = {
+    from,
+    to: [to],
+    subject: `Portfolio Contact: ${subject}`,
+    text: textBody,
+  };
+
+  if (email) {
+    sendPayload.replyTo = email;
+  }
 
   try {
     const resend = new Resend(apiKey);
-    const { error } = await resend.emails.send({
-      from,
-      to: [to],
-      replyTo: email,
-      subject: `Portfolio contact: ${subject}`,
-      text: `Name: ${name}\nEmail: ${email}\n\n${message}`,
-    });
+    const { error } = await resend.emails.send(sendPayload);
 
     if (error) {
       console.error("Resend error:", error);

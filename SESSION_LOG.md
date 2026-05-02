@@ -81,3 +81,19 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
 ### Agent convention
 - Cursor rule **`.cursor/rules/session-log.mdc`** (`alwaysApply`): substantive repo changes should update this file (`SESSION_LOG.md`) in the same batch so pushes always carry a current log.
+
+---
+
+## 2026-05-02 — Contact: two cards + optional email
+
+### Session Summary
+- **Contact section only:** Two side-by-side cards on desktop (stack on mobile): **form card** (left) + **“Let’s talk” / Book a call** bento-style card (right). Removed visible inbox, intro blurb, and Copy email to avoid clutter.
+- **Form:** Name, optional email, subject, message. Client + API require **name, subject, message** only. **`/api/contact`** sends to **`contactjoshuawaldo@gmail.com`**; **`replyTo`** only when a valid email is provided. No `mailto`.
+- **Booking card:** Placeholder **`https://cal.com/YOURUSERNAME`** with HTML comment to replace; warm-beige / purple-glow theming; **`contact-booking-card.js`** + **GSAP** (CDN) for subtle particles, spotlight, border glow, click pulse; **tilt off**; **`prefers-reduced-motion`** disables canvas/animation.
+- **Dependencies:** `gsap` in `package.json` (booking card only; form has no GSAP).
+
+### Files Added
+- `contact-booking-card.js`
+
+### Files Updated
+- `index.html`, `styles.css`, `api/contact.js`, `package.json`, `package-lock.json`, `SESSION_LOG.md`
