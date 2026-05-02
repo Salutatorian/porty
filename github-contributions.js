@@ -21,15 +21,29 @@
     return d.toLocaleDateString(undefined, { month: "short", timeZone: "UTC" });
   }
 
-  function showTooltip(tooltip, host, text, clientX, clientY) {
-    if (!tooltip || !host) return;
+  function positionTooltip(tooltip, clientX, clientY) {
+    if (!tooltip) return;
+    var pad = 10;
+    var tw = tooltip.offsetWidth;
+    var th = tooltip.offsetHeight;
+    var left = clientX - tw / 2;
+    var top = clientY - th - 12;
+    if (top < pad) top = clientY + 14;
+    left = Math.max(pad, Math.min(left, window.innerWidth - tw - pad));
+    top = Math.max(pad, Math.min(top, window.innerHeight - th - pad));
+    tooltip.style.left = left + "px";
+    tooltip.style.top = top + "px";
+  }
+
+  function showTooltip(tooltip, text, clientX, clientY) {
+    if (!tooltip) return;
     tooltip.textContent = text;
     tooltip.hidden = false;
-    var rect = host.getBoundingClientRect();
-    var x = clientX - rect.left + 12;
-    var y = clientY - rect.top - 8;
-    tooltip.style.left = x + "px";
-    tooltip.style.top = y + "px";
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        positionTooltip(tooltip, clientX, clientY);
+      });
+    });
   }
 
   function hideTooltip(tooltip) {
@@ -41,17 +55,17 @@
     if (!monthRow) return;
     monthRow.innerHTML = "";
     monthRow.style.setProperty("--weeks", String(weeks.length));
-    var seen = {};
+    var prevYm = "";
     for (var w = 0; w < weeks.length; w++) {
       var day = weeks[w] && weeks[w][0];
       if (!day || !day.date) continue;
-      var month = monthShortFromDate(day.date);
-      if (seen[month]) continue;
-      seen[month] = true;
+      var ym = day.date.slice(0, 7);
+      if (ym === prevYm) continue;
+      prevYm = ym;
       var el = document.createElement("span");
       el.className = "github-contrib-month";
       el.style.gridColumn = String(w + 1);
-      el.textContent = month;
+      el.textContent = monthShortFromDate(day.date);
       monthRow.appendChild(el);
     }
   }
@@ -80,12 +94,12 @@
         btn.addEventListener("mouseenter", function (e) {
           var count = Number(e.currentTarget.dataset.count || 0);
           var date = e.currentTarget.dataset.date || "";
-          showTooltip(tooltip, grid, formatCount(count) + " on " + formatDate(date), e.clientX, e.clientY);
+          showTooltip(tooltip, formatCount(count) + " on " + formatDate(date), e.clientX, e.clientY);
         });
         btn.addEventListener("mousemove", function (e) {
           var count = Number(e.currentTarget.dataset.count || 0);
           var date = e.currentTarget.dataset.date || "";
-          showTooltip(tooltip, grid, formatCount(count) + " on " + formatDate(date), e.clientX, e.clientY);
+          showTooltip(tooltip, formatCount(count) + " on " + formatDate(date), e.clientX, e.clientY);
         });
         btn.addEventListener("mouseleave", function () {
           hideTooltip(tooltip);
@@ -94,7 +108,7 @@
           var count = Number(e.currentTarget.dataset.count || 0);
           var date = e.currentTarget.dataset.date || "";
           var r = e.currentTarget.getBoundingClientRect();
-          showTooltip(tooltip, grid, formatCount(count) + " on " + formatDate(date), r.left + r.width / 2, r.top);
+          showTooltip(tooltip, formatCount(count) + " on " + formatDate(date), r.left + r.width / 2, r.top + r.height / 2);
         });
         btn.addEventListener("blur", function () {
           hideTooltip(tooltip);
@@ -104,11 +118,17 @@
     }
 
     if (stat) {
-      stat.textContent =
-        data.total +
-        " contributions in " +
-        data.year +
-        " on GitHub";
+      if (data.range === "calendar" && data.year != null) {
+        stat.textContent =
+          data.total +
+          " contributions in " +
+          data.year +
+          " on GitHub";
+      } else {
+        stat.textContent =
+          data.total +
+          " contributions in the last year on GitHub";
+      }
     }
   }
 
@@ -118,10 +138,10 @@
     var monthRow = document.getElementById("github-contrib-months");
     var stat = document.getElementById("github-contrib-stat");
     var tooltip = document.getElementById("github-contrib-tooltip");
-    var user = grid.getAttribute("data-user") || "Salutatorian";
-    var year = String(new Date().getFullYear());
-
-    fetch("/api/github-contributions?user=" + encodeURIComponent(user) + "&year=" + encodeURIComponent(year))
+    if (tooltip && tooltip.parentNode !== document.body) {
+      document.body.appendChild(tooltip);
+    }
+    fetch("/api/github-contributions?user=" + encodeURIComponent(user) + "&range=rolling")
       .then(function (r) {
         if (!r.ok) throw new Error("Failed request");
         return r.json();

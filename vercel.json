@@ -50,6 +50,9 @@
     "api/convert.js": {
       "maxDuration": 60,
       "memory": 1024
+    },
+    "api/contact.js": {
+      "maxDuration": 15
     }
   }
 }

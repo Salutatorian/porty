@@ -2202,7 +2202,7 @@ body.sf-intro-active {
   border-radius: 12px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   background: rgba(255, 255, 255, 0.65);
-  color: rgba(15, 18, 25, 0.86);
+  color: #2f2a25;
   font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
@@ -2211,17 +2211,18 @@ body.sf-intro-active {
 }
 
 .tech-pill-icon {
-  width: 16px;
-  height: 16px;
+  width: 1.1rem;
+  height: 1.1rem;
   flex-shrink: 0;
   display: block;
 }
 
-/* Icons whose brand color is white/cream become invisible on a light stripe.
-   filter: invert(1) flips them to black for the light theme; the dark-theme
-   block below resets the filter so they stay white on dark. */
-.tech-pill-icon[data-flip-on-light] {
-  filter: invert(1);
+/* CDN icons are rendered as a single fill (#2f2a25); invert for dark theme.
+   (img cannot use currentColor; monochrome URL + filter keeps parity with label.) */
+html[data-theme="dark"] .tech-pill-icon,
+html.dark .tech-pill-icon,
+body.dark .tech-pill-icon {
+  filter: invert(1) brightness(1.12);
 }
 
 html[data-theme="dark"] .tech-marquee,
@@ -2236,13 +2237,7 @@ html.dark .tech-pill,
 body.dark .tech-pill {
   border: 1px solid rgba(255, 255, 255, 0.10);
   background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.82);
-}
-
-html[data-theme="dark"] .tech-pill-icon[data-flip-on-light],
-html.dark .tech-pill-icon[data-flip-on-light],
-body.dark .tech-pill-icon[data-flip-on-light] {
-  filter: none;
+  color: #f3efe7;
 }
 
 /* Track moves from -50% to 0%: with the duplicated children, that's a seamless
@@ -2267,8 +2262,8 @@ body.dark .tech-pill-icon[data-flip-on-light] {
     gap: 8px;
   }
   .tech-pill-icon {
-    width: 14px;
-    height: 14px;
+    width: 1.1rem;
+    height: 1.1rem;
   }
 }
 
@@ -2282,70 +2277,80 @@ body.dark .tech-pill-icon[data-flip-on-light] {
 .github-contrib-card {
   position: relative;
   padding: 16px 14px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border);
   border-radius: 16px;
-  background: rgba(10, 12, 16, 0.46);
+  background: var(--bg-alt);
 }
 
 .github-contrib-months {
   display: grid;
   grid-template-columns: repeat(var(--weeks, 53), minmax(0, 1fr));
-  gap: 4px;
+  column-gap: clamp(2px, 0.35vw, 4px);
+  row-gap: 0;
   margin: 0 0 8px;
   min-height: 16px;
-  color: rgba(232, 236, 245, 0.72);
+  color: var(--text-muted);
   font-size: 11px;
+  width: 100%;
 }
 
 .github-contrib-month {
   white-space: nowrap;
+  justify-self: start;
+  min-width: 0;
 }
 
 .github-contrib-grid-wrap {
   position: relative;
-  overflow-x: auto;
+  overflow: visible;
+  width: 100%;
   padding-bottom: 2px;
 }
 
 .github-contrib-grid {
   --weeks: 53;
+  width: 100%;
   display: grid;
-  grid-template-columns: repeat(var(--weeks), 11px);
-  grid-template-rows: repeat(7, 11px);
-  gap: 4px;
-  min-width: fit-content;
+  grid-template-columns: repeat(var(--weeks), minmax(0, 1fr));
+  grid-template-rows: repeat(7, auto);
+  gap: clamp(2px, 0.35vw, 4px);
+  align-items: stretch;
 }
 
 .github-cell {
-  width: 11px;
-  height: 11px;
+  width: 100%;
+  aspect-ratio: 1;
+  height: auto;
+  min-height: 0;
+  min-width: 0;
   border: 0;
   border-radius: 2px;
-  background: #21252d;
+  background: #eceff3;
   padding: 0;
   cursor: default;
 }
 
-.github-cell.level-1 { background: #3a404c; }
-.github-cell.level-2 { background: #505a6b; }
-.github-cell.level-3 { background: #6c788f; }
-.github-cell.level-4 { background: #92a1bd; }
+.github-cell.level-1 { background: #d9dee6; }
+.github-cell.level-2 { background: #bbc5d3; }
+.github-cell.level-3 { background: #97a7bb; }
+.github-cell.level-4 { background: #6e859f; }
 
 .github-cell:focus-visible {
-  outline: 1px solid rgba(230, 236, 246, 0.95);
+  outline: 1px solid var(--text);
   outline-offset: 1px;
 }
 
 .github-contrib-tooltip {
-  position: absolute;
+  position: fixed;
   left: 0;
   top: 0;
-  z-index: 10;
+  z-index: 10050;
   pointer-events: none;
-  transform: translate(-50%, -100%);
-  background: #111418;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: #f2f4f8;
+  transform: none;
+  margin: 0;
+  background: #131518;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f4f6fb;
   border-radius: 8px;
   padding: 6px 9px;
   font-size: 12px;
@@ -2363,7 +2368,7 @@ body.dark .tech-pill-icon[data-flip-on-light] {
 
 .github-contrib-stat {
   margin: 0;
-  color: rgba(225, 230, 240, 0.78);
+  color: var(--text-muted);
   font-size: 14px;
 }
 
@@ -2371,7 +2376,7 @@ body.dark .tech-pill-icon[data-flip-on-light] {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: rgba(217, 223, 235, 0.75);
+  color: var(--text-muted);
   font-size: 12px;
 }
 
@@ -2380,62 +2385,432 @@ body.dark .tech-pill-icon[data-flip-on-light] {
   height: 11px;
   border-radius: 2px;
   display: inline-block;
-  background: #21252d;
+  background: #eceff3;
 }
 
-.legend-cell.level-1 { background: #3a404c; }
-.legend-cell.level-2 { background: #505a6b; }
-.legend-cell.level-3 { background: #6c788f; }
-.legend-cell.level-4 { background: #92a1bd; }
+.legend-cell.level-1 { background: #d9dee6; }
+.legend-cell.level-2 { background: #bbc5d3; }
+.legend-cell.level-3 { background: #97a7bb; }
+.legend-cell.level-4 { background: #6e859f; }
 
-.connect-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+.socialLinks {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
+  width: 100%;
 }
 
-.connect-link {
+.socialLink {
+  box-sizing: border-box;
+  min-height: 64px;
+  padding: 0 18px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: var(--bg-alt);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 550;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  min-height: 42px;
-  padding: 9px 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(20, 24, 31, 0.58);
-  color: #e6ebf5;
-  text-decoration: none;
-  font-size: 15px;
-  font-weight: 550;
+  justify-content: center;
+  gap: 12px;
+  white-space: nowrap;
+  min-width: 0;
 }
 
-.connect-link:hover,
-.connect-link:focus-visible {
-  border-color: rgba(255, 255, 255, 0.28);
-  background: rgba(20, 24, 31, 0.82);
+.socialLink:hover,
+.socialLink:focus-visible {
+  border-color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-alt) 88%, var(--text) 12%);
   text-decoration: none;
 }
 
-.connect-link svg {
+.socialLink svg {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
 }
 
-.portfolio-cta {
-  margin-top: 58px;
-  padding: 28px;
+.socialLink span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 1100px) {
+  .socialLinks {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .socialLinks {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 380px) {
+  .socialLinks {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .socialLink {
+    flex: 0 0 auto;
+    min-width: 138px;
+    justify-content: flex-start;
+    padding: 0 18px;
+  }
+}
+
+html[data-theme="dark"] .github-contrib-card,
+html.dark .github-contrib-card,
+body.dark .github-contrib-card {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(10, 12, 16, 0.46);
+}
+
+html[data-theme="dark"] .github-cell,
+html.dark .github-cell,
+body.dark .github-cell,
+html[data-theme="dark"] .legend-cell,
+html.dark .legend-cell,
+body.dark .legend-cell {
+  background: #21252d;
+}
+
+html[data-theme="dark"] .github-cell.level-1,
+html.dark .github-cell.level-1,
+body.dark .github-cell.level-1,
+html[data-theme="dark"] .legend-cell.level-1,
+html.dark .legend-cell.level-1,
+body.dark .legend-cell.level-1 { background: #3a404c; }
+
+html[data-theme="dark"] .github-cell.level-2,
+html.dark .github-cell.level-2,
+body.dark .github-cell.level-2,
+html[data-theme="dark"] .legend-cell.level-2,
+html.dark .legend-cell.level-2,
+body.dark .legend-cell.level-2 { background: #505a6b; }
+
+html[data-theme="dark"] .github-cell.level-3,
+html.dark .github-cell.level-3,
+body.dark .github-cell.level-3,
+html[data-theme="dark"] .legend-cell.level-3,
+html.dark .legend-cell.level-3,
+body.dark .legend-cell.level-3 { background: #6c788f; }
+
+html[data-theme="dark"] .github-cell.level-4,
+html.dark .github-cell.level-4,
+body.dark .github-cell.level-4,
+html[data-theme="dark"] .legend-cell.level-4,
+html.dark .legend-cell.level-4,
+body.dark .legend-cell.level-4 { background: #92a1bd; }
+
+html[data-theme="dark"] .socialLink,
+html.dark .socialLink,
+body.dark .socialLink {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(20, 24, 31, 0.58);
+  color: #e6ebf5;
+}
+
+html[data-theme="dark"] .socialLink:hover,
+html[data-theme="dark"] .socialLink:focus-visible,
+html.dark .socialLink:hover,
+html.dark .socialLink:focus-visible,
+body.dark .socialLink:hover,
+body.dark .socialLink:focus-visible {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(20, 24, 31, 0.82);
+}
+
+.contactSection {
+  margin-top: 42px;
+  padding: 96px 24px 160px;
+  box-sizing: border-box;
+}
+
+.contactCard {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: 28px 32px;
+  padding: 28px 32px;
+  border: 1px solid rgba(60, 52, 42, 0.18);
+  border-radius: 28px;
+  background: rgba(239, 232, 220, 0.72);
+}
+
+.contactIntro {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 22px;
+  min-width: 0;
+}
+
+.contactIntro-copy {
+  min-width: 0;
+}
+
+.contactSection-eyebrow {
+  margin-bottom: 8px !important;
+}
+
+.contactIntro-lede {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  letter-spacing: -0.01em;
+}
+
+.contactEmailLine {
+  margin: 12px 0 0;
+}
+
+.contactEmailPlain {
+  font-size: 14px;
+  word-break: break-word;
+  color: var(--text);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.contactActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.contactFormColumn {
+  min-width: 0;
+  padding-left: 0;
+  border-left: none;
+}
+
+@media (min-width: 801px) {
+  .contactFormColumn {
+    padding-left: 28px;
+    margin-left: 0;
+    border-left: 1px solid rgba(60, 52, 42, 0.14);
+  }
+}
+
+.contactForm {
+  display: grid;
+  gap: 12px;
+}
+
+.contact-field label {
+  display: block;
+  margin-bottom: 4px;
+  font-family: var(--font-dot);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.contact-field input,
+.contact-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(60, 52, 42, 0.18);
+  background: rgba(255, 255, 255, 0.28);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+  resize: vertical;
+  min-height: 0;
+}
+
+.contact-field textarea {
+  min-height: 140px;
+  max-height: 280px;
+}
+
+.contact-field input::placeholder,
+.contact-field textarea::placeholder {
+  color: color-mix(in srgb, var(--text-muted) 75%, transparent);
+}
+
+.contact-sendRow {
+  margin-top: 4px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.contactFormStatus {
+  margin: 8px 0 0;
+  min-height: 1.4em;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.contactFormStatus[hidden] {
+  display: none !important;
+}
+
+.contactFormStatus--success {
+  color: color-mix(in srgb, #2d6a4f 85%, var(--text));
+}
+
+.contactFormStatus--error {
+  color: color-mix(in srgb, #9b2226 88%, var(--text));
+}
+
+.contact-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.contact-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 600;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+a.contact-btn {
+  text-decoration: none;
+  color: inherit;
+}
+
+.contact-btn--primary {
+  color: var(--text);
+  background: var(--bg-alt);
+}
+
+.contact-btn--secondary {
+  color: var(--text);
+  background: transparent;
+}
+
+.contact-btn--tertiary {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.contact-btn:hover,
+.contact-btn:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--text-muted);
+}
+
+html[data-theme="dark"] .contactCard,
+html.dark .contactCard,
+body.dark .contactCard {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(18, 20, 24, 0.55);
+}
+
+html[data-theme="dark"] .contactFormColumn,
+html.dark .contactFormColumn,
+body.dark .contactFormColumn {
+  border-left-color: rgba(255, 255, 255, 0.1);
+}
+
+html[data-theme="dark"] .contact-field input,
+html[data-theme="dark"] .contact-field textarea,
+html.dark .contact-field input,
+html.dark .contact-field textarea,
+body.dark .contact-field input,
+body.dark .contact-field textarea {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(20, 24, 31, 0.58);
+  color: #e6ebf5;
+}
+
+html[data-theme="dark"] .contactFormStatus--success,
+html.dark .contactFormStatus--success,
+body.dark .contactFormStatus--success {
+  color: #8fcf9f;
+}
+
+html[data-theme="dark"] .contactFormStatus--error,
+html.dark .contactFormStatus--error,
+body.dark .contactFormStatus--error {
+  color: #f5a8a8;
+}
+
+html[data-theme="dark"] .contact-btn,
+html.dark .contact-btn,
+body.dark .contact-btn {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(20, 24, 31, 0.58);
+  color: #e6ebf5;
+}
+
+html[data-theme="dark"] .contact-btn--secondary,
+html.dark .contact-btn--secondary,
+body.dark .contact-btn--secondary {
+  background: transparent;
+}
+
+html[data-theme="dark"] .contact-btn--tertiary,
+html.dark .contact-btn--tertiary,
+body.dark .contact-btn--tertiary {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+html[data-theme="dark"] .contact-btn--primary,
+html.dark .contact-btn--primary,
+body.dark .contact-btn--primary {
+  background: rgba(20, 24, 31, 0.72);
+}
+
+@media (max-width: 800px) {
+  .contactCard {
+    grid-template-columns: 1fr;
+    padding: 22px 18px;
+    gap: 20px;
+    border-radius: 22px;
+  }
+
+  .contactFormColumn {
+    padding-left: 0 !important;
+    border-left: none !important;
+    padding-top: 20px;
+    border-top: 1px solid rgba(60, 52, 42, 0.14);
+  }
+
+  html[data-theme="dark"] .contactFormColumn,
+  html.dark .contactFormColumn,
+  body.dark .contactFormColumn {
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .contactSection {
+    padding: 56px 16px 148px;
+  }
 }
 
 .portfolio-footer {
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
-  margin-top: 38px;
-  padding-top: 22px;
+  margin-top: 28px;
+  padding-top: 16px;
   border-top: 1px solid var(--border);
-  color: var(--text-muted);
-  font-size: 12px;
+  min-height: 0;
 }
 
 @media (max-width: 760px) {
@@ -2469,9 +2844,6 @@ body.dark .tech-pill-icon[data-flip-on-light] {
     scroll-snap-align: center;
   }
 
-  .portfolio-footer {
-    flex-direction: column;
-  }
 }
 
 @media (max-width: 480px) {

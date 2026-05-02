@@ -17,12 +17,16 @@
   ],
   "author": "",
   "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.758.0",
     "@aws-sdk/s3-request-presigner": "^3.758.0",
     "@vercel/blob": "^2.3.1",
     "dcraw": "^1.0.3",
     "multiparty": "^4.2.3",
+    "resend": "^6.12.2",
     "sharp": "^0.34.5"
   }
 }

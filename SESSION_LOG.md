@@ -44,7 +44,37 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 - Restart local server after route changes:
   - `npm run dev`
 - Verify:
-  - `/api/github-contributions?user=Salutatorian&year=2026` returns JSON.
+  - `/api/github-contributions?user=Salutatorian&range=rolling` returns JSON.
   - GitHub heatmap section loads.
   - Connect links are correct (user to confirm final URLs).
 
+### Update — contributions window
+- Default fetch is **`range=rolling`** (last **365 days** of **public** contributions from GitHub’s graph), not calendar year only — better once repos are public.
+- Calendar year still available: `?range=calendar&year=2025`.
+
+---
+
+## 2026-05-02 — Contact / stack / email (follow-up)
+
+### Session Summary
+- **Connect / social:** CSS grid layout for social pills (`socialLinks` / `socialLink`), responsive columns + narrow horizontal scroll fallback; Strava icon aligned with header asset.
+- **Contact:** Rebuilt as two-column **contact card** (intro + Copy email + Book a meeting on Cal.com `josh-allen-v1jqpl`; compact form on the right). Extra bottom padding so fixed dock does not cover actions.
+- **Public email:** Prefers `contactjoshuawaldo@gmail.com`; Copy button uses same.
+- **Portfolio hero:** Removed redundant GitHub / LinkedIn / Resume pill row (duplicated Connect section).
+- **Tech stack marquee:** Simple Icons URLs use single monochrome hex (`2f2a25`); dark mode uses invert filter on rasterized CDN icons.
+- **Contact delivery:** Replaced `mailto:` submit with **`POST /api/contact`** using **Resend** (`api/contact.js`). Secrets via **`RESEND_API_KEY`** (and optional `RESEND_FROM`, `CONTACT_TO_EMAIL`). Wired in **`server.js`** and **`vercel.json`** (`api/contact.js`).
+- **`admin/index.html`:** Help mailto updated to contact inbox.
+- **`env.example`:** Documents Resend variables.
+
+### Operational note (Resend testing)
+- With **`onboarding@resend.dev`**, Resend only delivers **to your Resend-account email** until a domain is verified. Set **`CONTACT_TO_EMAIL`** accordingly locally/Vercel, or verify a domain and update **`RESEND_FROM`**.
+
+### Files Added
+- `api/contact.js`
+
+### Files Updated (high level)
+- `index.html`, `styles.css`, `server.js`, `vercel.json`, `package.json`, `package-lock.json`, `env.example`, `admin/index.html`, `SESSION_LOG.md`
+
+### Next Start Checklist
+- Local: `.env.local` with **`RESEND_API_KEY`** (never commit). Restart **`npm run dev`** after env changes.
+- Vercel (when deployed): set **`RESEND_API_KEY`**, **`CONTACT_TO_EMAIL`**, optional **`RESEND_FROM`** in project env.

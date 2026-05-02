@@ -42,14 +42,30 @@ module.exports = async function githubContributionsHandler(req, res) {
     const user = (reqUrl.searchParams.get("user") || "Salutatorian").trim();
     const now = new Date();
     const currentYear = now.getUTCFullYear();
-    const year = Number(reqUrl.searchParams.get("year")) || currentYear;
+    const rangeParam = (reqUrl.searchParams.get("range") || "rolling").toLowerCase();
+    const rangeMode = rangeParam === "calendar" ? "calendar" : "rolling";
 
     if (!/^[A-Za-z0-9-]{1,39}$/.test(user)) {
       return res.status(400).json({ error: "Invalid GitHub username." });
     }
 
-    const from = `${year}-01-01`;
-    const to = `${year}-12-31`;
+    let from;
+    let to;
+    let calendarYear = null;
+
+    if (rangeMode === "calendar") {
+      calendarYear = Number(reqUrl.searchParams.get("year")) || currentYear;
+      from = `${calendarYear}-01-01`;
+      to = `${calendarYear}-12-31`;
+    } else {
+      const toUtc = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+      );
+      const fromUtc = new Date(toUtc.getTime() - 364 * DAY_MS);
+      from = toIsoDateUTC(fromUtc);
+      to = toIsoDateUTC(toUtc);
+    }
+
     const ghUrl = `https://github.com/users/${encodeURIComponent(
       user
     )}/contributions?from=${from}&to=${to}`;
@@ -71,11 +87,11 @@ module.exports = async function githubContributionsHandler(req, res) {
     const svgText = await ghRes.text();
     const parsed = parseContributionRects(svgText);
 
-    const yearStart = new Date(Date.UTC(year, 0, 1));
-    const yearEnd = new Date(Date.UTC(year, 11, 31));
-    const gridStart = new Date(yearStart);
+    const rangeStart = new Date(from + "T00:00:00.000Z");
+    const rangeEnd = new Date(to + "T00:00:00.000Z");
+    const gridStart = new Date(rangeStart);
     gridStart.setUTCDate(gridStart.getUTCDate() - gridStart.getUTCDay());
-    const gridEnd = new Date(yearEnd);
+    const gridEnd = new Date(rangeEnd);
     gridEnd.setUTCDate(gridEnd.getUTCDate() + (6 - gridEnd.getUTCDay()));
 
     const weeks = [];
@@ -104,7 +120,10 @@ module.exports = async function githubContributionsHandler(req, res) {
     res.setHeader("Cache-Control", "public, max-age=900");
     return res.json({
       user,
-      year,
+      range: rangeMode === "calendar" ? "calendar" : "rolling",
+      year: calendarYear,
+      from,
+      to,
       total,
       weeks,
     });
