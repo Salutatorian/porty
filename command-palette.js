@@ -228,7 +228,7 @@
     if (!it) return;
     closePalette();
     if (it.action === "toggleTheme") {
-      var t = document.querySelector(".theme-toggle");
+      var t = document.querySelector(".theme-toggle, .nav-link[data-dock-action=\"theme\"]");
       if (t) t.click();
     } else if (it.action === "readingTheme") {
       try {
@@ -310,8 +310,9 @@
   }
 
   document.addEventListener("click", function (e) {
-    if (e.target.closest(".mobile-nav-search")) {
+    if (e.target.closest(".mobile-nav-search") || e.target.closest('.nav-link[data-dock-action="search"]')) {
       e.preventDefault();
+      e.stopPropagation();
       var mobileNav = document.querySelector(".mobile-nav");
       var menuBtn = document.querySelector(".mobile-menu-btn");
       if (mobileNav) mobileNav.classList.remove("is-open");

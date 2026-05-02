@@ -14,12 +14,14 @@
     "/portfolio": "Work",
     "/about": "About",
     "/writing": "Writing",
+    "/books": "Books",
+    "/movies": "Movies",
     "/photos": "Photos",
     "/videos": "Videos",
     "/tools": "Tools",
     "/training": "Training",
-    "/books": "Books",
-    "/movies": "Movies",
+    "#search": "Search",
+    "#theme": "Theme",
   };
 
   function prefersReducedMotion() {
@@ -93,7 +95,9 @@
       var label = LABELS[href] || (a.textContent || "").trim() || "";
       if (label) {
         a.setAttribute("aria-label", label);
+        // Use custom CSS tooltip only to avoid duplicate native bubbles.
         a.title = "";
+        wrap.setAttribute("data-dock-label", label);
       }
 
       slots.push({
@@ -119,6 +123,7 @@
 
     insertSepAfterHref("/writing");
     insertSepAfterHref("/videos");
+    insertSepAfterHref("/training");
 
     var mouseX = Infinity;
     var hoveredSlot = null;

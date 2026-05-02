@@ -53,6 +53,8 @@
           </div>
           <a href="/tools" class="nav-link nav-link--mobile-only">photo converter</a>
           <a href="/training" class="nav-link">training</a>
+          <a href="#search" class="nav-link nav-link--dock-action" data-dock-action="search" aria-label="Search"></a>
+          <a href="#theme" class="nav-link nav-link--dock-action" data-dock-action="theme" aria-label="Toggle theme"></a>
         </nav>
 
         <div class="sidebar-music">
@@ -160,17 +162,9 @@
 
         <div class="page page-home page-home--portfolio" id="portfolio-home">
           <section class="portfolio-hero scroll-reveal" aria-labelledby="portfolio-title">
-            <div class="portfolio-profile">
-              <span class="portfolio-avatar" aria-hidden="true"></span>
-              <div>
-                <p class="portfolio-profile-name">Joshua Waldo</p>
-                <p class="portfolio-profile-role">Full-Stack Web Developer</p>
-              </div>
-            </div>
-            <h1 class="portfolio-title" id="portfolio-title">I build clean, useful web products.</h1>
-            <p class="portfolio-lede">
-              I design and ship static-first interfaces, small APIs, admin tools, and product demos with a bias for clean UX, sharp details, and maintainable code.
-            </p>
+            <h1 class="portfolio-intro-name" id="portfolio-title">Joshua Waldo</h1>
+            <p class="portfolio-intro-role font-dot">learning full stack dev</p>
+            <p class="portfolio-blank-slot">&lt;blank&gt;</p>
             <div class="portfolio-actions" aria-label="Portfolio links">
               <a href="https://github.com/Salutatorian" target="_blank" rel="noopener noreferrer">GitHub</a>
               <a href="https://www.linkedin.com/in/joshua-waldo-8b8023394/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
@@ -179,43 +173,14 @@
           </section>
 
           <section class="portfolio-section scroll-reveal" id="work" aria-labelledby="featured-projects">
-            <div class="portfolio-section-head">
-              <p class="portfolio-eyebrow">selected work</p>
-              <h2 id="featured-projects">Projects with visible outcomes</h2>
-            </div>
-            <div class="featured-projects">
-              <article class="featured-project">
-                <span class="featured-project-index">01</span>
-                <h3>Page Views API</h3>
-                <p>Lightweight analytics endpoint for tracking page views, built around practical server routes and simple persistence.</p>
-                <p class="featured-project-meta">API design · Node · data flow</p>
-              </article>
-              <article class="featured-project">
-                <span class="featured-project-index">02</span>
-                <h3>ratneshc.com</h3>
-                <p>Portfolio rebuild for Ratnesh with a fast static surface, project storytelling, and direct contact paths.</p>
-                <p class="featured-project-meta">portfolio · static site · UX</p>
-              </article>
-              <article class="featured-project">
-                <span class="featured-project-index">03</span>
-                <h3>draftlogo</h3>
-                <p>Branding and prototype work for a logo-drafting idea, focused on quick iteration and crisp presentation.</p>
-                <p class="featured-project-meta">product demo · design tooling</p>
-              </article>
-              <article class="featured-project">
-                <span class="featured-project-index">04</span>
-                <h3>Fork &amp; Fire</h3>
-                <p>Restaurant-style web concept with strong visual hierarchy, menu structure, and conversion-oriented calls to action.</p>
-                <p class="featured-project-meta">landing page · content design</p>
-              </article>
-            </div>
+            <p class="portfolio-eyebrow" id="featured-projects">projects</p>
+            <p class="portfolio-blank-slot">&lt;blank&gt;</p>
           </section>
 
           <section class="portfolio-section portfolio-section--deck scroll-reveal" aria-labelledby="card-deck-title">
-            <div class="portfolio-section-head">
-              <p class="portfolio-eyebrow font-dot">explore</p>
-              <h2 id="card-deck-title">Where to start</h2>
-              <p>Hover, focus, or tap the deck to fan it out. Each card opens a part of the site.</p>
+            <div class="portfolio-section-head portfolio-section-head--minimal">
+              <p class="portfolio-eyebrow font-dot" id="card-deck-title">explore</p>
+              <p class="portfolio-blank-slot">&lt;blank&gt;</p>
             </div>
             <div class="portfolio-stack" id="portfolio-stack" aria-label="Portfolio sections">
               <a href="/portfolio" class="stack-card" aria-label="Web Projects — builds, demos, and shipped work" style="--rest-x:-12px; --rest-y:6px; --rest-rot:-4deg; --fan-x:-275px; --fan-y:10px; --fan-rot:-15deg; --z:1; --stagger:2;">
@@ -311,22 +276,8 @@
           </section>
 
           <section class="portfolio-section scroll-reveal" aria-labelledby="experience-title">
-            <div class="portfolio-section-head">
-              <p class="portfolio-eyebrow">experience</p>
-              <h2 id="experience-title">Where I have worked</h2>
-            </div>
-            <div class="experience-list">
-              <article class="experience-item">
-                <p class="experience-date">2025 · internship / developer work</p>
-                <h3>Collab Vision Infosolutions</h3>
-                <p>Contributed to web experiences and internal workflows, balancing UI implementation with practical backend integration.</p>
-              </article>
-              <article class="experience-item">
-                <p class="experience-date">ongoing · independent projects</p>
-                <h3>The Greater Engine</h3>
-                <p>Built this static portfolio, content admin, media galleries, training dashboard, music controls, and command palette.</p>
-              </article>
-            </div>
+            <p class="portfolio-eyebrow" id="experience-title">experience</p>
+            <p class="portfolio-blank-slot">&lt;blank&gt;</p>
           </section>
 
           <section class="portfolio-section scroll-reveal" aria-labelledby="stack-title">
@@ -370,10 +321,9 @@
           </section>
 
           <section class="portfolio-section portfolio-section--admin-projects scroll-reveal" aria-labelledby="admin-projects-title">
-            <div class="portfolio-section-head">
-              <p class="portfolio-eyebrow">live entries</p>
-              <h2 id="admin-projects-title">Admin-managed projects</h2>
-              <p>Hardcoded highlights stay visible while future entries from the dashboard can still appear here.</p>
+            <div class="portfolio-section-head portfolio-section-head--minimal">
+              <p class="portfolio-eyebrow" id="admin-projects-title">live entries</p>
+              <p class="portfolio-blank-slot">&lt;blank&gt;</p>
             </div>
             <div class="projects-filters" data-section="life">
               <button type="button" class="projects-filter active" data-filter="now">now</button>
@@ -386,10 +336,66 @@
             </div>
           </section>
 
+          <section class="portfolio-section github-contrib-section scroll-reveal" aria-labelledby="github-contrib-title">
+            <div class="portfolio-section-head portfolio-section-head--minimal">
+              <p class="portfolio-eyebrow" id="github-contrib-title">GitHub contributions</p>
+            </div>
+            <div class="github-contrib-card">
+              <div class="github-contrib-months" id="github-contrib-months" aria-hidden="true"></div>
+              <div class="github-contrib-grid-wrap">
+                <div class="github-contrib-grid" id="github-contrib-grid" data-user="Salutatorian" role="grid" aria-label="GitHub contribution heatmap"></div>
+                <div class="github-contrib-tooltip" id="github-contrib-tooltip" hidden></div>
+              </div>
+              <div class="github-contrib-foot">
+                <p class="github-contrib-stat" id="github-contrib-stat">Loading contributions...</p>
+                <div class="github-contrib-legend" aria-hidden="true">
+                  <span>Less</span>
+                  <i class="legend-cell level-0"></i>
+                  <i class="legend-cell level-1"></i>
+                  <i class="legend-cell level-2"></i>
+                  <i class="legend-cell level-3"></i>
+                  <i class="legend-cell level-4"></i>
+                  <span>More</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="portfolio-section connect-section scroll-reveal" aria-labelledby="connect-title">
+            <div class="portfolio-section-head portfolio-section-head--minimal">
+              <p class="portfolio-eyebrow" id="connect-title">connect with me</p>
+            </div>
+            <div class="connect-links">
+              <a class="connect-link" href="mailto:joshuaawaldo@gmail.com" aria-label="Email Joshua">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.8"/><path d="M22 8l-10 6L2 8" stroke="currentColor" stroke-width="1.8"/></svg>
+                <span>Email</span>
+              </a>
+              <a class="connect-link" href="https://github.com/Salutatorian" target="_blank" rel="noopener noreferrer" aria-label="GitHub profile">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.21.68-.48v-1.68c-2.78.6-3.37-1.18-3.37-1.18-.45-1.15-1.1-1.45-1.1-1.45-.9-.61.07-.6.07-.6 1 .07 1.52 1.02 1.52 1.02.88 1.52 2.31 1.08 2.88.82.09-.64.35-1.08.64-1.33-2.22-.25-4.56-1.11-4.56-4.93 0-1.09.4-1.98 1.02-2.67-.1-.25-.44-1.27.1-2.65 0 0 .84-.27 2.75 1.02A9.41 9.41 0 0 1 12 6.8c.85 0 1.71.12 2.51.35 1.91-1.29 2.75-1.02 2.75-1.02.54 1.38.2 2.4.1 2.65.63.69 1.02 1.58 1.02 2.67 0 3.83-2.34 4.68-4.57 4.93.36.31.68.9.68 1.82v2.7c0 .27.18.58.69.48A10 10 0 0 0 12 2z" fill="currentColor"/></svg>
+                <span>GitHub</span>
+              </a>
+              <a class="connect-link" href="https://www.linkedin.com/in/joshua-waldo-8b8023394/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn profile">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M8 10v7M8 7.5v.01M12 17v-4c0-1.1.9-2 2-2s2 .9 2 2v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                <span>LinkedIn</span>
+              </a>
+              <a class="connect-link" href="https://www.instagram.com/joshuaawaldo/" target="_blank" rel="noopener noreferrer" aria-label="Instagram profile">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+                <span>Instagram</span>
+              </a>
+              <a class="connect-link" href="https://www.strava.com/athletes/73302983" target="_blank" rel="noopener noreferrer" aria-label="Strava profile">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 3l3.8 7H6.2L10 3zm8 14l-2.7-5h-4.1l4.8 9L18 17z" fill="currentColor"/></svg>
+                <span>Strava</span>
+              </a>
+              <a class="connect-link" href="/resume.pdf" target="_blank" rel="noopener noreferrer" aria-label="Resume PDF">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h7l5 5v13H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.8"/><path d="M14 3v5h5M9 12h6M9 16h6" stroke="currentColor" stroke-width="1.8"/></svg>
+                <span>Resume</span>
+              </a>
+            </div>
+          </section>
+
           <section class="portfolio-cta scroll-reveal" id="contact" aria-labelledby="cta-title">
-            <p class="portfolio-eyebrow">contact</p>
-            <h2 id="cta-title">Need a clean web build or a sharp portfolio?</h2>
-            <p>Send me a brief, a rough idea, or a messy prototype. I can help turn it into a working site people understand quickly.</p>
+            <p class="portfolio-eyebrow" id="cta-title">contact</p>
+            <p class="portfolio-blank-slot">&lt;blank&gt;</p>
             <div class="portfolio-actions">
               <a href="mailto:joshuaawaldo@gmail.com">joshuaawaldo@gmail.com</a>
               <a href="https://github.com/Salutatorian" target="_blank" rel="noopener noreferrer">See code</a>
@@ -409,6 +415,7 @@
     <script src="app-router.js"></script>
     <script src="page-ripple.js"></script>
     <script src="command-palette.js"></script>
+    <script src="github-contributions.js"></script>
     <script>
       (function(){
         var reveals = document.querySelectorAll(".page-home--portfolio .scroll-reveal");

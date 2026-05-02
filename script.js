@@ -41,9 +41,35 @@
   }
 
   document.addEventListener("click", function (e) {
-    if (e.target.closest(".theme-toggle")) {
+    if (e.target.closest(".theme-toggle, .nav-link[data-dock-action=\"theme\"]")) {
       e.preventDefault();
+      e.stopPropagation();
       toggleTheme();
+    }
+  });
+
+  function openCommandPalette() {
+    var trigger = document.querySelector(".search-trigger");
+    if (trigger) {
+      trigger.click();
+      return;
+    }
+    var isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform || "");
+    var ev = new KeyboardEvent("keydown", {
+      key: "k",
+      bubbles: true,
+      cancelable: true,
+      metaKey: isMac,
+      ctrlKey: !isMac,
+    });
+    document.dispatchEvent(ev);
+  }
+
+  document.addEventListener("click", function (e) {
+    if (e.target.closest('.nav-link[data-dock-action="search"]')) {
+      e.preventDefault();
+      e.stopPropagation();
+      openCommandPalette();
     }
   });
 
