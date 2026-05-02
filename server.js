@@ -18,17 +18,22 @@ try {
       const trimmed = line.trim();
       if (!trimmed || trimmed.startsWith("#")) return;
 
-      const m = trimmed.match(/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
-      if (m) {
-        const key = m[1];
-        const value = m[2].replace(/^["']|["']$/g, "").trim();
-        process.env[key] = value;
-      }
+      const eq = trimmed.indexOf("=");
+      if (eq === -1) return;
+      const key = trimmed.slice(0, eq).trim();
+      if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) return;
+      let value = trimmed
+        .slice(eq + 1)
+        .trim()
+        .replace(/^["']|["']$/g, "")
+        .trim();
+      process.env[key] = value;
     });
 
     console.log("STRAVA_CLIENT_ID loaded:", !!process.env.STRAVA_CLIENT_ID);
     console.log("STRAVA_CLIENT_SECRET loaded:", !!process.env.STRAVA_CLIENT_SECRET);
     console.log("STRAVA_REFRESH_TOKEN loaded:", !!process.env.STRAVA_REFRESH_TOKEN);
+    console.log("GITHUB_TOKEN loaded:", !!process.env.GITHUB_TOKEN);
   } else {
     console.warn(".env.local was not found.");
   }

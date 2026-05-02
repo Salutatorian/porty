@@ -97,3 +97,90 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
 ### Files Updated
 - `index.html`, `styles.css`, `api/contact.js`, `package.json`, `package-lock.json`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-02 — Connect: icon-only social row
+
+### Session Summary
+- **“Connect with me” row only:** Icon-only **72×72** rounded cards, **28px** SVGs, **6 columns** desktop / **3 columns** at `max-width: 720px`. Removed label `<span>`s (no ellipsis). **`aria-label`** + **`title`** on each link; custom **`::after`** tooltip from `aria-label` on hover/focus; dark theme uses a light tooltip chip.
+
+### Files Updated
+- `index.html`, `styles.css`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-02 — Booking card: React Bits–style PixelCard (esbuild)
+
+### Session Summary
+- **Book a call card only:** Replaced GSAP “MagicBento” canvas with a **React `PixelCard`** (canvas grid shimmer on hover/focus, **`prefers-reduced-motion`** disables animation intensity). Theme-aware **`colors`** via `BookingCard` + MutationObserver (warm beige/amber light; purple-blue dark).
+- **Static site:** Not Next/shadcn — **`booking-pixel.js`** is an **esbuild IIFE** bundle (`npm run build:booking`). Mount: `#booking-pixel-root` beside contact form; **`booking-pixel.js`** loaded with **`defer`**.
+- **Removed:** `contact-booking-card.js`, GSAP CDN script, **`gsap`** npm dependency.
+
+### Files Added
+- `src/booking/PixelCard.jsx`, `src/booking/BookingCard.jsx`, `src/booking/booking-entry.jsx`, `booking-pixel.js` (built bundle — rebuild after editing JSX)
+
+### Files Updated
+- `index.html`, `styles.css`, `package.json`, `package-lock.json`, `SESSION_LOG.md`
+
+### Files Removed
+- `contact-booking-card.js`
+
+---
+
+## 2026-05-02 — GitHub contributions: fix stuck loading
+
+### Session Summary
+- **Root cause:** `github-contributions.js` used an **undefined `user`** in the fetch URL (ReferenceError before `fetch`), so the promise **`.catch` never ran** and the stat stayed on **“Loading contributions...”**
+- **Fix:** Read **`data-user`** from `#github-contrib-grid` (default **`Salutatorian`**), **async/await** with **`try` / `catch` / `finally`**, **stale-request** guard via **`requestGeneration`**, error copy **“Could not load GitHub contributions.”**, **`console.error`** + optional **`[github-contrib debug]`** logs (toggle **`GH_CONTRIB_DEBUG`**).
+- **API** remains **`GET /api/github-contributions`** (server-side fetch to GitHub—no browser CORS to GitHub).
+
+### Files Updated
+- `github-contributions.js`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-02 — Contact grid: equal-height cards
+
+### Session Summary
+- **`.contactGrid`:** `1.2fr / 0.9fr`, **`align-items: stretch`** (unchanged intent); **`.contactFormCard`** **`height: 100%`**.
+- **`.contactBookingMount`:** flex column, **`height: 100%`**, **`min-height: 0`**; inner **`.bookingPixelCard`** **`flex: 1`**, **`display: flex`**, **`flex-direction: column`** so the Pixel canvas layer + content fill the row height.
+- **Booking content:** **`bookingPixelBlock--top` / `--middle` / `--bottom`** — eyebrow top, title + copy centered in **`flex: 1`** middle, button anchored bottom; rebuilt **`booking-pixel.js`**.
+
+### Files Updated
+- `styles.css`, `src/booking/BookingCard.jsx`, `booking-pixel.js`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-02 — GitHub contributions: GraphQL + GITHUB_TOKEN
+
+### Session Summary
+- **`GET /api/github-contributions`** now uses **GitHub GraphQL** `contributionsCollection` / `contributionCalendar` (same data as the profile graph), not HTML/SVG scraping.
+- **Env:** **`GITHUB_TOKEN`** required — if missing, **503** with **`{ "error": "Missing GITHUB_TOKEN" }`** (no silent all-zero grid).
+- **Response:** `total` / `totalContributions` from GitHub, **`weeks`** mapped to `{ date, count, level, color, weekday }` for the existing heatmap UI.
+- **Client:** fetches **`?username=`** (still accepts `user=`), **debug logs** for URL, status, and payload summary; **error** line shows API message (e.g. missing token) up to 220 chars.
+- **`env.example`:** documents **`GITHUB_TOKEN`**; **`vercel.json`:** `maxDuration` for this function.
+
+### Files Updated
+- `api/github-contributions.js`, `github-contributions.js`, `env.example`, `vercel.json`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-02 — Dock simplify + Media hub
+
+### Session Summary
+- **Sidebar / dock:** Reduced items to **Home → Media → Tools → Training → Search → Theme** on every site-shell page (mobile menu trimmed to **home, media, writing, tools, training, admin**).
+- **Removed from dock:** Portfolio, About, Writing, and separate Books/Movies/Photos/Videos entries (those routes remain reachable).
+- **New `media.html`:** Hub with four cards linking to `/books`, `/movies`, `/photos`, `/videos`; matching typography (`portfolio-eyebrow`, dot font, cards).
+- **`dock-nav.js`:** Updated labels and separators (**after Media**, **after Training**).
+- **`styles.css`:** `/media` dock icon (Images-style SVG); removed unused per-href dock rules for removed dock targets; **media hub** layout styles; **`site-shell--media`** width rule.
+- **`app-router.js`:** Active nav highlights **media** on `/media` and on books/movies/photos/videos subpages.
+- **`command-palette.js`:** **Media** entry added near top of Pages.
+- **`vercel.json`:** `/media` redirect + rewrite.
+- **Homepage stack card “Media”** now links to **`/media`** instead of **`/photos`**.
+
+### Files Added
+- `media.html`
+
+### Files Updated
+- `index.html`, `*.html` (site-shell pages + writing posts), `styles.css`, `dock-nav.js`, `app-router.js`, `command-palette.js`, `vercel.json`, `SESSION_LOG.md`

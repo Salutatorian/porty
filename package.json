@@ -6,6 +6,7 @@
     "start": "npx serve .",
     "preview": "npx serve .",
     "dev": "node server.js",
+    "build:booking": "esbuild src/booking/booking-entry.jsx --bundle --minify --outfile=booking-pixel.js --format=iife --jsx=automatic --define:process.env.NODE_ENV=\\\"production\\\"",
     "set-r2-cors": "node scripts/set-r2-cors.js",
     "migrate:blob-to-r2": "node scripts/migrate-blob-to-r2.js",
     "migrate:blob-to-r2:dry": "node scripts/migrate-blob-to-r2.js --dry-run"
@@ -25,9 +26,13 @@
     "@aws-sdk/s3-request-presigner": "^3.758.0",
     "@vercel/blob": "^2.3.1",
     "dcraw": "^1.0.3",
-    "gsap": "^3.15.0",
     "multiparty": "^4.2.3",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
     "resend": "^6.12.2",
     "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0"
   }
 }

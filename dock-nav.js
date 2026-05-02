@@ -11,13 +11,7 @@
 
   var LABELS = {
     "/": "Home",
-    "/portfolio": "Work",
-    "/about": "About",
-    "/writing": "Writing",
-    "/books": "Books",
-    "/movies": "Movies",
-    "/photos": "Photos",
-    "/videos": "Videos",
+    "/media": "Media",
     "/tools": "Tools",
     "/training": "Training",
     "#search": "Search",
@@ -121,8 +115,7 @@
       w.parentNode.insertBefore(sep, w.nextSibling);
     }
 
-    insertSepAfterHref("/writing");
-    insertSepAfterHref("/videos");
+    insertSepAfterHref("/media");
     insertSepAfterHref("/training");
 
     var mouseX = Infinity;

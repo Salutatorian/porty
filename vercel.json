@@ -9,6 +9,7 @@
     { "source": "/videos.html", "destination": "/videos", "permanent": true },
     { "source": "/training.html", "destination": "/training", "permanent": true },
     { "source": "/tools.html", "destination": "/tools", "permanent": true },
+    { "source": "/media.html", "destination": "/media", "permanent": true },
     { "source": "/portfolio.html", "destination": "/portfolio", "permanent": true },
     { "source": "/writing/index.html", "destination": "/writing", "permanent": true },
     { "source": "/writing/post.html", "destination": "/writing/post", "permanent": true },
@@ -24,6 +25,7 @@
     { "source": "/videos", "destination": "/videos.html" },
     { "source": "/training", "destination": "/training.html" },
     { "source": "/tools", "destination": "/tools.html" },
+    { "source": "/media", "destination": "/media.html" },
     { "source": "/portfolio", "destination": "/portfolio.html" },
     { "source": "/writing", "destination": "/writing/index.html" },
     { "source": "/writing/post", "destination": "/writing/post.html" },
@@ -53,6 +55,9 @@
     },
     "api/contact.js": {
       "maxDuration": 15
+    },
+    "api/github-contributions.js": {
+      "maxDuration": 20
     }
   }
 }

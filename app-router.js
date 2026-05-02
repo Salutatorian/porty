@@ -42,23 +42,22 @@
     links.forEach(function (link) {
       link.classList.remove("active");
       var label = (link.textContent || "").trim().toLowerCase();
+      var onMediaSection =
+        path === "/media" ||
+        path.endsWith("/books") ||
+        path.endsWith("/movies") ||
+        path.endsWith("/photos") ||
+        path.endsWith("/videos");
       var active =
         (label === "home" && (path === "/" || path === "" || path === "/index.html")) ||
-        (label === "portfolio" && path.endsWith("portfolio")) ||
-        (label === "about" && path.endsWith("about")) ||
+        (label === "media" && onMediaSection) ||
         (label === "writing" && isWriting) ||
-        (label === "books" && path.endsWith("books")) ||
-        (label === "movies" && path.endsWith("movies")) ||
-        (label === "photos" && path.endsWith("photos")) ||
-        (label === "videos" && path.endsWith("videos")) ||
         (label === "training" && path.endsWith("training")) ||
-        (label === "photo converter" && onTools);
+        (label === "tools" && onTools);
       if (active) link.classList.add("active");
     });
     document.querySelectorAll(".nav-dropdown-trigger").forEach(function (trigger) {
       trigger.classList.remove("active");
-      var tlabel = (trigger.textContent || "").trim().toLowerCase();
-      if (tlabel === "tools" && onTools) trigger.classList.add("active");
     });
   }
 

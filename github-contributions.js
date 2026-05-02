@@ -2,6 +2,11 @@
   if (window.__PORTY_GITHUB_CONTRIB_INIT__) return;
   window.__PORTY_GITHUB_CONTRIB_INIT__ = true;
 
+  /** Set to false to silence temporary contribution-fetch debug logs */
+  var GH_CONTRIB_DEBUG = true;
+
+  var requestGeneration = 0;
+
   function formatDate(iso) {
     var d = new Date(iso + "T00:00:00Z");
     return d.toLocaleDateString(undefined, {
@@ -135,24 +140,113 @@
   function initGithubContrib() {
     var grid = document.getElementById("github-contrib-grid");
     if (!grid || grid.dataset.loaded === "1") return;
+
     var monthRow = document.getElementById("github-contrib-months");
     var stat = document.getElementById("github-contrib-stat");
     var tooltip = document.getElementById("github-contrib-tooltip");
     if (tooltip && tooltip.parentNode !== document.body) {
       document.body.appendChild(tooltip);
     }
-    fetch("/api/github-contributions?user=" + encodeURIComponent(user) + "&range=rolling")
-      .then(function (r) {
-        if (!r.ok) throw new Error("Failed request");
-        return r.json();
-      })
-      .then(function (data) {
+
+    var user = (grid.getAttribute("data-user") || "Salutatorian").trim();
+    if (!user) user = "Salutatorian";
+
+    var myGen = ++requestGeneration;
+
+    async function loadContributions() {
+      var success = false;
+      try {
+        var url =
+          "/api/github-contributions?username=" +
+          encodeURIComponent(user) +
+          "&range=rolling";
+
+        if (GH_CONTRIB_DEBUG) {
+          console.log("[github-contrib debug] GET", url);
+        }
+
+        var res = await fetch(url);
+
+        if (GH_CONTRIB_DEBUG) {
+          console.log(
+            "[github-contrib debug] response status:",
+            res.status,
+            res.statusText
+          );
+        }
+
+        if (myGen !== requestGeneration) return;
+
+        if (!res.ok) {
+          var errBody = await res.text();
+          var errMsg = "HTTP " + res.status;
+          try {
+            var ep = JSON.parse(errBody);
+            if (ep && ep.error) errMsg = ep.error;
+            if (ep && ep.details) errMsg = errMsg + (ep.error ? " — " : ": ") + ep.details;
+            if (GH_CONTRIB_DEBUG) {
+              console.error("[github-contrib debug] API error body:", ep);
+            }
+          } catch (e) {
+            if (GH_CONTRIB_DEBUG) {
+              console.error("[github-contrib debug] error text:", errBody.slice(0, 300));
+            }
+            if (errBody) errMsg = errMsg + " — " + errBody.slice(0, 200);
+          }
+          throw new Error(errMsg);
+        }
+
+        var data = await res.json();
+
+        if (GH_CONTRIB_DEBUG) {
+          console.log("[github-contrib debug] response data:", {
+            total: data.total,
+            totalContributions: data.totalContributions,
+            weekColumns: data.weeks && data.weeks.length,
+            user: data.user,
+          });
+        }
+
+        if (myGen !== requestGeneration) return;
+
+        if (
+          data.error &&
+          (!data.weeks || !Array.isArray(data.weeks) || data.weeks.length === 0)
+        ) {
+          throw new Error(data.error || "API returned an error");
+        }
+
         grid.dataset.loaded = "1";
         renderContrib(data, grid, monthRow, stat, tooltip);
-      })
-      .catch(function () {
-        if (stat) stat.textContent = "Could not load contributions right now.";
-      });
+        success = true;
+      } catch (err) {
+        console.error("Failed to load GitHub contributions:", err);
+        if (myGen !== requestGeneration) return;
+
+        var brief =
+          err && err.message
+            ? String(err.message).slice(0, 220)
+            : "Could not load GitHub contributions.";
+        if (stat) stat.textContent = brief;
+        if (grid) {
+          grid.innerHTML = "";
+          grid.dataset.loaded = "1";
+        }
+        if (monthRow) monthRow.innerHTML = "";
+      } finally {
+        if (myGen !== requestGeneration) return;
+
+        if (
+          !success &&
+          stat &&
+          stat.textContent.indexOf("Loading contributions") !== -1
+        ) {
+          stat.textContent = "Could not load GitHub contributions.";
+        }
+      }
+    }
+
+    loadContributions();
   }
 
   if (document.readyState === "loading") {

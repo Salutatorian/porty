@@ -5,12 +5,13 @@
 
   var staticItems = [
     { label: "Home", href: "/", icon: "home", group: "Pages", keywords: "home" },
+    { label: "Media", href: "/media", icon: "image", group: "Pages", keywords: "media books movies photos videos gallery" },
     { label: "Portfolio", href: "/portfolio", icon: "code", group: "Pages", keywords: "portfolio code projects work" },
     { label: "About", href: "/about", icon: "user", group: "Pages", keywords: "about" },
     { label: "Writing", href: "/writing", icon: "pen", group: "Pages", keywords: "writing blog articles" },
     { label: "Books", href: "/books", icon: "book", group: "Pages", keywords: "books reading goodreads library" },
     { label: "Movies", href: "/movies", icon: "film", group: "Pages", keywords: "movies films library watching" },
-    { label: "Photos", href: "/photos", icon: "image", group: "Pages", keywords: "photos pictures gallery media" },
+    { label: "Photos", href: "/photos", icon: "image", group: "Pages", keywords: "photos pictures gallery" },
     { label: "Videos", href: "/videos", icon: "film", group: "Pages", keywords: "videos montage clips media" },
     { label: "Training", href: "/training", icon: "chart", group: "Pages", keywords: "training" },
     { label: "Photo converter (RAW)", href: "/tools", icon: "image", group: "Pages", keywords: "tools raw arw dng cr2 convert photo" },
