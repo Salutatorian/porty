@@ -12,8 +12,10 @@
   var LABELS = {
     "/": "Home",
     "/media": "Media",
+    "/#work": "Projects",
     "/tools": "Tools",
     "/training": "Training",
+    "/admin": "Admin",
     "#search": "Search",
     "#theme": "Theme",
   };
@@ -153,6 +155,11 @@
       hoveredSlot = slot;
     }
 
+    /** Tooltip is hover-only; clear state so click/focus does not leave the label visible. */
+    function dismissDockTooltip() {
+      setTooltipForSlot(null);
+    }
+
     function positionTooltip() {
       if (tooltip.hidden || !hoveredSlot) return;
       var iconEl = hoveredSlot.inner;
@@ -259,18 +266,46 @@
         function (e) {
           var rt = e.relatedTarget;
           if (rt && nav.contains(rt)) return;
-          setTooltipForSlot(null);
+          dismissDockTooltip();
         },
         { passive: true }
       );
-      s.link.addEventListener("focus", function () {
-        setTooltipForSlot(s);
-        positionTooltip();
-        scheduleTick();
+
+      /* Tooltip shows on hover only — not on focus — so click-focus does not lock the label open. */
+      s.link.addEventListener(
+        "blur",
+        function () {
+          dismissDockTooltip();
+        },
+        { passive: true }
+      );
+
+      function hideTooltipBeforeNavigate() {
+        dismissDockTooltip();
+        try {
+          if (s.link && typeof s.link.blur === "function") {
+            s.link.blur();
+          }
+        } catch (err) {}
+      }
+
+      ["pointerdown", "mousedown"].forEach(function (evtName) {
+        s.wrap.addEventListener(
+          evtName,
+          function () {
+            dismissDockTooltip();
+          },
+          { passive: true }
+        );
       });
-      s.link.addEventListener("blur", function () {
-        setTooltipForSlot(null);
-      });
+
+      s.link.addEventListener(
+        "click",
+        function () {
+          hideTooltipBeforeNavigate();
+        },
+        true
+      );
     });
 
     mouseX = Infinity;

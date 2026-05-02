@@ -18,7 +18,11 @@
 
   function getPreferredTheme() {
     var stored = getStoredTheme();
-    if (stored === "dark" || stored === "light" || stored === "reading") return stored;
+    if (stored === "dark" || stored === "light") return stored;
+    if (stored === "reading") {
+      setStoredTheme("light");
+      return "light";
+    }
     if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) return "dark";
     return "light";
   }
@@ -34,17 +38,25 @@
 
   function toggleTheme() {
     var current = document.documentElement.getAttribute("data-theme");
-    var next = current === "dark" ? "reading" : current === "reading" ? "light" : "dark";
+    var next = current === "dark" ? "light" : "dark";
     applyTheme(next);
     setStoredTheme(next);
     try { window.dispatchEvent(new CustomEvent("themechange", { detail: { theme: next } })); } catch (e) {}
   }
 
   document.addEventListener("click", function (e) {
-    if (e.target.closest(".theme-toggle, .nav-link[data-dock-action=\"theme\"]")) {
+    var trigger = e.target.closest(".theme-toggle, .nav-link[data-dock-action=\"theme\"], .nav-link[href=\"#theme\"]");
+    if (trigger) {
       e.preventDefault();
       e.stopPropagation();
-      toggleTheme();
+      var dockBtns = document.querySelectorAll('.nav-link[href="#theme"]');
+      dockBtns.forEach(function (b) { b.classList.add("is-flipping"); });
+      setTimeout(function () {
+        toggleTheme();
+        setTimeout(function () {
+          dockBtns.forEach(function (b) { b.classList.remove("is-flipping"); });
+        }, 30);
+      }, 180);
     }
   });
 

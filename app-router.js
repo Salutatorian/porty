@@ -35,10 +35,19 @@
     }
   }
 
-  function setActiveNav(path) {
+  function setActiveNav(path, hash) {
+    if (hash === undefined || hash === null) {
+      try {
+        hash = typeof window !== "undefined" ? window.location.hash || "" : "";
+      } catch (e) {
+        hash = "";
+      }
+    }
     var links = document.querySelectorAll(".nav-link, .mobile-nav-link");
     var isWriting = path.indexOf("/writing") >= 0;
     var onTools = path === "/tools" || path === "/tools.html";
+    var onAdmin = path.indexOf("/admin") === 0;
+    var onProjects = (path === "/" || path === "" || path === "/index.html") && hash === "#work";
     links.forEach(function (link) {
       link.classList.remove("active");
       var label = (link.textContent || "").trim().toLowerCase();
@@ -49,11 +58,15 @@
         path.endsWith("/photos") ||
         path.endsWith("/videos");
       var active =
-        (label === "home" && (path === "/" || path === "" || path === "/index.html")) ||
+        (label === "home" &&
+          (path === "/" || path === "" || path === "/index.html") &&
+          !onProjects) ||
         (label === "media" && onMediaSection) ||
         (label === "writing" && isWriting) ||
-        (label === "training" && path.endsWith("training")) ||
-        (label === "tools" && onTools);
+        (label === "projects" && onProjects) ||
+        (label === "training" && path.indexOf("training") >= 0) ||
+        (label === "tools" && onTools) ||
+        (label === "admin" && onAdmin);
       if (active) link.classList.add("active");
     });
     document.querySelectorAll(".nav-dropdown-trigger").forEach(function (trigger) {
@@ -109,8 +122,8 @@
         var title = doc.querySelector("title");
         if (title) document.title = title.textContent;
 
-        history.pushState({ path: path, url: href }, "", url.pathname + url.search);
-        setActiveNav(path);
+        history.pushState({ path: path, url: href }, "", url.pathname + url.search + url.hash);
+        setActiveNav(path, url.hash);
         runPageScripts(doc, url.href);
         window.dispatchEvent(new CustomEvent("pagechange", { detail: { path: path, url: href } }));
       })
@@ -131,6 +144,19 @@
 
   document.addEventListener("click", function (e) {
     var a = e.target.closest("a");
+    if (a && a.getAttribute("href") === "/#work") {
+      var shell = document.getElementById("portfolio-home");
+      if (shell) {
+        e.preventDefault();
+        try {
+          window.history.pushState({}, "", "/#work");
+        } catch (err) {}
+        var sec = document.getElementById("work");
+        if (sec) sec.scrollIntoView({ behavior: "smooth" });
+        setActiveNav("/", "#work");
+        return;
+      }
+    }
     if (!isInternalLink(a)) return;
     if (a.classList.contains("nav-link") || a.classList.contains("mobile-nav-link") || a.classList.contains("brand") || a.classList.contains("mobile-nav-brand")) {
       playNavSound();
@@ -143,5 +169,5 @@
     navigate(window.location.href);
   });
 
-  setActiveNav(getPath(new URL(window.location.href)));
+  setActiveNav(getPath(new URL(window.location.href)), window.location.hash);
 })();

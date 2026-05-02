@@ -184,3 +184,168 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
 ### Files Updated
 - `index.html`, `*.html` (site-shell pages + writing posts), `styles.css`, `dock-nav.js`, `app-router.js`, `command-palette.js`, `vercel.json`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-02 — Dock tooltip: hide on click
+
+### Session Summary
+- **`dock-nav.js`:** Tooltip is **hover-only** (removed `focus` → show tooltip). On **`pointerdown`** / **`mousedown`** / **`click`** (capture): dismiss tooltip and **`blur()`** the activated link so focus does not keep the label visible; Search/Theme behavior preserved.
+
+### Files Updated
+- `dock-nav.js`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-02 — Hero → content: soft fade only (revert overlap)
+
+### Session Summary
+- Reverted the hero/page overlap (it pulled the content block up and produced a tan rectangle over the hero).
+- **Removed:** `hero-transition-mist` markup, scroll-linked `--hero-blend-progress` JS, and the `.page-home--portfolio` negative-margin / padding-top / solid-background overlap rule.
+- **Kept:** `--page-surface` / `--page-surface-rgb` tokens (light/dark/reading).
+- **Kept (simpler):** `.hero.alpine-hero::after` 160px gradient fade into `var(--page-surface)` — no layout movement, hero copy untouched.
+
+### Files Updated
+- `index.html`, `styles.css`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-02 — Tech marquee: linked pills
+
+### Session Summary
+- Each stack pill is now **`<a class="tech-pill">`** to official docs/home (**target="_blank"**, **`rel="noopener noreferrer"`**). Minimal **hover/focus** styles for anchors.
+
+### Files Updated
+- `index.html`, `styles.css`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-02 — Homepage hero: remove tagline
+
+### Session Summary
+- Removed the hero **`<p class="heroSubtitle">`** line (“teaching, training, writing, and building things that matter.”).
+
+### Files Updated
+- `index.html`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-02 — Portfolio section labels: larger + remove stack h2
+
+### Session Summary
+- Removed **“Tools I reach for”** (`h2`) from the tech stack section; **`stack`** eyebrow keeps **`id="stack-title"`** for **aria-labelledby**.
+- Enlarged **`.portfolio-eyebrow`** (section titles like projects / explore / stack) via **`clamp(13px, 1.15vw, 16px)`** and slightly tighter letter-spacing.
+
+### Files Updated
+- `index.html`, `styles.css`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-02 — Connect: remove mailto (contact form only)
+
+### Session Summary
+- Removed the duplicate **mailto** envelope pill from **connect with me**; visitors reach you via the **contact** form and other social links.
+
+### Files Updated
+- `index.html`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-02 — Home: no section hairlines; explore deck paused
+
+### Session Summary
+- Removed **horizontal hairline dividers** between portfolio sections (`.portfolio-section` **border-top**) and relied on **larger vertical gaps** instead.
+- **Explore** card stack is **hidden via CSS** (class **`portfolio-section--explore-paused`**) so the HTML and deck behavior stay in the repo for a future friends/network strip — remove that class on the section to show it again.
+
+### Files Updated
+- `index.html`, `styles.css`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-02 — Remove home “experience” section
+
+### Session Summary
+- Dropped the placeholder **experience** portfolio block from the homepage so it no longer appears in the scroll flow.
+
+### Files Updated
+- `index.html`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-02 — Writing in sidebar dock (all pages)
+
+### Session Summary
+- Added **`/writing`** to the **desktop dock** (home → media → **writing** → tools → training, matching mobile) on every page with the shared sidebar nav.
+- **`dock-nav.js`** tooltip + **`styles.css`** pen icon / label for Writing.
+
+### Files Updated
+- `about.html`, `books.html`, `index.html`, `media.html`, `movies.html`, `photos.html`, `portfolio.html`, `tools.html`, `training.html`, `videos.html`, `writing/*.html`, `dock-nav.js`, `styles.css`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-02 — Home Projects (Current / Future tabs); remove Live Entries
+
+### Session Summary
+- Replaced the blank **projects** strip with a **tabbed Projects** section (**Current** | **Future**), driven by **`home-projects.js`** (`currentProjects` / `futureProjects` arrays).
+- Removed **Live Entries** from the homepage and removed the **Life** admin pane/tab (home projects are edited in **`home-projects.js`** for now). Portfolio/code projects admin + **`/portfolio`** page unchanged.
+- **`/api/projects`** remains for portfolio entries; **`data/projects.json`** was already empty.
+
+### Files Updated
+- `index.html`, `home-projects.js`, `styles.css`, `admin/index.html`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-02 — Homepage projects: API, admin page, seed data
+
+### Session Summary
+- **Single source of truth** for the home “Current / Future” project cards: **`/api/home-projects`** (`api/home-projects.js`) with optional **R2 / Vercel Blob** at **`home-projects/index.json`** or local fallback **`data/home-projects.json`**.
+- Admin UI: **`/admin/home-projects`** — password via **`POST /api/auth`**, **`sessionStorage.admin_pw`**, **`Authorization: Bearer`** on writes (same pattern as main admin).
+- **GET** is public; responses without auth omit **`visible === false`** items. Full list and mutations require **`ADMIN_PASSWORD`**.
+- Main **`/admin`** dashboard includes a banner link to this editor.
+- **`home-projects.js`**: cleaner tab binding after fetch.
+- **`env.example`**: optional **`BLOB_HOME_PROJECTS_INDEX_URL`**.
+
+### Files Added / Updated
+- Added: `admin/home-projects.html`, `data/home-projects.json`
+- Updated: `admin/index.html`, `home-projects.js`, `env.example`, `SESSION_LOG.md`
+
+### Operational notes
+- Local: **`ADMIN_PASSWORD`** in `.env.local`; restart **`npm run dev`**. Seed JSON used when cloud index is missing.
+- Production: **`BLOB_READ_WRITE_TOKEN`** or **R2** env; optional **`BLOB_HOME_PROJECTS_INDEX_URL`** for faster reads.
+
+---
+
+## 2026-05-02 — Get in touch: merged Connect + Contact
+
+### Session Summary
+- Combined **Connect with me** and **Contact** into one **`GET IN TOUCH`** section (`portfolio-eyebrow`: “get in touch”).
+- Layout: **social icon row** → **two-column grid** (message form | booking PixelCard); **`contactShell`** max-width **1180px**.
+- Tighter vertical rhythm: **`socialLinks`** margins **`28px` / `48px`**, removed extra gap between former sections; section padding **`96px 24px 160px`** so the fixed dock clears content.
+- Responsive: **`contactGrid`** stacks at **`900px`** max-width.
+
+### Files Updated
+- `index.html`, `styles.css`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-02 — Greater Engine wordmark logo
+
+### Session Summary
+- Added **`/images/greater-engine-logo.png`** dot-matrix wordmark; swapped the text **“greater engine”** in **`.brand-name`** / **`.mobile-nav-brand-name`** for **`<img class="brand-logo" />`** across every sidebar page (kept the small **“the”** prefix).
+- CSS: **`.brand-logo`** / **`.mobile-nav-brand-logo`** sized to fit the sidebar/mobile nav; dark-mode `filter: invert(1)` so the black wordmark stays visible.
+
+### Files Updated
+- `images/greater-engine-logo.png` (new), `styles.css`, all 15 sidebar pages (`index.html`, `about.html`, `books.html`, `media.html`, `movies.html`, `photos.html`, `portfolio.html`, `tools.html`, `training.html`, `videos.html`, `writing/*.html`), `SESSION_LOG.md`
+
+---
+
+## 2026-05-02 — Two-mode theme toggle + animated dock sun/moon
+
+### Session Summary
+- Removed the third **`reading`** theme. Toggle now flips **dark ↔ light** only. Stored `"reading"` values are auto-migrated to `"light"` on load. Reading-mode entry in the command palette removed.
+- Dock **`#theme`** button now swaps icon by current theme: **sun** in light mode, **moon** in dark mode (CSS-only, via `[data-theme="dark"] .nav-link[href="#theme"]` overriding `--dock-icon`).
+- Click adds an **`is-flipping`** class for a brief rotate/scale + opacity transition before applying the theme — the icon visibly animates between sun and moon.
+- Admin page toggle simplified to two modes too.
+
+### Files Updated
+- `script.js`, `styles.css`, `command-palette.js`, `admin/index.html`, all 15 sidebar pages + `admin/home-projects.html` (inline boot script), `SESSION_LOG.md`

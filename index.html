@@ -10,25 +10,25 @@
     <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Inter:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css" />
     <script>
-      (function(){var k='greater-engine-theme';try{var t=localStorage.getItem(k);if(t==='dark'||t==='light'||t==='reading')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
+      (function(){var k='greater-engine-theme';try{var t=localStorage.getItem(k);if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
     </script>
   </head>
   <body>
+    <a href="/" class="site-logo" aria-label="Greater Engine — home"><span class="site-logo-mark" aria-hidden="true"></span></a>
     <div class="site-shell">
       <aside class="sidebar">
         <a href="/admin" class="sidebar-admin" title="Admin" aria-label="Admin"><svg class="sidebar-admin-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66z"/></svg></a>
-        <a href="/" class="brand">
-          <span class="brand-mark">the</span>
-          <span class="brand-name">greater engine</span>
-        </a>
+        <a href="/" class="brand" aria-label="Greater Engine — home"><img class="brand-logo brand-logo--light" src="/images/greater-engine-logo-light.png" alt="Greater Engine" /><img class="brand-logo brand-logo--dark" src="/images/greater-engine-logo-dark.png" alt="" aria-hidden="true" /></a>
 
         <nav class="nav">
           <a href="/" class="nav-link active">home</a>
           <a href="/media" class="nav-link">media</a>
+          <a href="/#work" class="nav-link">projects</a>
           <a href="/tools" class="nav-link">tools</a>
           <a href="/training" class="nav-link">training</a>
           <a href="#search" class="nav-link nav-link--dock-action" data-dock-action="search" aria-label="Search"></a>
           <a href="#theme" class="nav-link nav-link--dock-action" data-dock-action="theme" aria-label="Toggle theme"></a>
+          <a href="/admin" class="nav-link">admin</a>
         </nav>
 
         <div class="sidebar-music">
@@ -76,9 +76,6 @@
           <div class="heroContent">
             <p class="heroEyebrow">portfolio</p>
             <h1>joshua waldo</h1>
-            <p class="heroSubtitle">
-              teaching, training, writing, and building things that matter.
-            </p>
 
             <div class="heroButtons">
               <a href="#work" class="heroButton light">view work</a>
@@ -105,16 +102,14 @@
 
         <nav class="mobile-nav" aria-hidden="true">
           <div class="mobile-nav-header">
-            <a href="/" class="mobile-nav-brand">
-              <span class="mobile-nav-brand-mark">the</span>
-              <span class="mobile-nav-brand-name">greater engine</span>
-            </a>
+            <a href="/" class="mobile-nav-brand" aria-label="Greater Engine — home"><img class="mobile-nav-brand-logo mobile-nav-brand-logo--light" src="/images/greater-engine-logo-light.png" alt="Greater Engine" /><img class="mobile-nav-brand-logo mobile-nav-brand-logo--dark" src="/images/greater-engine-logo-dark.png" alt="" aria-hidden="true" /></a>
             <button type="button" class="mobile-nav-close" aria-label="Close menu">×</button>
           </div>
           <div class="mobile-nav-links">
             <button type="button" class="mobile-nav-link mobile-nav-search" aria-label="Search">search</button>
             <a href="/" class="mobile-nav-link active">home</a>
             <a href="/media" class="mobile-nav-link">media</a>
+            <a href="/#work" class="mobile-nav-link">projects</a>
             <a href="/writing" class="mobile-nav-link">writing</a>
             <a href="/tools" class="mobile-nav-link">tools</a>
             <a href="/training" class="mobile-nav-link">training</a>
@@ -136,12 +131,20 @@
             <p class="portfolio-blank-slot">&lt;blank&gt;</p>
           </section>
 
-          <section class="portfolio-section scroll-reveal" id="work" aria-labelledby="featured-projects">
-            <p class="portfolio-eyebrow" id="featured-projects">projects</p>
-            <p class="portfolio-blank-slot">&lt;blank&gt;</p>
+          <section class="portfolio-section home-projects-section scroll-reveal" id="work" aria-labelledby="home-projects-title">
+            <p class="portfolio-eyebrow font-dot" id="home-projects-title">projects</p>
+            <div class="home-projects" id="home-projects-root">
+              <div class="home-projects-tabs font-dot" role="tablist" aria-label="Projects">
+                <button type="button" class="home-projects-tab active" role="tab" id="home-tab-current" aria-selected="true" aria-controls="home-panel-current" data-tab="current">Current</button>
+                <button type="button" class="home-projects-tab" role="tab" id="home-tab-future" aria-selected="false" aria-controls="home-panel-future" data-tab="future">Future</button>
+              </div>
+              <div id="home-panel-current" class="home-projects-panel" role="tabpanel" aria-labelledby="home-tab-current"></div>
+              <div id="home-panel-future" class="home-projects-panel" role="tabpanel" aria-labelledby="home-tab-future" hidden></div>
+            </div>
           </section>
 
-          <section class="portfolio-section portfolio-section--deck scroll-reveal" aria-labelledby="card-deck-title">
+          <!-- Explore card deck: paused (friends / network contacts TBD). Remove class portfolio-section--explore-paused to show again. -->
+          <section class="portfolio-section portfolio-section--deck portfolio-section--explore-paused scroll-reveal" aria-labelledby="card-deck-title">
             <div class="portfolio-section-head portfolio-section-head--minimal">
               <p class="portfolio-eyebrow font-dot" id="card-deck-title">explore</p>
               <p class="portfolio-blank-slot">&lt;blank&gt;</p>
@@ -239,38 +242,72 @@
             </div>
           </section>
 
-          <section class="portfolio-section scroll-reveal" aria-labelledby="experience-title">
-            <p class="portfolio-eyebrow" id="experience-title">experience</p>
-            <p class="portfolio-blank-slot">&lt;blank&gt;</p>
-          </section>
-
           <section class="portfolio-section scroll-reveal" aria-labelledby="stack-title">
             <div class="portfolio-section-head">
-              <p class="portfolio-eyebrow">stack</p>
-              <h2 id="stack-title">Tools I reach for</h2>
+              <p class="portfolio-eyebrow" id="stack-title">stack</p>
             </div>
             <div class="tech-marquee" role="region" aria-label="Technology stack">
               <ul class="tech-marquee-track" role="list">
-                <li class="tech-pill"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/typescript/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>TypeScript</span></li>
-                <li class="tech-pill"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/javascript/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>JavaScript</span></li>
-                <li class="tech-pill"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/nodedotjs/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Node.js</span></li>
-                <li class="tech-pill"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/express/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Express.js</span></li>
-                <li class="tech-pill"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/bun/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Bun</span></li>
-                <li class="tech-pill"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/react/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>React</span></li>
-                <li class="tech-pill"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/nextdotjs/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Next.js</span></li>
-                <li class="tech-pill"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/tailwindcss/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>TailwindCSS</span></li>
-                <li class="tech-pill"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/shadcnui/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>shadcn/ui</span></li>
-                <li class="tech-pill"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/framer/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Motion</span></li>
-                <li class="tech-pill"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/redux/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Redux</span></li>
-                <li class="tech-pill"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/git/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Git</span></li>
-                <li class="tech-pill"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/mongodb/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>MongoDB</span></li>
-                <li class="tech-pill"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/postgresql/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>PostgreSQL</span></li>
-                <li class="tech-pill"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/prisma/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Prisma</span></li>
-                <li class="tech-pill"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/supabase/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Supabase</span></li>
-                <li class="tech-pill"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/figma/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Figma</span></li>
-                <li class="tech-pill"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/mysql/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>MySQL</span></li>
-                <li class="tech-pill"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/astro/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Astro</span></li>
-                <li class="tech-pill"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/vuedotjs/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Vue</span></li>
+                <li>
+                  <a class="tech-pill" href="https://www.typescriptlang.org/" target="_blank" rel="noopener noreferrer"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/typescript/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>TypeScript</span></a>
+                </li>
+                <li>
+                  <a class="tech-pill" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank" rel="noopener noreferrer"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/javascript/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>JavaScript</span></a>
+                </li>
+                <li>
+                  <a class="tech-pill" href="https://nodejs.org/" target="_blank" rel="noopener noreferrer"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/nodedotjs/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Node.js</span></a>
+                </li>
+                <li>
+                  <a class="tech-pill" href="https://expressjs.com/" target="_blank" rel="noopener noreferrer"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/express/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Express.js</span></a>
+                </li>
+                <li>
+                  <a class="tech-pill" href="https://bun.sh/" target="_blank" rel="noopener noreferrer"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/bun/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Bun</span></a>
+                </li>
+                <li>
+                  <a class="tech-pill" href="https://react.dev/" target="_blank" rel="noopener noreferrer"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/react/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>React</span></a>
+                </li>
+                <li>
+                  <a class="tech-pill" href="https://nextjs.org/" target="_blank" rel="noopener noreferrer"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/nextdotjs/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Next.js</span></a>
+                </li>
+                <li>
+                  <a class="tech-pill" href="https://tailwindcss.com/" target="_blank" rel="noopener noreferrer"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/tailwindcss/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>TailwindCSS</span></a>
+                </li>
+                <li>
+                  <a class="tech-pill" href="https://ui.shadcn.com/" target="_blank" rel="noopener noreferrer"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/shadcnui/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>shadcn/ui</span></a>
+                </li>
+                <li>
+                  <a class="tech-pill" href="https://motion.dev/" target="_blank" rel="noopener noreferrer"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/framer/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Motion</span></a>
+                </li>
+                <li>
+                  <a class="tech-pill" href="https://redux.js.org/" target="_blank" rel="noopener noreferrer"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/redux/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Redux</span></a>
+                </li>
+                <li>
+                  <a class="tech-pill" href="https://git-scm.com/" target="_blank" rel="noopener noreferrer"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/git/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Git</span></a>
+                </li>
+                <li>
+                  <a class="tech-pill" href="https://www.mongodb.com/" target="_blank" rel="noopener noreferrer"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/mongodb/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>MongoDB</span></a>
+                </li>
+                <li>
+                  <a class="tech-pill" href="https://www.postgresql.org/" target="_blank" rel="noopener noreferrer"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/postgresql/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>PostgreSQL</span></a>
+                </li>
+                <li>
+                  <a class="tech-pill" href="https://www.prisma.io/" target="_blank" rel="noopener noreferrer"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/prisma/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Prisma</span></a>
+                </li>
+                <li>
+                  <a class="tech-pill" href="https://supabase.com/" target="_blank" rel="noopener noreferrer"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/supabase/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Supabase</span></a>
+                </li>
+                <li>
+                  <a class="tech-pill" href="https://www.figma.com/" target="_blank" rel="noopener noreferrer"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/figma/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Figma</span></a>
+                </li>
+                <li>
+                  <a class="tech-pill" href="https://www.mysql.com/" target="_blank" rel="noopener noreferrer"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/mysql/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>MySQL</span></a>
+                </li>
+                <li>
+                  <a class="tech-pill" href="https://astro.build/" target="_blank" rel="noopener noreferrer"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/astro/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Astro</span></a>
+                </li>
+                <li>
+                  <a class="tech-pill" href="https://vuejs.org/" target="_blank" rel="noopener noreferrer"><img class="tech-pill-icon" src="https://cdn.simpleicons.org/vuedotjs/2f2a25" alt="" loading="lazy" decoding="async" aria-hidden="true" /><span>Vue</span></a>
+                </li>
               </ul>
               <script>
                 (function () {
@@ -281,22 +318,6 @@
                   while (clone.firstChild) track.appendChild(clone.firstChild);
                 })();
               </script>
-            </div>
-          </section>
-
-          <section class="portfolio-section portfolio-section--admin-projects scroll-reveal" aria-labelledby="admin-projects-title">
-            <div class="portfolio-section-head portfolio-section-head--minimal">
-              <p class="portfolio-eyebrow" id="admin-projects-title">live entries</p>
-              <p class="portfolio-blank-slot">&lt;blank&gt;</p>
-            </div>
-            <div class="projects-filters" data-section="life">
-              <button type="button" class="projects-filter active" data-filter="now">now</button>
-              <button type="button" class="projects-filter" data-filter="future">future</button>
-              <button type="button" class="projects-filter" data-filter="done">done</button>
-              <button type="button" class="projects-filter" data-filter="all">all</button>
-            </div>
-            <div class="projects-grid" id="projects-grid-life">
-              <p class="projects-empty">No admin-managed projects yet.</p>
             </div>
           </section>
 
@@ -325,64 +346,61 @@
             </div>
           </section>
 
-          <section class="portfolio-section connect-section scroll-reveal" aria-labelledby="connect-title">
-            <div class="portfolio-section-head portfolio-section-head--minimal">
-              <p class="portfolio-eyebrow" id="connect-title">connect with me</p>
-            </div>
-            <div class="socialLinks" role="list">
-              <a class="socialLink" role="listitem" href="mailto:contactjoshuawaldo@gmail.com" aria-label="Email" title="Email">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.8"/><path d="M22 8l-10 6L2 8" stroke="currentColor" stroke-width="1.8"/></svg>
-              </a>
-              <a class="socialLink" role="listitem" href="https://github.com/Salutatorian" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.21.68-.48v-1.68c-2.78.6-3.37-1.18-3.37-1.18-.45-1.15-1.1-1.45-1.1-1.45-.9-.61.07-.6.07-.6 1 .07 1.52 1.02 1.52 1.02.88 1.52 2.31 1.08 2.88.82.09-.64.35-1.08.64-1.33-2.22-.25-4.56-1.11-4.56-4.93 0-1.09.4-1.98 1.02-2.67-.1-.25-.44-1.27.1-2.65 0 0 .84-.27 2.75 1.02A9.41 9.41 0 0 1 12 6.8c.85 0 1.71.12 2.51.35 1.91-1.29 2.75-1.02 2.75-1.02.54 1.38.2 2.4.1 2.65.63.69 1.02 1.58 1.02 2.67 0 3.83-2.34 4.68-4.57 4.93.36.31.68.9.68 1.82v2.7c0 .27.18.58.69.48A10 10 0 0 0 12 2z" fill="currentColor"/></svg>
-              </a>
-              <a class="socialLink" role="listitem" href="https://www.linkedin.com/in/joshua-waldo-8b8023394/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M8 10v7M8 7.5v.01M12 17v-4c0-1.1.9-2 2-2s2 .9 2 2v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-              </a>
-              <a class="socialLink" role="listitem" href="https://www.instagram.com/joshuaawaldo/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
-              </a>
-              <a class="socialLink" role="listitem" href="https://www.strava.com/athletes/73302983" target="_blank" rel="noopener noreferrer" aria-label="Strava" title="Strava">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 4.6 2.635-4.6h4.907l-6.107 10.172-2.301 3.828-2.301-3.828-6.107-10.172h4.908l2.629 4.6z"/></svg>
-              </a>
-              <a class="socialLink" role="listitem" href="/resume.pdf" target="_blank" rel="noopener noreferrer" aria-label="Resume" title="Resume">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h7l5 5v13H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.8"/><path d="M14 3v5h5M9 12h6M9 16h6" stroke="currentColor" stroke-width="1.8"/></svg>
-              </a>
-            </div>
-          </section>
-
-          <section class="contactSection scroll-reveal" id="contact" aria-labelledby="cta-title">
-            <p class="portfolio-eyebrow contactSection-pageEyebrow" id="cta-title">contact</p>
-            <div class="contactGrid">
-              <div class="contactFormCard">
-                <form class="contactForm" id="contact-form">
-                  <div class="contact-field">
-                    <label for="contact-name">Name</label>
-                    <input type="text" id="contact-name" name="name" autocomplete="name" required />
-                  </div>
-                  <div class="contact-field">
-                    <label for="contact-email">Email <span class="contact-field-optional">(optional)</span></label>
-                    <input type="email" id="contact-email" name="email" autocomplete="email" inputmode="email" placeholder="" />
-                  </div>
-                  <div class="contact-field">
-                    <label for="contact-subject">Subject</label>
-                    <input type="text" id="contact-subject" name="subject" autocomplete="off" required />
-                  </div>
-                  <div class="contact-field contact-field--message">
-                    <label for="contact-message">Message</label>
-                    <textarea id="contact-message" name="message" rows="4" required></textarea>
-                  </div>
-                  <div class="contact-sendRow">
-                    <button type="submit" class="contact-btn contact-btn--primary" id="contact-submit-btn">Send message</button>
-                  </div>
-                  <p class="contactFormStatus" id="contact-form-status" role="status" aria-live="polite" hidden></p>
-                </form>
+          <section
+            class="portfolio-section contactSection scroll-reveal"
+            id="contact"
+            aria-labelledby="cta-title"
+          >
+            <div class="contactShell">
+              <p class="portfolio-eyebrow" id="cta-title">get in touch</p>
+              <div class="socialLinks" role="list">
+                <a class="socialLink" role="listitem" href="https://github.com/Salutatorian" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.21.68-.48v-1.68c-2.78.6-3.37-1.18-3.37-1.18-.45-1.15-1.1-1.45-1.1-1.45-.9-.61.07-.6.07-.6 1 .07 1.52 1.02 1.52 1.02.88 1.52 2.31 1.08 2.88.82.09-.64.35-1.08.64-1.33-2.22-.25-4.56-1.11-4.56-4.93 0-1.09.4-1.98 1.02-2.67-.1-.25-.44-1.27.1-2.65 0 0 .84-.27 2.75 1.02A9.41 9.41 0 0 1 12 6.8c.85 0 1.71.12 2.51.35 1.91-1.29 2.75-1.02 2.75-1.02.54 1.38.2 2.4.1 2.65.63.69 1.02 1.58 1.02 2.67 0 3.83-2.34 4.68-4.57 4.93.36.31.68.9.68 1.82v2.7c0 .27.18.58.69.48A10 10 0 0 0 12 2z" fill="currentColor"/></svg>
+                </a>
+                <a class="socialLink" role="listitem" href="https://www.linkedin.com/in/joshua-waldo-8b8023394/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M8 10v7M8 7.5v.01M12 17v-4c0-1.1.9-2 2-2s2 .9 2 2v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                </a>
+                <a class="socialLink" role="listitem" href="https://www.instagram.com/joshuaawaldo/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>
+                </a>
+                <a class="socialLink" role="listitem" href="https://www.strava.com/athletes/73302983" target="_blank" rel="noopener noreferrer" aria-label="Strava" title="Strava">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 4.6 2.635-4.6h4.907l-6.107 10.172-2.301 3.828-2.301-3.828-6.107-10.172h4.908l2.629 4.6z"/></svg>
+                </a>
+                <a class="socialLink" role="listitem" href="/resume.pdf" target="_blank" rel="noopener noreferrer" aria-label="Resume" title="Resume">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h7l5 5v13H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.8"/><path d="M14 3v5h5M9 12h6M9 16h6" stroke="currentColor" stroke-width="1.8"/></svg>
+                </a>
               </div>
-              <aside
-                id="booking-pixel-root"
-                class="contactBookingMount"
-                aria-label="Schedule a call"
-              ></aside>
+              <div class="contactGrid">
+                <div class="contactFormCard contactCard">
+                  <form class="contactForm" id="contact-form">
+                    <div class="contact-field">
+                      <label for="contact-name">Name</label>
+                      <input type="text" id="contact-name" name="name" autocomplete="name" required />
+                    </div>
+                    <div class="contact-field">
+                      <label for="contact-email">Email <span class="contact-field-optional">(optional)</span></label>
+                      <input type="email" id="contact-email" name="email" autocomplete="email" inputmode="email" placeholder="" />
+                    </div>
+                    <div class="contact-field">
+                      <label for="contact-subject">Subject</label>
+                      <input type="text" id="contact-subject" name="subject" autocomplete="off" required />
+                    </div>
+                    <div class="contact-field contact-field--message">
+                      <label for="contact-message">Message</label>
+                      <textarea id="contact-message" name="message" rows="4" required></textarea>
+                    </div>
+                    <div class="contact-sendRow">
+                      <button type="submit" class="contact-btn contact-btn--primary" id="contact-submit-btn">Send message</button>
+                    </div>
+                    <p class="contactFormStatus" id="contact-form-status" role="status" aria-live="polite" hidden></p>
+                  </form>
+                </div>
+                <aside
+                  id="booking-pixel-root"
+                  class="contactBookingMount"
+                  aria-label="Schedule a call"
+                ></aside>
+              </div>
             </div>
           </section>
 
@@ -398,6 +416,7 @@
     <script src="command-palette.js"></script>
     <script src="github-contributions.js"></script>
     <script src="booking-pixel.js" defer></script>
+    <script src="home-projects.js" defer></script>
     <script>
       (function(){
         var reveals = document.querySelectorAll(".page-home--portfolio .scroll-reveal");
@@ -594,85 +613,6 @@
           });
         }
 
-        var lifeGrid = document.getElementById('projects-grid-life');
-        if (!lifeGrid) return;
-
-        function setupSection(grid) {
-          var filterBar = grid.previousElementSibling;
-          while (filterBar && !filterBar.classList.contains('projects-filters')) filterBar = filterBar.previousElementSibling;
-          var filterBtns = filterBar ? filterBar.querySelectorAll('.projects-filter') : [];
-
-          function applyFilter(filter) {
-            var items = grid.querySelectorAll('.project-card');
-            var emptyEl = grid.querySelector('.projects-empty');
-            items.forEach(function(el){
-              var status = el.getAttribute('data-status') || '';
-              el.style.display = (filter === 'all' || status === filter) ? '' : 'none';
-            });
-            if (emptyEl) {
-              var visible = Array.from(items).filter(function(el){ return el.style.display !== 'none'; });
-              emptyEl.style.display = (items.length === 0) ? '' : (visible.length > 0 ? 'none' : '');
-            }
-          }
-
-          filterBtns.forEach(function(btn){
-            btn.addEventListener('click', function(){
-              var filter = btn.getAttribute('data-filter');
-              filterBtns.forEach(function(b){ b.classList.remove('active'); });
-              btn.classList.add('active');
-              applyFilter(filter);
-            });
-          });
-
-          return applyFilter;
-        }
-
-        var applyLifeFilter = setupSection(lifeGrid);
-
-        function projectDateRange(p) {
-          var s = p.startDate, e = p.endDate, st = p.status || "now";
-          if (st === "future") return "pending – pending";
-          if (st === "now") {
-            if (!s) return "— – present";
-            var parts = String(s).split("-");
-            var mon = parts[1] ? ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][parseInt(parts[1],10)-1] : "";
-            return (mon ? mon + " " + (parts[0]||"") : s) + " – present";
-          }
-          if (st === "done") {
-            function fmt(ym) {
-              if (!ym) return "—";
-              var parts = String(ym).split("-");
-              var m = parts[1] ? ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][parseInt(parts[1],10)-1] : "";
-              return m ? m + " " + (parts[0]||"") : ym;
-            }
-            return fmt(s) + " – " + fmt(e);
-          }
-          return "—";
-        }
-
-        function renderProjects(projects) {
-          var lifeProjects = projects.filter(function(p){ return (p.type || 'life') === 'life'; });
-
-          function renderInto(grid, items, applyFn) {
-            var emptyEl = grid.querySelector('.projects-empty');
-            if (items.length === 0) { if (emptyEl) emptyEl.style.display = ''; return; }
-            if (emptyEl) emptyEl.style.display = 'none';
-            var cards = items.map(function(p){
-              var range = projectDateRange(p);
-              return '<div class="project-card" data-status="' + (p.status || 'now') + '">' +
-                '<h3>' + (p.title || 'Untitled') + '</h3>' +
-                (range ? '<p class="project-card-dates">' + range + '</p>' : '') +
-                (p.description ? '<div class="project-card-desc">' + p.description + '</div>' : '') +
-                '</div>';
-            }).join('');
-            grid.insertAdjacentHTML('beforeend', cards);
-            applyFn('now');
-          }
-
-          renderInto(lifeGrid, lifeProjects, applyLifeFilter);
-        }
-
-        fetch('/api/projects?_t=' + Date.now()).then(function(r){ return r.ok ? r.json() : []; }).then(renderProjects).catch(function(){ renderProjects([]); });
       })();
     </script>
     <script>

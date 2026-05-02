@@ -22,7 +22,6 @@
     { label: "Resume", href: "/resume.pdf", icon: "file", group: "Links", keywords: "resume cv" },
     { label: "Admin", href: "/admin", icon: "gear", group: "Links", keywords: "admin" },
     { label: "Toggle theme", action: "toggleTheme", icon: "moon", group: "Settings", keywords: "theme dark light" },
-    { label: "Reading mode", action: "readingTheme", icon: "book", group: "Settings", keywords: "reading tan" }
   ];
 
   var dynamicItems = [];
@@ -231,12 +230,6 @@
     if (it.action === "toggleTheme") {
       var t = document.querySelector(".theme-toggle, .nav-link[data-dock-action=\"theme\"]");
       if (t) t.click();
-    } else if (it.action === "readingTheme") {
-      try {
-        document.documentElement.setAttribute("data-theme", "reading");
-        localStorage.setItem("greater-engine-theme", "reading");
-        if (window.dispatchEvent) window.dispatchEvent(new CustomEvent("themechange", { detail: { theme: "reading" } }));
-      } catch (e) {}
     } else if (it.photoId) {
       window.location.href = it.href + "#photo=" + encodeURIComponent(it.photoId);
     } else if (it.href) {

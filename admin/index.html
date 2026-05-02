@@ -633,8 +633,7 @@
       <div id="admin-forms" class="admin-form">
         <div class="admin-nav-row">
         <div class="admin-tabs admin-tabs--segmented" role="tablist">
-          <button type="button" class="admin-tab active" role="tab" data-pane="life" aria-selected="true">Life</button>
-          <button type="button" class="admin-tab" role="tab" data-pane="portfolio" aria-selected="false">Portfolio</button>
+          <button type="button" class="admin-tab active" role="tab" data-pane="portfolio" aria-selected="true">Portfolio</button>
           <button type="button" class="admin-tab" role="tab" data-pane="media" aria-selected="false">Media</button>
           <button type="button" class="admin-tab" role="tab" data-pane="writings" aria-selected="false">Writings</button>
         </div>
@@ -645,44 +644,15 @@
           </div>
         </div>
         </div>
-        <div id="pane-life" class="admin-pane active">
-        <div class="admin-projects-layout">
-        <div>
-        <h2>Add life project</h2>
-        <p style="color: var(--text-muted); font-size: 13px; margin: -8px 0 16px;">Shown on home under <strong>life</strong>.</p>
-        <form id="life-project-form" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore>
-          <label for="life-proj-title">Title</label>
-          <input type="text" autocomplete="off" id="life-proj-title" required />
-          <label for="life-proj-desc-editor">Description</label>
-          <div class="editor-wrap"><div id="life-proj-desc-editor"></div></div>
-          <label for="life-proj-status">Status</label>
-          <select id="life-proj-status">
-            <option value="now">now</option>
-            <option value="future">future</option>
-            <option value="done">done</option>
-          </select>
-          <label for="life-proj-start-date">Start date (month year)</label>
-          <input type="month" autocomplete="off" id="life-proj-start-date" />
-          <label for="life-proj-end-date">End date (month year, for done only)</label>
-          <input type="month" autocomplete="off" id="life-proj-end-date" />
-          <button type="submit" id="life-proj-submit">Add life project</button>
-          <p class="msg" id="life-proj-msg"></p>
-        </form>
+        <div class="admin-homepage-projects-banner" style="margin-bottom: 28px; padding: 16px 20px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-alt); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;">
+          <div style="min-width: 0;">
+            <p class="font-dot" style="font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 6px;">Homepage</p>
+            <p style="margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -0.02em;">Projects section (Current / Future)</p>
+            <p style="margin: 6px 0 0; font-size: 13px; color: var(--text-muted); line-height: 1.45;">Edit the projects on the home page. This is separate from the <strong>Portfolio</strong> code projects tab.</p>
+          </div>
+          <a href="/admin/home-projects" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; background: var(--text); color: var(--bg); text-decoration: none; border-radius: 10px; font-size: 13px; font-weight: 600; white-space: nowrap;">Open editor →</a>
         </div>
-        <div>
-        <h2>Edit or delete life projects</h2>
-        <p style="color: var(--text-muted); font-size: 13px; margin: -8px 0 16px;">Update or remove life projects (home page). Use <strong>Done</strong> to see completed items.</p>
-        <div class="admin-project-subtabs admin-project-subtabs--segmented" role="tablist" aria-label="Filter life projects by status" data-project-pane="life">
-          <button type="button" class="admin-project-subtab active" role="tab" aria-selected="true" data-project-pane="life" data-filter="now">Now</button>
-          <button type="button" class="admin-project-subtab" role="tab" aria-selected="false" data-project-pane="life" data-filter="future">Future</button>
-          <button type="button" class="admin-project-subtab" role="tab" aria-selected="false" data-project-pane="life" data-filter="done">Done</button>
-        </div>
-        <div id="life-projects-list" class="projects-list"></div>
-        <p class="msg" id="life-projects-msg"></p>
-        </div>
-        </div>
-        </div>
-        <div id="pane-portfolio" class="admin-pane">
+        <div id="pane-portfolio" class="admin-pane active">
         <div class="admin-projects-layout">
         <div>
         <h2>Add portfolio project</h2>
@@ -937,11 +907,9 @@
           loadPhotosForDelete();
           loadVideosForManage();
           loadWritingsForManage();
-          loadLifeProjectsForManage();
-          syncProjectSubtabUI("life");
           loadPortfolioProjectsForManage();
           syncProjectSubtabUI("portfolio");
-          initLifeDescQuill();
+          initPortfolioDescQuill();
           resetInactivityTimer();
         }
 
@@ -1078,7 +1046,7 @@
         if (adminToggle) {
           adminToggle.addEventListener("click", function() {
             var cur = document.documentElement.getAttribute("data-theme") || "light";
-            var next = cur === "dark" ? "reading" : cur === "reading" ? "light" : "dark";
+            var next = cur === "dark" ? "light" : "dark";
             applyAdminTheme(next);
             try { localStorage.setItem(THEME_KEY, next); } catch(e) {}
           });
@@ -1109,11 +1077,6 @@
                 mediaBar.classList.remove("is-visible");
                 mediaBar.setAttribute("aria-hidden", "true");
               }
-            }
-            if (pane === "life") {
-              loadLifeProjectsForManage();
-              syncProjectSubtabUI("life");
-              initLifeDescQuill();
             }
             if (pane === "portfolio") {
               loadPortfolioProjectsForManage();
@@ -1163,7 +1126,7 @@
           });
         });
 
-        var projectStatusFilter = { life: "now", portfolio: "now" };
+        var projectStatusFilter = { portfolio: "now" };
         function syncProjectSubtabUI(pane) {
           var wrap = document.querySelector('.admin-project-subtabs[data-project-pane="' + pane + '"]');
           if (!wrap) return;
@@ -1181,13 +1144,11 @@
             if (!pane || !f || !["now", "future", "done"].includes(f)) return;
             projectStatusFilter[pane] = f;
             syncProjectSubtabUI(pane);
-            if (pane === "life") loadLifeProjectsForManage();
             if (pane === "portfolio") loadPortfolioProjectsForManage();
           });
         });
 
         var writingQuill = null;
-        var lifeDescQuill = null;
         var portfolioDescQuill = null;
         var videoDescQuill = null;
         var quillTooltipLabels = { bold: "Bold", italic: "Italic", underline: "Underline", ordered: "Numbered list", bullet: "Bullet list", link: "Insert link", image: "Insert image", clean: "Clear formatting" };
@@ -1324,14 +1285,6 @@
               }
             }
           };
-        }
-
-        function initLifeDescQuill() {
-          if (lifeDescQuill) return;
-          var el = document.getElementById("life-proj-desc-editor");
-          if (!el || typeof Quill === "undefined") return;
-          lifeDescQuill = new Quill("#life-proj-desc-editor", projectDescQuillOptions(function () { return lifeDescQuill; }));
-          addQuillTooltips(lifeDescQuill);
         }
 
         function initPortfolioDescQuill() {
@@ -2577,7 +2530,7 @@
             if (!Array.isArray(projects)) projects = [];
             var filtered = projects.filter(function(p){
               if (fixedType === "code") return p.type === "code";
-              return (p.type || "life") === "life";
+              return false;
             });
             if (filtered.length === 0) {
               list.innerHTML = "<p style=\"color: var(--text-muted); font-size: 14px;\">" + emptyLabel + "</p>";
@@ -2756,16 +2709,6 @@
             list.appendChild(section);
           }).catch(function(){
             list.innerHTML = "<p style=\"color: var(--text-muted); font-size: 14px;\">Could not load projects.</p>";
-          });
-        }
-
-        function loadLifeProjectsForManage() {
-          loadProjectsList({
-            listId: "life-projects-list",
-            msgId: "life-projects-msg",
-            fixedType: "life",
-            filterKey: "life",
-            emptyLabel: "No life projects yet."
           });
         }
 
@@ -3025,46 +2968,6 @@
             });
           });
         }
-
-        document.getElementById("life-project-form").addEventListener("submit", function(e){
-          e.preventDefault();
-          var msg = document.getElementById("life-proj-msg");
-          var submitBtn = document.getElementById("life-proj-submit");
-          var status = document.getElementById("life-proj-status").value;
-          var startVal = document.getElementById("life-proj-start-date").value;
-          var endVal = document.getElementById("life-proj-end-date").value;
-
-          submitBtn.disabled = true;
-          showMsg(msg, "Saving…", true);
-
-          var payload = {
-            title: document.getElementById("life-proj-title").value.trim(),
-            description: lifeDescQuill ? lifeDescQuill.root.innerHTML : "",
-            status: status,
-            type: "life",
-            password: pw
-          };
-          if (status !== "future") payload.startDate = startVal || null;
-          if (status === "done") payload.endDate = endVal || null;
-
-          fetch("/api/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
-            .then(function(r){ return r.json(); })
-            .then(function(data){
-              submitBtn.disabled = false;
-              if (data.ok) {
-                showMsg(msg, "Life project added.", true);
-                loadLifeProjectsForManage();
-                document.getElementById("life-project-form").reset();
-                if (lifeDescQuill) lifeDescQuill.root.innerHTML = "";
-              } else {
-                showMsg(msg, data.error || "Failed", false);
-              }
-            })
-            .catch(function(){
-              submitBtn.disabled = false;
-              showMsg(msg, "Request failed.", false);
-            });
-        });
 
         document.getElementById("portfolio-project-form").addEventListener("submit", function(e){
           e.preventDefault();

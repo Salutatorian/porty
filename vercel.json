@@ -13,7 +13,7 @@
     { "source": "/portfolio.html", "destination": "/portfolio", "permanent": true },
     { "source": "/writing/index.html", "destination": "/writing", "permanent": true },
     { "source": "/writing/post.html", "destination": "/writing/post", "permanent": true },
-    { "source": "/admin/index.html", "destination": "/admin", "permanent": true },
+    { "source": "/admin/home-projects.html", "destination": "/admin/home-projects", "permanent": true },
     { "source": "/index", "destination": "/", "permanent": true }
   ],
   "rewrites": [
@@ -29,6 +29,7 @@
     { "source": "/portfolio", "destination": "/portfolio.html" },
     { "source": "/writing", "destination": "/writing/index.html" },
     { "source": "/writing/post", "destination": "/writing/post.html" },
+    { "source": "/admin/home-projects", "destination": "/admin/home-projects.html" },
     { "source": "/admin", "destination": "/admin/index.html" }
   ],
   "headers": [

@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Homepage projects · Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Inter:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+    <style>
+      .hp-admin {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 48px 24px 96px;
+        min-height: 100vh;
+        font-family: Inter, system-ui, sans-serif;
+      }
+      .hp-admin-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 32px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--border);
+      }
+      .hp-admin-header h1 {
+        margin: 8px 0 4px;
+        font-size: 1.65rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+      }
+      .hp-admin-kicker {
+        font-family: var(--font-dot);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin: 0;
+      }
+      .hp-admin-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .hp-admin-actions button,
+      .hp-admin-actions a.secondary {
+        padding: 8px 16px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid var(--border);
+        background: var(--bg-alt);
+        color: var(--text);
+        text-decoration: none;
+        font-family: inherit;
+      }
+      .hp-admin-actions button.primary {
+        background: var(--text);
+        color: var(--bg);
+        border-color: var(--text);
+      }
+      .hp-login-panel {
+        max-width: 420px;
+        padding: 28px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: var(--bg-alt);
+      }
+      .hp-login-panel label {
+        display: block;
+        font-size: 12px;
+        margin-bottom: 8px;
+        color: var(--text-muted);
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .hp-login-panel input[type="password"] {
+        width: 100%;
+        padding: 12px 14px;
+        margin-bottom: 16px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text);
+        font-size: 15px;
+        box-sizing: border-box;
+      }
+      .hp-section {
+        margin-bottom: 36px;
+      }
+      .hp-section-title {
+        font-family: var(--font-dot);
+        font-size: 12px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin: 0 0 14px;
+      }
+      .hp-form-grid label {
+        display: block;
+        font-size: 12px;
+        margin-bottom: 6px;
+        color: var(--text-muted);
+        font-weight: 500;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+      }
+      .hp-form-grid input[type="text"],
+      .hp-form-grid textarea,
+      .hp-form-grid select {
+        width: 100%;
+        padding: 10px 12px;
+        margin-bottom: 14px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text);
+        font-size: 14px;
+        box-sizing: border-box;
+        font-family: inherit;
+      }
+      .hp-form-grid textarea {
+        min-height: 88px;
+        resize: vertical;
+      }
+      .hp-checkbox-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      .hp-checkbox-row input {
+        width: auto;
+      }
+      .hp-links-editor {
+        border: 1px dashed var(--border);
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 14px;
+      }
+      .hp-link-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 8px;
+        margin-bottom: 8px;
+        align-items: center;
+      }
+      .hp-link-row:last-child {
+        margin-bottom: 0;
+      }
+      .hp-link-row button {
+        padding: 8px 10px;
+        font-size: 12px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text-muted);
+        cursor: pointer;
+      }
+      .hp-form-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 8px;
+      }
+      .hp-form-buttons button {
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        border: none;
+        font-family: inherit;
+      }
+      .hp-form-buttons button.save {
+        background: var(--text);
+        color: var(--bg);
+      }
+      .hp-form-buttons button.ghost {
+        background: transparent;
+        color: var(--text-muted);
+        border: 1px solid var(--border);
+      }
+      .hp-project-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .hp-card {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px 16px;
+        background: var(--bg-alt);
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: start;
+      }
+      .hp-card h3 {
+        margin: 0 0 4px;
+        font-size: 15px;
+        font-weight: 600;
+      }
+      .hp-card-meta {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin: 0;
+      }
+      .hp-card-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: flex-end;
+      }
+      .hp-card-actions button {
+        padding: 6px 10px;
+        font-size: 12px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text);
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .hp-card-actions button.danger {
+        color: #dc2626;
+        border-color: rgba(220, 38, 38, 0.35);
+      }
+      .hp-msg {
+        margin: 12px 0 0;
+        font-size: 13px;
+        font-weight: 500;
+      }
+      .hp-msg.ok {
+        color: #16a34a;
+      }
+      .hp-msg.err {
+        color: #dc2626;
+      }
+      [hidden] {
+        display: none !important;
+      }
+    </style>
+    <script>
+      (function () {
+        var k = "greater-engine-theme";
+        try {
+          var t = localStorage.getItem(k);
+          if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="hp-admin">
+      <header class="hp-admin-header">
+        <div>
+          <p class="hp-admin-kicker">Admin · Homepage</p>
+          <h1>Projects</h1>
+          <p style="margin: 0; font-size: 14px; color: var(--text-muted); max-width: 52ch">
+            Manage Current and Future cards on the home page. Saves to the same API the public site reads (<code style="font-size: 12px">/api/home-projects</code>).
+          </p>
+        </div>
+        <div class="hp-admin-actions">
+          <a class="secondary" href="/admin">Main admin</a>
+          <a class="secondary" href="/">Site home</a>
+          <button type="button" class="primary" id="hp-logout" hidden>Log out</button>
+        </div>
+      </header>
+
+      <div id="hp-login">
+        <div class="hp-login-panel">
+          <p class="hp-admin-kicker" style="margin-bottom: 12px">Sign in</p>
+          <p style="margin: 0 0 16px; font-size: 14px; color: var(--text-muted); line-height: 1.5">
+            Enter the admin password configured as <code style="font-size: 12px">ADMIN_PASSWORD</code> on the server. It is verified via <code style="font-size: 12px">POST /api/auth</code> and stored only for this browser tab session (<code style="font-size: 12px">sessionStorage</code>).
+          </p>
+          <label for="hp-password">Password</label>
+          <input type="password" id="hp-password" autocomplete="current-password" />
+          <div class="hp-form-buttons">
+            <button type="button" class="save" id="hp-login-btn">Unlock</button>
+          </div>
+          <p class="hp-msg" id="hp-login-msg"></p>
+        </div>
+      </div>
+
+      <div id="hp-app" hidden>
+        <p class="hp-msg" id="hp-global-msg" style="margin-top: 0"></p>
+
+        <section class="hp-section" aria-labelledby="hp-form-heading">
+          <h2 class="hp-section-title" id="hp-form-heading">Add or edit</h2>
+          <form id="hp-project-form" class="hp-form-grid">
+            <input type="hidden" id="hp-field-id" value="" />
+            <label for="hp-field-title">Title</label>
+            <input type="text" id="hp-field-title" required autocomplete="off" />
+
+            <label for="hp-field-type">Type</label>
+            <select id="hp-field-type">
+              <option value="current">Current</option>
+              <option value="future">Future</option>
+            </select>
+
+            <div id="hp-wrap-status">
+              <label for="hp-field-status">Status</label>
+              <input type="text" id="hp-field-status" placeholder="e.g. building" autocomplete="off" />
+            </div>
+            <div id="hp-wrap-priority" hidden>
+              <label for="hp-field-priority">Priority</label>
+              <select id="hp-field-priority">
+                <option value="">—</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+
+            <label for="hp-field-description">Description</label>
+            <textarea id="hp-field-description" required></textarea>
+
+            <label for="hp-field-tags">Tags (comma-separated)</label>
+            <input type="text" id="hp-field-tags" placeholder="React, UI/UX, Vercel" autocomplete="off" />
+
+            <span class="hp-section-title" style="display: block; margin-bottom: 8px">Links</span>
+            <div class="hp-links-editor" id="hp-links-editor"></div>
+            <button type="button" class="ghost" id="hp-add-link" style="margin-bottom: 14px">+ Add link</button>
+
+            <label for="hp-field-notes">Notes (future ideas)</label>
+            <textarea id="hp-field-notes" placeholder="Optional internal or public notes"></textarea>
+
+            <div class="hp-checkbox-row">
+              <input type="checkbox" id="hp-field-visible" checked />
+              <label for="hp-field-visible" style="margin: 0; text-transform: none; letter-spacing: 0">Visible on public site</label>
+            </div>
+
+            <div class="hp-form-buttons">
+              <button type="submit" class="save" id="hp-save-btn">Save project</button>
+              <button type="button" class="ghost" id="hp-new-btn">New project</button>
+            </div>
+            <p class="hp-msg" id="hp-form-msg"></p>
+          </form>
+        </section>
+
+        <section class="hp-section" aria-labelledby="hp-current-heading">
+          <h2 class="hp-section-title" id="hp-current-heading">Current</h2>
+          <div class="hp-project-list" id="hp-list-current"></div>
+        </section>
+
+        <section class="hp-section" aria-labelledby="hp-future-heading">
+          <h2 class="hp-section-title" id="hp-future-heading">Future</h2>
+          <div class="hp-project-list" id="hp-list-future"></div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        var STORAGE_KEY = "admin_pw";
+        var pw = "";
+        try {
+          pw = sessionStorage.getItem(STORAGE_KEY) || "";
+        } catch (e) {}
+
+        var loginEl = document.getElementById("hp-login");
+        var appEl = document.getElementById("hp-app");
+        var logoutBtn = document.getElementById("hp-logout");
+        var loginBtn = document.getElementById("hp-login-btn");
+        var loginPw = document.getElementById("hp-password");
+        var loginMsg = document.getElementById("hp-login-msg");
+
+        var globalMsg = document.getElementById("hp-global-msg");
+        var formMsg = document.getElementById("hp-form-msg");
+        var form = document.getElementById("hp-project-form");
+        var fieldId = document.getElementById("hp-field-id");
+        var fieldTitle = document.getElementById("hp-field-title");
+        var fieldType = document.getElementById("hp-field-type");
+        var fieldStatus = document.getElementById("hp-field-status");
+        var fieldPriority = document.getElementById("hp-field-priority");
+        var wrapStatus = document.getElementById("hp-wrap-status");
+        var wrapPriority = document.getElementById("hp-wrap-priority");
+        var fieldDesc = document.getElementById("hp-field-description");
+        var fieldTags = document.getElementById("hp-field-tags");
+        var fieldNotes = document.getElementById("hp-field-notes");
+        var fieldVisible = document.getElementById("hp-field-visible");
+        var linksEditor = document.getElementById("hp-links-editor");
+        var addLinkBtn = document.getElementById("hp-add-link");
+        var listCurrent = document.getElementById("hp-list-current");
+        var listFuture = document.getElementById("hp-list-future");
+
+        var cacheItems = [];
+
+        function showGlobal(text, ok) {
+          globalMsg.textContent = text || "";
+          globalMsg.className = "hp-msg " + (ok === true ? "ok" : ok === false ? "err" : "");
+        }
+        function showForm(text, ok) {
+          formMsg.textContent = text || "";
+          formMsg.className = "hp-msg " + (ok === true ? "ok" : ok === false ? "err" : "");
+        }
+
+        function authHeaders(withJsonBody) {
+          var h = { Authorization: "Bearer " + pw };
+          if (withJsonBody) {
+            h["Content-Type"] = "application/json";
+          }
+          return h;
+        }
+
+        function applyTypeUi() {
+          var fut = fieldType.value === "future";
+          wrapPriority.hidden = !fut;
+          wrapStatus.hidden = fut;
+        }
+        fieldType.addEventListener("change", function () {
+          var fut = fieldType.value === "future";
+          applyTypeUi();
+          if (fut) fieldStatus.value = "";
+          else fieldPriority.value = "";
+        });
+
+        function getLinksFromDom() {
+          var rows = linksEditor.querySelectorAll(".hp-link-row");
+          var out = [];
+          rows.forEach(function (row) {
+            var lab = row.querySelector(".hp-link-label");
+            var href = row.querySelector(".hp-link-href");
+            var label = lab ? lab.value.trim() : "";
+            var h = href ? href.value.trim() : "";
+            if (label || h) out.push({ label: label || "Link", href: h || "#" });
+          });
+          return out;
+        }
+
+        function renderLinkRows(links) {
+          links = links && links.length ? links : [{ label: "", href: "" }];
+          linksEditor.innerHTML = "";
+          links.forEach(function (L, idx) {
+            var row = document.createElement("div");
+            row.className = "hp-link-row";
+            row.innerHTML =
+              '<input type="text" class="hp-link-label" placeholder="Label" value="' +
+              escapeAttr(L.label) +
+              '" />' +
+              '<input type="text" class="hp-link-href" placeholder="URL" value="' +
+              escapeAttr(L.href) +
+              '" />' +
+              '<button type="button" class="hp-remove-link" aria-label="Remove link">×</button>';
+            row.querySelector(".hp-remove-link").addEventListener("click", function () {
+              row.remove();
+              if (!linksEditor.querySelector(".hp-link-row")) renderLinkRows([]);
+            });
+            linksEditor.appendChild(row);
+          });
+        }
+
+        function escapeAttr(s) {
+          return String(s || "")
+            .replace(/&/g, "&amp;")
+            .replace(/"/g, "&quot;")
+            .replace(/</g, "&lt;");
+        }
+
+        addLinkBtn.addEventListener("click", function () {
+          var row = document.createElement("div");
+          row.className = "hp-link-row";
+          row.innerHTML =
+            '<input type="text" class="hp-link-label" placeholder="Label" />' +
+            '<input type="text" class="hp-link-href" placeholder="URL" />' +
+            '<button type="button" class="hp-remove-link" aria-label="Remove link">×</button>';
+          row.querySelector(".hp-remove-link").addEventListener("click", function () {
+            row.remove();
+          });
+          linksEditor.appendChild(row);
+        });
+
+        function clearForm() {
+          fieldId.value = "";
+          fieldTitle.value = "";
+          fieldType.value = "current";
+          fieldStatus.value = "";
+          fieldPriority.value = "";
+          fieldDesc.value = "";
+          fieldTags.value = "";
+          fieldNotes.value = "";
+          fieldVisible.checked = true;
+          renderLinkRows([]);
+          applyTypeUi();
+          showForm("", null);
+        }
+
+        function fillForm(p) {
+          fieldId.value = p.id || "";
+          fieldTitle.value = p.title || "";
+          fieldType.value = p.type === "future" ? "future" : "current";
+          fieldStatus.value = p.status || "";
+          var pr = String(p.priority || "").toLowerCase();
+          fieldPriority.value = ["high", "medium", "low"].indexOf(pr) >= 0 ? pr : "";
+          fieldDesc.value = p.description || "";
+          fieldTags.value = (p.tags || []).join(", ");
+          fieldNotes.value = p.notes || "";
+          fieldVisible.checked = p.visible !== false;
+          renderLinkRows(p.links && p.links.length ? p.links : []);
+          applyTypeUi();
+        }
+
+        function sortByOrder(a, b) {
+          var ao = typeof a.sortOrder === "number" ? a.sortOrder : 0;
+          var bo = typeof b.sortOrder === "number" ? b.sortOrder : 0;
+          if (ao !== bo) return ao - bo;
+          return String(a.title || "").localeCompare(String(b.title || ""));
+        }
+
+        function splitLists(items) {
+          var cur = items.filter(function (p) {
+            return p && p.type !== "future";
+          });
+          var fut = items.filter(function (p) {
+            return p && p.type === "future";
+          });
+          cur.sort(sortByOrder);
+          fut.sort(sortByOrder);
+          return { cur: cur, fut: fut };
+        }
+
+        function renderLists() {
+          var sp = splitLists(cacheItems);
+          listCurrent.innerHTML = "";
+          listFuture.innerHTML = "";
+          sp.cur.forEach(function (p) {
+            listCurrent.appendChild(renderCard(p, "current"));
+          });
+          sp.fut.forEach(function (p) {
+            listFuture.appendChild(renderCard(p, "future"));
+          });
+          if (!sp.cur.length) {
+            listCurrent.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">No current projects.</p>';
+          }
+          if (!sp.fut.length) {
+            listFuture.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">No future projects.</p>';
+          }
+        }
+
+        function renderCard(p, group) {
+          var el = document.createElement("div");
+          el.className = "hp-card";
+          var meta =
+            (p.visible === false ? "Hidden · " : "") +
+            (group === "current" ? (p.status ? "Status: " + p.status : "Current") : p.priority ? "Priority: " + p.priority : "Future");
+          el.innerHTML =
+            "<div><h3>" +
+            escapeHtml(p.title || "Untitled") +
+            "</h3><p class=\"hp-card-meta\">" +
+            escapeHtml(meta) +
+            "</p></div>";
+          var actions = document.createElement("div");
+          actions.className = "hp-card-actions";
+
+          function mkBtn(label, fn) {
+            var b = document.createElement("button");
+            b.type = "button";
+            b.textContent = label;
+            b.addEventListener("click", fn);
+            return b;
+          }
+
+          actions.appendChild(
+            mkBtn("Edit", function () {
+              fillForm(p);
+              showForm("Editing — change fields and save.", true);
+              fieldTitle.focus();
+            })
+          );
+          actions.appendChild(
+            mkBtn("Up", function () {
+              moveWithinGroup(p.id, group, -1);
+            })
+          );
+          actions.appendChild(
+            mkBtn("Down", function () {
+              moveWithinGroup(p.id, group, 1);
+            })
+          );
+          var del = mkBtn("Delete", function () {
+            if (!confirm("Delete “" + (p.title || "project") + "”?")) return;
+            deleteProject(p.id);
+          });
+          del.classList.add("danger");
+          actions.appendChild(del);
+
+          el.appendChild(actions);
+          return el;
+        }
+
+        function escapeHtml(s) {
+          return String(s || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/"/g, "&quot;");
+        }
+
+        function rebuildOrderIds() {
+          var sp = splitLists(cacheItems);
+          return sp.cur
+            .map(function (p) {
+              return p.id;
+            })
+            .concat(
+              sp.fut.map(function (p) {
+                return p.id;
+              })
+            );
+        }
+
+        function moveWithinGroup(id, group, dir) {
+          var sp = splitLists(cacheItems);
+          var arr = group === "future" ? sp.fut : sp.cur;
+          var i = arr.findIndex(function (p) {
+            return String(p.id) === String(id);
+          });
+          var j = i + dir;
+          if (i < 0 || j < 0 || j >= arr.length) return;
+          var t = arr[i];
+          arr[i] = arr[j];
+          arr[j] = t;
+          var ids = sp.cur
+            .map(function (p) {
+              return p.id;
+            })
+            .concat(
+              sp.fut.map(function (p) {
+                return p.id;
+              })
+            );
+          patchOrder(ids);
+        }
+
+        function patchOrder(ids) {
+          showGlobal("Saving order…", null);
+          fetch("/api/home-projects", {
+            method: "PATCH",
+            headers: authHeaders(true),
+            body: JSON.stringify({ ids: ids }),
+          })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { ok: r.ok, data: data };
+              });
+            })
+            .then(function (res) {
+              if (!res.ok) {
+                showGlobal(res.data.error || "Could not reorder.", false);
+                return;
+              }
+              showGlobal("Order saved.", true);
+              loadAll();
+            })
+            .catch(function () {
+              showGlobal("Network error while reordering.", false);
+            });
+        }
+
+        function deleteProject(id) {
+          showGlobal("Deleting…", null);
+          fetch("/api/home-projects?id=" + encodeURIComponent(id), {
+            method: "DELETE",
+            headers: authHeaders(false),
+          })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { ok: r.ok, data: data };
+              });
+            })
+            .then(function (res) {
+              if (!res.ok) {
+                showGlobal(res.data.error || "Delete failed.", false);
+                return;
+              }
+              showGlobal("Deleted.", true);
+              if (String(fieldId.value) === String(id)) clearForm();
+              loadAll();
+            })
+            .catch(function () {
+              showGlobal("Network error.", false);
+            });
+        }
+
+        function loadAll() {
+          showGlobal("Loading…", null);
+          fetch("/api/home-projects", { headers: authHeaders() })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { ok: r.ok, data: data, status: r.status };
+              });
+            })
+            .then(function (res) {
+              if (!res.ok || res.status === 401) {
+                sessionLogout();
+                showGlobal("", null);
+                return;
+              }
+              cacheItems = res.data.items || [];
+              renderLists();
+              showGlobal(cacheItems.length ? "Loaded " + cacheItems.length + " project(s)." : "No projects yet — add one below.", true);
+            })
+            .catch(function () {
+              showGlobal("Could not load projects.", false);
+            });
+        }
+
+        function sessionLogout() {
+          pw = "";
+          try {
+            sessionStorage.removeItem(STORAGE_KEY);
+          } catch (e) {}
+          appEl.hidden = true;
+          loginEl.hidden = false;
+          logoutBtn.hidden = true;
+          loginMsg.textContent = "";
+          loginPw.value = "";
+        }
+
+        function sessionLogin(password) {
+          fetch("/api/auth", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password: password }),
+          })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { ok: r.ok, data: data };
+              });
+            })
+            .then(function (res) {
+              if (!res.ok || !res.data.ok) {
+                loginMsg.textContent = res.data.error || "Invalid password.";
+                loginMsg.className = "hp-msg err";
+                return;
+              }
+              pw = password;
+              try {
+                sessionStorage.setItem(STORAGE_KEY, pw);
+              } catch (e) {}
+              loginEl.hidden = true;
+              appEl.hidden = false;
+              logoutBtn.hidden = false;
+              loginMsg.textContent = "";
+              clearForm();
+              applyTypeUi();
+              loadAll();
+            })
+            .catch(function () {
+              loginMsg.textContent = "Cannot reach API. Run npm run dev locally or check deployment.";
+              loginMsg.className = "hp-msg err";
+            });
+        }
+
+        function tryResumeSession() {
+          if (!pw) return;
+          fetch("/api/home-projects", { headers: authHeaders() })
+            .then(function (r) {
+              if (r.status === 401) {
+                sessionLogout();
+                return;
+              }
+              if (!r.ok) return;
+              loginEl.hidden = true;
+              appEl.hidden = false;
+              logoutBtn.hidden = false;
+              return r.json();
+            })
+            .then(function (data) {
+              if (!data) return;
+              cacheItems = data.items || [];
+              renderLists();
+              clearForm();
+              applyTypeUi();
+              showGlobal("Session restored.", true);
+            })
+            .catch(function () {});
+        }
+
+        loginBtn.addEventListener("click", function () {
+          var x = (loginPw.value || "").trim();
+          loginMsg.textContent = "";
+          if (!x) {
+            loginMsg.textContent = "Enter a password.";
+            loginMsg.className = "hp-msg err";
+            return;
+          }
+          sessionLogin(x);
+        });
+        loginPw.addEventListener("keydown", function (ev) {
+          if (ev.key === "Enter") loginBtn.click();
+        });
+        logoutBtn.addEventListener("click", sessionLogout);
+
+        form.addEventListener("submit", function (ev) {
+          ev.preventDefault();
+          var id = fieldId.value.trim();
+          var tags = fieldTags.value
+            .split(",")
+            .map(function (t) {
+              return t.trim();
+            })
+            .filter(Boolean);
+          var body = {
+            title: fieldTitle.value.trim(),
+            type: fieldType.value,
+            description: fieldDesc.value,
+            tags: tags,
+            links: getLinksFromDom(),
+            notes: fieldNotes.value,
+            visible: fieldVisible.checked,
+          };
+          if (fieldType.value === "current") {
+            body.status = fieldStatus.value.trim();
+          } else {
+            body.priority = fieldPriority.value || undefined;
+          }
+
+          if (id) {
+            showForm("Saving…", null);
+            fetch("/api/home-projects?id=" + encodeURIComponent(id), {
+              method: "PUT",
+              headers: authHeaders(true),
+              body: JSON.stringify(body),
+            })
+              .then(function (r) {
+                return r.json().then(function (data) {
+                  return { ok: r.ok, data: data };
+                });
+              })
+              .then(function (res) {
+                if (!res.ok) {
+                  showForm(res.data.error || "Save failed.", false);
+                  return;
+                }
+                showForm("Saved.", true);
+                loadAll();
+              })
+              .catch(function () {
+                showForm("Network error.", false);
+              });
+          } else {
+            showForm("Creating…", null);
+            fetch("/api/home-projects", {
+              method: "POST",
+              headers: authHeaders(true),
+              body: JSON.stringify(body),
+            })
+              .then(function (r) {
+                return r.json().then(function (data) {
+                  return { ok: r.ok, data: data };
+                });
+              })
+              .then(function (res) {
+                if (!res.ok) {
+                  showForm(res.data.error || "Create failed.", false);
+                  return;
+                }
+                showForm("Created.", true);
+                fieldId.value = res.data.id || "";
+                loadAll();
+              })
+              .catch(function () {
+                showForm("Network error.", false);
+              });
+          }
+        });
+
+        document.getElementById("hp-new-btn").addEventListener("click", function () {
+          clearForm();
+          showForm("New project — fill in and save.", true);
+        });
+
+        tryResumeSession();
+      })();
+    </script>
+  </body>
+</html>

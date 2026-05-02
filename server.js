@@ -301,6 +301,11 @@ const server = http.createServer(async (req, res) => {
     attachApiResponseHelpers(res);
   }
 
+  if (urlPath.startsWith("/api/home-projects")) {
+    const homeProjectsHandler = require("./api/home-projects");
+    return homeProjectsHandler(req, res);
+  }
+
   if (urlPath === "/api/projects") {
     const projectsHandler = require("./api/projects");
     return projectsHandler(req, res);
