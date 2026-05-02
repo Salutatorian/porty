@@ -1,0 +1,24 @@
+---
+description: Always update SESSION_LOG.md when changing porty so git pushes include a current log.
+alwaysApply: true
+---
+
+# Session log (SESSION_LOG.md)
+
+The maintainer relies on **`SESSION_LOG.md`** staying current when work is merged or pushed. They will forget to update it—the agent must not.
+
+## When to update
+
+Whenever this repo gets **meaningful changes** (features, fixes, new routes, env/setup shifts, notable refactors), **append or edit `SESSION_LOG.md`** in the same change batch—preferably **before** committing or advising a push.
+
+## What to include
+
+- **Date** (and short session title if helpful).
+- **Summary bullets** of what changed and why it matters.
+- **Files touched** (added / updated) when useful for handoff.
+- **Operational notes** (env vars, restart steps, deploy caveats) when relevant.
+
+## Out of scope
+
+- Do not log trivial one-line typo fixes unless the user asks.
+- Never commit **`.env.local`**—session log may mention env **names** only.

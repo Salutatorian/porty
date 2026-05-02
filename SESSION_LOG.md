@@ -78,3 +78,6 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 ### Next Start Checklist
 - Local: `.env.local` with **`RESEND_API_KEY`** (never commit). Restart **`npm run dev`** after env changes.
 - Vercel (when deployed): set **`RESEND_API_KEY`**, **`CONTACT_TO_EMAIL`**, optional **`RESEND_FROM`** in project env.
+
+### Agent convention
+- Cursor rule **`.cursor/rules/session-log.mdc`** (`alwaysApply`): substantive repo changes should update this file (`SESSION_LOG.md`) in the same batch so pushes always carry a current log.
