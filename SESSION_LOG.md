@@ -360,3 +360,13 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
 ### Files Updated
 - `script.js`, `index.html`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-03 — Homepage: restore `script.js`
+
+### Session Summary
+- **`index.html`** was missing **`script src="script.js"`** after a Friends FAB edit, which broke **theme toggle**, **Friends FAB**, scroll-reveal, and **mobile menu** on `/` — other pages already loaded **`script.js`**.
+
+### Files Updated
+- `index.html`, `SESSION_LOG.md`
