@@ -394,12 +394,17 @@ a:hover {
    Original fan spans roughly fan-x: 20→740 and fan-y: -430→-380.
    Shift the stack origin to viewport center, offset by half the spread
    so the cards appear centered. */
+/* Math: cards have transform-origin bottom-left; fan-x spans 20→740 (span 720),
+   each card 260 wide, so visual horizontal center sits at ~510px right of stack origin.
+   fan-y goes -430→-380, each card 380 tall, so visual vertical center sits at ~615px
+   above stack origin. To center the fan in viewport, shift the stack origin
+   accordingly from viewport center. */
 .friends-fab.is-open .friends-fab-stack {
   position: fixed;
   left: 50vw;
   top: 50vh;
   bottom: auto;
-  transform: translate(-380px, 200px);
+  transform: translate(-510px, 615px);
   z-index: 1;
 }
 .friend-card {
@@ -534,11 +539,25 @@ a:hover {
 [data-theme="dark"] .friend-card {
   background: #f6f3ec;
   color: #1a1a1a;
+  border-color: rgba(255,255,255,0.08);
+  box-shadow: 0 14px 32px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.6) inset;
 }
+[data-theme="dark"] .friend-card-eyebrow { color: rgba(0,0,0,0.5); }
+[data-theme="dark"] .friend-card-blurb { color: rgba(0,0,0,0.6); }
 [data-theme="dark"] .friend-card:hover,
 [data-theme="dark"] .friend-card:focus-visible {
   background: #0f1116;
   color: #fff;
+  border-color: rgba(255,255,255,0.14);
+  box-shadow: 0 28px 56px rgba(0,0,0,0.7), 0 1px 0 rgba(255,255,255,0.08) inset;
+}
+[data-theme="dark"] .friend-card:hover .friend-card-eyebrow,
+[data-theme="dark"] .friend-card:focus-visible .friend-card-eyebrow {
+  color: rgba(255,255,255,0.6);
+}
+[data-theme="dark"] .friend-card:hover .friend-card-blurb,
+[data-theme="dark"] .friend-card:focus-visible .friend-card-blurb {
+  color: rgba(255,255,255,0.78);
 }
 
 @media (max-width: 720px) {
