@@ -11,6 +11,7 @@
     if (!a || a.tagName !== "A") return false;
     var href = a.getAttribute("href");
     if (!href || href === "#" || href.startsWith("javascript:")) return false;
+    if (href === "#credits-overlay" || href === "#search" || href === "#theme") return false;
     if (a.target === "_blank" || a.hasAttribute("download")) return false;
     if (a.getAttribute("rel") === "external") return false;
     try {
@@ -126,6 +127,14 @@
         setActiveNav(path, url.hash);
         runPageScripts(doc, url.href);
         window.dispatchEvent(new CustomEvent("pagechange", { detail: { path: path, url: href } }));
+        if (url.hash === "#work") {
+          var workEl = document.getElementById("work");
+          if (workEl) {
+            requestAnimationFrame(function () {
+              workEl.scrollIntoView({ behavior: "smooth" });
+            });
+          }
+        }
       })
       .catch(function (err) {
         console.error("Router error:", err);

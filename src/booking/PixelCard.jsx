@@ -100,7 +100,9 @@ export default function PixelCard({
             alpha = 0.04 + 0.09 * hash(idx + col * 0.37);
           }
           ctx.fillStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha})`;
-          ctx.fillRect(x, y, cell - 1, cell - 1);
+          const cw = Math.min(cell, w - x);
+          const ch = Math.min(cell, h - y);
+          if (cw > 0 && ch > 0) ctx.fillRect(x, y, cw, ch);
         }
       }
     }

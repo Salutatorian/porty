@@ -3,18 +3,34 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <link rel="icon" href="/favicon.ico?v=2" sizes="any">
+    <link rel="apple-touch-icon" href="/ge-icon-180x180.png?v=2">
+    <link rel="manifest" href="/site.webmanifest?v=2">
+
     <title>Admin · The Greater Engine</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Inter:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../styles.css" />
+    <script>
+      (function () {
+        var k = "greater-engine-theme";
+        try {
+          var t = localStorage.getItem(k);
+          if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
     <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet" />
     <style>
       /* ---- admin shell ---- */
       .admin-page {
-        max-width: 1200px; margin: 0 auto; padding: 48px 32px;
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        max-width: min(100%, 980px);
+        margin: 0 auto;
+        padding: 112px 32px max(120px, calc(96px + env(safe-area-inset-bottom)));
+        font-family: var(--font-main), system-ui, -apple-system, sans-serif;
         min-height: 100vh;
+        box-sizing: border-box;
       }
 
       /* ---- admin header ---- */
@@ -30,10 +46,22 @@
         display: inline-flex; align-items: center; gap: 6px;
       }
       .admin-back a:hover { color: var(--text); }
-      .admin-page h1 { font-size: 1.75rem; margin: 0; font-weight: 700; letter-spacing: -0.03em; }
+      .admin-header-left h1 {
+        font-size: clamp(1.75rem, 4vw, 2.5rem);
+        margin: 0;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        line-height: 0.95;
+      }
       .admin-tagline {
-        font-size: 11px; font-weight: 500; text-transform: uppercase;
-        letter-spacing: 0.15em; color: var(--text-muted); opacity: 0.6; margin: 4px 0 0;
+        font-family: var(--font-dot);
+        font-size: 11px;
+        font-weight: 400;
+        text-transform: lowercase;
+        letter-spacing: 0.2em;
+        color: var(--text-muted);
+        margin: 10px 0 0;
+        opacity: 1;
       }
 
       /* ---- theme toggle (admin) ---- */
@@ -249,50 +277,79 @@
       .audio-trim-fallback summary { cursor: pointer; font-size: 12px; color: var(--text-muted); }
       .audio-trim-fallback[open] summary { margin-bottom: 8px; }
 
-      /* ---- OTP login demo ---- */
+      /* ---- OTP login — themed to match site tokens (Home-style card) ---- */
       .admin-login {
         margin: 0 auto 32px; max-width: 430px; text-align: left;
         padding: 0; background: transparent;
       }
       .admin-login-card {
-        border-radius: 28px; padding: 28px;
-        background: #050505; color: #f7f7f7;
-        border: 1px solid rgba(255,255,255,0.1);
-        box-shadow: 0 26px 80px rgba(0,0,0,0.25);
+        border-radius: 24px; padding: 32px 28px;
+        background: var(--bg-alt);
+        color: var(--text);
+        border: 1px solid var(--border);
+        box-shadow: 0 26px 80px rgba(0, 0, 0, 0.08);
       }
-      .admin-login label { color: rgba(255,255,255,0.62); text-align: left; }
+      [data-theme="dark"] .admin-login-card {
+        box-shadow: 0 26px 80px rgba(0, 0, 0, 0.35);
+      }
+      .admin-login label {
+        color: var(--text-muted); text-align: left;
+        font-family: var(--font-dot);
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: lowercase;
+      }
       .admin-login input {
-        margin-bottom: 16px; background: #101010; color: #fff;
-        border-color: rgba(255,255,255,0.14);
+        margin-bottom: 16px;
+        background: var(--bg); color: var(--text);
+        border-color: var(--border);
       }
       .admin-login input:focus {
-        border-color: rgba(255,255,255,0.42);
-        box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
+        border-color: var(--text-muted);
+        box-shadow: 0 0 0 3px rgba(128, 128, 128, 0.12);
       }
-      .admin-login button { width: 100%; background: #f7f7f7; color: #080808; }
-      .admin-login button:hover { opacity: 1; background: #fff; }
+      .admin-login button {
+        width: 100%;
+        background: var(--text); color: var(--bg);
+      }
+      .admin-login button:hover { opacity: 0.9; }
       .admin-login-step[hidden] { display: none !important; }
       .otp-art {
-        width: 116px; height: 116px; border-radius: 50%; margin: 0 auto 22px;
+        width: 96px; height: 96px; border-radius: 50%; margin: 0 auto 20px;
         display: grid; place-items: center; position: relative;
-        background: radial-gradient(circle at 32% 24%, #fff 0 8%, #d8ecff 9% 28%, #6aa9ff 29% 56%, #16345e 57% 100%);
-        box-shadow: inset 0 0 0 9px rgba(255,255,255,0.08), 0 14px 44px rgba(77,154,255,0.22);
+        background:
+          radial-gradient(circle at 32% 24%,
+            rgba(255, 255, 255, 0.9) 0 8%,
+            rgba(168, 198, 224, 0.55) 9% 32%,
+            rgba(74, 144, 226, 0.55) 33% 62%,
+            rgba(22, 52, 94, 0.85) 63% 100%);
+        box-shadow:
+          inset 0 0 0 6px rgba(255, 255, 255, 0.06),
+          0 10px 32px rgba(74, 144, 226, 0.18);
+      }
+      [data-theme="light"] .otp-art,
+      :root:not([data-theme="dark"]) .otp-art {
+        box-shadow:
+          inset 0 0 0 6px rgba(255, 255, 255, 0.35),
+          0 10px 32px rgba(74, 144, 226, 0.22);
       }
       .otp-art::after {
-        content: ""; width: 38px; height: 24px; border-left: 6px solid #fff; border-bottom: 6px solid #fff;
-        transform: rotate(-45deg) translate(2px, -3px); border-radius: 3px;
+        content: ""; width: 30px; height: 20px;
+        border-left: 5px solid #fff; border-bottom: 5px solid #fff;
+        transform: rotate(-45deg) translate(2px, -3px); border-radius: 2px;
       }
       .otp-title {
         margin: 0 0 8px; text-align: center; font-size: 28px;
-        letter-spacing: -0.04em; line-height: 1.05;
+        letter-spacing: -0.03em; line-height: 1.05;
+        color: var(--text);
       }
       .otp-helper {
-        margin: 0 0 22px; text-align: center; color: rgba(255,255,255,0.58);
+        margin: 0 0 22px; text-align: center; color: var(--text-muted);
         font-size: 14px; line-height: 1.55;
       }
       .otp-email-row {
         margin: -8px 0 18px; text-align: center; font-size: 13px;
-        color: rgba(255,255,255,0.72);
+        color: var(--text-muted);
       }
       .otp-code-row {
         display: flex; justify-content: center; gap: 8px; margin-bottom: 16px;
@@ -300,19 +357,25 @@
       .admin-page .otp-input {
         width: 48px; height: 54px; margin: 0; padding: 0;
         text-align: center; font-size: 24px; font-weight: 700;
-        border-radius: 16px; background: #121212; color: #fff;
+        border-radius: 14px;
+        background: var(--bg); color: var(--text);
+        border: 1px solid var(--border);
+      }
+      .admin-page .otp-input:focus {
+        border-color: var(--text-muted);
+        box-shadow: 0 0 0 3px rgba(128, 128, 128, 0.12);
       }
       .otp-dots {
         display: flex; justify-content: center; gap: 8px; margin-bottom: 18px;
       }
       .otp-dots span {
-        width: 6px; height: 6px; border-radius: 999px; background: rgba(255,255,255,0.24);
+        width: 6px; height: 6px; border-radius: 999px; background: var(--border);
       }
       .otp-help {
         display: flex; justify-content: center; gap: 6px; margin-top: 18px;
-        font-size: 13px; color: rgba(255,255,255,0.54);
+        font-size: 13px; color: var(--text-muted);
       }
-      .otp-help a { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+      .otp-help a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
       .otp-verified {
         text-align: center; padding-top: 4px;
       }
@@ -572,6 +635,7 @@
     </style>
   </head>
   <body>
+    <a href="/" class="site-logo" aria-label="Greater Engine — home"><span class="site-logo-mark" aria-hidden="true"></span></a>
     <div class="admin-page">
       <div class="admin-header">
         <div class="admin-header-left">

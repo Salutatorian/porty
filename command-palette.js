@@ -4,24 +4,16 @@
   var apiBase = "";
 
   var staticItems = [
-    { label: "Home", href: "/", icon: "home", group: "Pages", keywords: "home" },
-    { label: "Media", href: "/media", icon: "image", group: "Pages", keywords: "media books movies photos videos gallery" },
-    { label: "Portfolio", href: "/portfolio", icon: "code", group: "Pages", keywords: "portfolio code projects work" },
-    { label: "About", href: "/about", icon: "user", group: "Pages", keywords: "about" },
-    { label: "Writing", href: "/writing", icon: "pen", group: "Pages", keywords: "writing blog articles" },
-    { label: "Books", href: "/books", icon: "book", group: "Pages", keywords: "books reading goodreads library" },
-    { label: "Movies", href: "/movies", icon: "film", group: "Pages", keywords: "movies films library watching" },
-    { label: "Photos", href: "/photos", icon: "image", group: "Pages", keywords: "photos pictures gallery" },
-    { label: "Videos", href: "/videos", icon: "film", group: "Pages", keywords: "videos montage clips media" },
-    { label: "Training", href: "/training", icon: "chart", group: "Pages", keywords: "training" },
-    { label: "Photo converter (RAW)", href: "/tools", icon: "image", group: "Pages", keywords: "tools raw arw dng cr2 convert photo" },
-    { label: "GitHub", href: "https://github.com/Salutatorian", icon: "github", group: "Links", keywords: "github g" },
-    { label: "LinkedIn", href: "https://www.linkedin.com/in/joshua-waldo-8b8023394/", icon: "linkedin", group: "Links", keywords: "linkedin" },
-    { label: "Instagram", href: "https://www.instagram.com/joshuaawaldo/", icon: "instagram", group: "Links", keywords: "instagram" },
-    { label: "Strava", href: "https://www.strava.com/athletes/73302983", icon: "strava", group: "Links", keywords: "strava" },
-    { label: "Resume", href: "/resume.pdf", icon: "file", group: "Links", keywords: "resume cv" },
-    { label: "Admin", href: "/admin", icon: "gear", group: "Links", keywords: "admin" },
-    { label: "Toggle theme", action: "toggleTheme", icon: "moon", group: "Settings", keywords: "theme dark light" },
+    { label: "Home", href: "/", icon: "home", group: "Navigation", keywords: "home portfolio main" },
+    { label: "Media", href: "/media", icon: "image", group: "Navigation", keywords: "books movies photos videos media" },
+    { label: "Projects", href: "/#work", icon: "code", group: "Navigation", keywords: "projects current future work" },
+    { label: "Tools", href: "/tools", icon: "wrench", group: "Navigation", keywords: "tools raw convert photo utilities" },
+    { label: "Training", href: "/training", icon: "chart", group: "Navigation", keywords: "training stats triathlon running" },
+    { label: "Admin", href: "/admin", icon: "gear", group: "Navigation", keywords: "admin edit dashboard manage" },
+    { label: "Credits", action: "openCredits", icon: "user", group: "Actions", keywords: "credits friends shoutouts" },
+    { label: "Toggle theme", action: "toggleTheme", icon: "moon", group: "Actions", keywords: "theme dark light" },
+    { label: "GitHub", href: "https://github.com/Salutatorian", icon: "github", group: "Links", keywords: "github code repo" },
+    { label: "Resume", href: "/resume.pdf", icon: "file", group: "Links", keywords: "resume cv download" },
   ];
 
   var dynamicItems = [];
@@ -118,6 +110,7 @@
     code: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path fill-rule="evenodd" d="M3 6a3 3 0 013-3h12a3 3 0 013 3v12a3 3 0 01-3 3H6a3 3 0 01-3-3V6zm3-1.5A1.5 1.5 0 004.5 6v12A1.5 1.5 0 006 19.5h12a1.5 1.5 0 001.5-1.5V6A1.5 1.5 0 0018 4.5H6z" clip-rule="evenodd"/><path d="M10.72 8.47a.75.75 0 011.06 0l3.75 3.75a.75.75 0 010 1.06l-3.75 3.75a.75.75 0 11-1.06-1.06l3.22-3.22-3.22-3.22a.75.75 0 010-1.06zM8.22 8.47a.75.75 0 000 1.06L11.44 12l-3.22 3.22a.75.75 0 101.06 1.06l3.75-3.75a.75.75 0 000-1.06L9.28 8.47a.75.75 0 00-1.06 0z"/></svg>',
     pen: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z"/></svg>',
     image: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path fill-rule="evenodd" d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.161a1.5 1.5 0 00-2.12 0L3 16.061zM12 7.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" clip-rule="evenodd"/></svg>',
+    wrench: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M14.7 6.3a4 4 0 0 0-5 5L3 18v3h3l6.7-6.7a4 4 0 0 0 5-5l-2.4 2.4-3-3z"/></svg>',
     chart: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path fill-rule="evenodd" d="M15.75 2.25a.75.75 0 01.75.75v4.5h4.5a.75.75 0 010 1.5h-4.5v6.75h4.5a.75.75 0 010 1.5h-4.5v2.25a.75.75 0 01-1.5 0v-2.25H9v2.25a.75.75 0 01-1.5 0v-2.25H3.75a.75.75 0 010-1.5H9V9H3.75a.75.75 0 010-1.5h4.5v-4.5a.75.75 0 011.5 0V8h3V3.75a.75.75 0 011.5 0V8h3V3.75a.75.75 0 01.75-.75z" clip-rule="evenodd"/></svg>',
     github: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>',
     linkedin: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>',
@@ -136,7 +129,10 @@
   var selectedIdx = 0;
 
   function openPalette() {
-    if (modal) return;
+    if (modal) {
+      if (input) input.focus();
+      return;
+    }
     dynamicItems = [];
     itemsCache = null;
     loadDynamicItems();
@@ -147,8 +143,10 @@
     modal.innerHTML =
       '<div class="command-palette">' +
       '  <div class="command-palette-header">' +
-      '    <input type="text" class="command-palette-input" placeholder="Search pages, articles, media..." autocomplete="off" autocapitalize="off" spellcheck="false" />' +
-      '    <span class="command-palette-hint">' + modKey + '+K to close</span>' +
+      '    <div class="command-palette-search">' +
+      '      <input type="search" class="command-palette-input" placeholder="Search pages, projects, tools, actions..." autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Search site" />' +
+      '    </div>' +
+      '    <span class="command-palette-hint">' + modKey + '+K · Esc</span>' +
       '  </div>' +
       '  <div class="command-palette-list"></div>' +
       '</div>';
@@ -230,6 +228,8 @@
     if (it.action === "toggleTheme") {
       var t = document.querySelector(".theme-toggle, .nav-link[data-dock-action=\"theme\"]");
       if (t) t.click();
+    } else if (it.action === "openCredits") {
+      document.dispatchEvent(new CustomEvent("ge-open-credits"));
     } else if (it.photoId) {
       window.location.href = it.href + "#photo=" + encodeURIComponent(it.photoId);
     } else if (it.href) {
@@ -277,36 +277,22 @@
   }
 
   document.addEventListener("keydown", function (e) {
-    if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+    if ((e.metaKey || e.ctrlKey) && String(e.key).toLowerCase() === "k") {
       e.preventDefault();
       if (modal) closePalette();
       else openPalette();
+      return;
+    }
+    if (e.key === "Escape" && modal) {
+      e.preventDefault();
+      closePalette();
     }
   });
-
-  function injectSearchTrigger() {
-    var header = document.querySelector(".header-actions");
-    if (!header) return;
-    if (header.querySelector(".search-trigger")) return;
-    var themeToggle = document.querySelector(".theme-toggle");
-    var btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "search-trigger";
-    btn.setAttribute("aria-label", "Search");
-    btn.title = "Search (" + modKey + "+K)";
-    btn.innerHTML = '<span class="search-trigger-label">' + modKey + '</span><span class="search-trigger-key">K</span>';
-    btn.addEventListener("click", function () {
-      if (modal) closePalette();
-      else openPalette();
-    });
-    if (themeToggle) header.insertBefore(btn, themeToggle);
-    else header.appendChild(btn);
-  }
 
   document.addEventListener("click", function (e) {
     if (e.target.closest(".mobile-nav-search") || e.target.closest('.nav-link[data-dock-action="search"]')) {
       e.preventDefault();
-      e.stopPropagation();
+      e.stopImmediatePropagation();
       var mobileNav = document.querySelector(".mobile-nav");
       var menuBtn = document.querySelector(".mobile-menu-btn");
       if (mobileNav) mobileNav.classList.remove("is-open");
@@ -315,11 +301,13 @@
         menuBtn.setAttribute("aria-expanded", "false");
         menuBtn.setAttribute("aria-label", "Open menu");
       }
-      if (modal) closePalette();
-      else openPalette();
+      openPalette();
     }
-  });
+  }, true);
 
-  document.addEventListener("DOMContentLoaded", injectSearchTrigger);
-  window.addEventListener("pagechange", injectSearchTrigger);
+  window.GECommandPalette = {
+    open: openPalette,
+    close: closePalette,
+    isOpen: function () { return !!modal; }
+  };
 })();

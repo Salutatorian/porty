@@ -177,8 +177,8 @@
       var r = active.getBoundingClientRect();
       var px = (e.clientX - r.left) / r.width - 0.5;
       var py = (e.clientY - r.top) / r.height - 0.5;
-      active.style.setProperty("--stack-ry", (px * 12).toFixed(2) + "deg");
-      active.style.setProperty("--stack-rx", (-py * 12).toFixed(2) + "deg");
+      active.style.setProperty("--stack-ry", (px * 20).toFixed(2) + "deg");
+      active.style.setProperty("--stack-rx", (-py * 20).toFixed(2) + "deg");
     });
     track.addEventListener("mouseleave", function () {
       var active = cards[0];

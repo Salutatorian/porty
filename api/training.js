@@ -112,6 +112,14 @@ function processActivitiesToDashboard(activities, rangeDays = 365) {
   const weekBuckets = {};
   const dayBuckets = {};
 
+  const highlights = {
+    longestRide: null,
+    longestRun: null,
+    longestSwim: null,
+    biggestWeek: null,
+    lastActivity: null,
+  };
+
   activities.forEach((a) => {
     const start = new Date(a.start_date);
     const key = start.toISOString().slice(0, 10);
@@ -125,6 +133,7 @@ function processActivitiesToDashboard(activities, rangeDays = 365) {
 
     const hours = (a.moving_time || 0) / 3600;
     const miles = (a.distance || 0) / 1609.344;
+    const name = a.name || "";
 
     if (!weekBuckets[weekKey]) {
       weekBuckets[weekKey] = {
@@ -149,6 +158,23 @@ function processActivitiesToDashboard(activities, rangeDays = 365) {
     if (!dayBuckets[key]) dayBuckets[key] = { minutes: 0, count: 0 };
     dayBuckets[key].minutes += hours * 60;
     dayBuckets[key].count += 1;
+
+    const longestKey =
+      sport === "cycling" ? "longestRide" : sport === "running" ? "longestRun" : "longestSwim";
+    const currentLongest = highlights[longestKey];
+    if (!currentLongest || miles > currentLongest.distanceMi) {
+      highlights[longestKey] = { distanceMi: miles, hours, date: key, name };
+    }
+
+    if (!highlights.lastActivity || start.getTime() > new Date(highlights.lastActivity.date).getTime()) {
+      highlights.lastActivity = {
+        date: start.toISOString(),
+        sport,
+        distanceMi: miles,
+        hours,
+        name,
+      };
+    }
   });
 
   const weekKeys = Object.keys(weekBuckets).sort();
@@ -160,16 +186,44 @@ function processActivitiesToDashboard(activities, rangeDays = 365) {
     runningHours: 0,
     swimmingHours: 0,
     totalHours: 0,
+    cyclingMiles: 0,
+    runningMiles: 0,
+    swimmingMiles: 0,
+    totalMiles: 0,
+    cyclingSessions: 0,
+    runningSessions: 0,
+    swimmingSessions: 0,
+    totalSessions: 0,
+    weeksCount: weeks.length,
   };
 
   weeks.forEach((w) => {
     totals.cyclingHours += w.cyclingHours;
     totals.runningHours += w.runningHours;
     totals.swimmingHours += w.swimmingHours;
+    totals.cyclingMiles += w.cyclingMiles;
+    totals.runningMiles += w.runningMiles;
+    totals.swimmingMiles += w.swimmingMiles;
+    totals.cyclingSessions += w.cyclingSessions;
+    totals.runningSessions += w.runningSessions;
+    totals.swimmingSessions += w.swimmingSessions;
   });
 
   totals.totalHours =
     totals.cyclingHours + totals.runningHours + totals.swimmingHours;
+  totals.totalMiles =
+    totals.cyclingMiles + totals.runningMiles + totals.swimmingMiles;
+  totals.totalSessions =
+    totals.cyclingSessions + totals.runningSessions + totals.swimmingSessions;
+
+  let biggestWeek = null;
+  weeks.forEach((w) => {
+    const weekHours = w.cyclingHours + w.runningHours + w.swimmingHours;
+    if (!biggestWeek || weekHours > biggestWeek.hours) {
+      biggestWeek = { hours: weekHours, weekLabel: w.weekLabel };
+    }
+  });
+  highlights.biggestWeek = biggestWeek;
 
   const consistencyDays = Math.min(rangeDays, 365);
   const consistencyData = [];
@@ -205,14 +259,18 @@ function processActivitiesToDashboard(activities, rangeDays = 365) {
   if (run > 0 && currentStreak === 0) currentStreak = run;
 
   const consistencyCols = Math.ceil(consistencyDays / 7);
+  const restDays = consistencyDays - trainingDays;
   return {
     weeks,
     weekLabels,
     totals,
     consistencyData,
     consistencyCols,
+    consistencyDays,
     trainingDays,
+    restDays,
     longestStreak,
     currentStreak,
+    highlights,
   };
 }

@@ -44,28 +44,197 @@
     try { window.dispatchEvent(new CustomEvent("themechange", { detail: { theme: next } })); } catch (e) {}
   }
 
-  /* Friends FAB: use capture phase so theme-button handlers (stopPropagation) never block this. */
-  function initFriendsFab() {
-    var fab = document.getElementById("friends-fab");
-    var trig = document.getElementById("friends-fab-trigger");
-    if (!fab || !trig) return;
-    if (fab.dataset.friendsFabBound === "1") return;
-    fab.dataset.friendsFabBound = "1";
+  /* Credits fan deck (#credits-deck-stack): parallax tilt from pointer vs card center (~±10deg). */
+  var CARD_TILT_DEG_PER_HALF = 20;
 
-    function setOpen(o) {
-      fab.classList.toggle("is-open", o);
-      trig.setAttribute("aria-expanded", o ? "true" : "false");
-      if (!o) {
-        Array.prototype.forEach.call(fab.querySelectorAll(".friend-card"), function (c) {
-          c.style.setProperty("--tilt-rx", "0deg");
-          c.style.setProperty("--tilt-ry", "0deg");
-        });
-      }
+  function resetCreditsDeckTilt(mount) {
+    if (!mount) return;
+    Array.prototype.forEach.call(mount.querySelectorAll(".friend-card"), function (c) {
+      c.style.setProperty("--tilt-rx", "0deg");
+      c.style.setProperty("--tilt-ry", "0deg");
+      c.style.setProperty("--mx", "-9999px");
+      c.style.setProperty("--my", "-9999px");
+    });
+  }
+
+  /* ---- Credits full-screen overlay (dock + palette; same #credits-deck-stack fan deck) ---- */
+  var geCreditsOverlayEl = null;
+  var geCreditsOverlayIsOpen = false;
+  var geCreditsCloseTimer = 0;
+
+  function prefersCreditsOverlayReducedMotion() {
+    try {
+      return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    } catch (e) {
+      return false;
     }
+  }
 
-    /* Deterministic per-friend icon motif (stable across reloads).
-       FNV-1a hash → mulberry32 PRNG → pick 5-7 lucide-ish SVG glyphs at
-       seeded positions/sizes/rotations. Same name = same layout, forever. */
+  function ensureCreditsOverlay() {
+    if (geCreditsOverlayEl) return geCreditsOverlayEl;
+    var root = document.createElement("div");
+    root.id = "ge-credits-overlay";
+    root.className = "ge-credits-overlay";
+    if (prefersCreditsOverlayReducedMotion()) root.classList.add("ge-credits-overlay--reduced");
+    root.setAttribute("hidden", "");
+    root.setAttribute("aria-hidden", "true");
+    root.innerHTML =
+      '<div class="ge-credits-overlay__backdrop" data-credits-backdrop="1" aria-hidden="true"></div>' +
+      '<div class="ge-credits-overlay__panel" role="dialog" aria-modal="true" aria-label="Credits">' +
+      '  <div class="credits-deck credits-deck--overlay" aria-label="Credits">' +
+      '    <div class="friends-fab-stack credits-deck-stack" id="credits-deck-stack">' +
+      '      <div class="friends-fab-stack-inner stack-inner-visible" role="list" aria-label="Credits">' +
+      '        <article class="friend-card" role="listitem" tabindex="0" style="--rest-x:-2px; --rest-y:-6px; --rest-rot:-3deg; --fan-x:20px; --fan-y:-380px; --fan-rot:-10deg; --z:1; --stagger:3;">' +
+      '          <div class="friend-card-avatar friend-card-avatar--photo" aria-hidden="true"><img src="/images/friends/ty.png" alt="" /></div>' +
+      '          <p class="friend-card-eyebrow font-dot">day one</p>' +
+      '          <h3 class="friend-card-name">Ty Cepeda</h3>' +
+      '          <p class="friend-card-blurb">Edit me — your shoutout for Ty.</p>' +
+      "        </article>" +
+      '        <article class="friend-card" role="listitem" tabindex="0" style="--rest-x:0px; --rest-y:-3px; --rest-rot:-1deg; --fan-x:200px; --fan-y:-410px; --fan-rot:-5deg; --z:2; --stagger:2;">' +
+      '          <div class="friend-card-avatar" aria-hidden="true">&lt;blank&gt;</div>' +
+      '          <p class="friend-card-eyebrow font-dot">blank</p>' +
+      '          <h3 class="friend-card-name">&lt;blank&gt;</h3>' +
+      '          <p class="friend-card-blurb">&lt;blank&gt;</p>' +
+      "        </article>" +
+      '        <article class="friend-card" role="listitem" tabindex="0" style="--rest-x:0px; --rest-y:0px; --rest-rot:0deg; --fan-x:380px; --fan-y:-430px; --fan-rot:0deg; --z:3; --stagger:0;">' +
+      '          <div class="friend-card-avatar" aria-hidden="true">&lt;blank&gt;</div>' +
+      '          <p class="friend-card-eyebrow font-dot">blank</p>' +
+      '          <h3 class="friend-card-name">&lt;blank&gt;</h3>' +
+      '          <p class="friend-card-blurb">&lt;blank&gt;</p>' +
+      "        </article>" +
+      '        <article class="friend-card" role="listitem" tabindex="0" style="--rest-x:0px; --rest-y:-3px; --rest-rot:1deg; --fan-x:560px; --fan-y:-410px; --fan-rot:5deg; --z:2; --stagger:2;">' +
+      '          <div class="friend-card-avatar" aria-hidden="true">&lt;blank&gt;</div>' +
+      '          <p class="friend-card-eyebrow font-dot">blank</p>' +
+      '          <h3 class="friend-card-name">&lt;blank&gt;</h3>' +
+      '          <p class="friend-card-blurb">&lt;blank&gt;</p>' +
+      "        </article>" +
+      '        <article class="friend-card" role="listitem" tabindex="0" style="--rest-x:2px; --rest-y:-6px; --rest-rot:3deg; --fan-x:740px; --fan-y:-380px; --fan-rot:10deg; --z:1; --stagger:3;">' +
+      '          <div class="friend-card-avatar" aria-hidden="true">&lt;blank&gt;</div>' +
+      '          <p class="friend-card-eyebrow font-dot">blank</p>' +
+      '          <h3 class="friend-card-name">&lt;blank&gt;</h3>' +
+      '          <p class="friend-card-blurb">&lt;blank&gt;</p>' +
+      "        </article>" +
+      "      </div></div></div></div>";
+
+    root.addEventListener("click", function (e) {
+      if (e.target.closest("[data-credits-close]")) {
+        e.preventDefault();
+        closeCreditsOverlay();
+        return;
+      }
+      if (e.target.closest("[data-credits-backdrop]")) {
+        closeCreditsOverlay();
+        return;
+      }
+      if (!e.target.closest(".credits-deck")) {
+        closeCreditsOverlay();
+      }
+    });
+
+    document.body.appendChild(root);
+    geCreditsOverlayEl = root;
+    return root;
+  }
+
+  function setCreditsNavActive(active) {
+    document
+      .querySelectorAll('a[href="#credits-overlay"].nav-link, a[href="#credits-overlay"].mobile-nav-link')
+      .forEach(function (a) {
+        a.classList.toggle("active", !!active);
+      });
+  }
+
+  function ensureCreditsDeckInitialized() {
+    var mount = document.getElementById("credits-deck-stack");
+    if (!mount || mount.dataset.creditsDeckBound === "1") return;
+    initCreditsDeck();
+  }
+
+  function openCreditsOverlay() {
+    if (geCreditsCloseTimer) {
+      clearTimeout(geCreditsCloseTimer);
+      geCreditsCloseTimer = 0;
+    }
+    var root = ensureCreditsOverlay();
+    if (geCreditsOverlayIsOpen) return;
+    geCreditsOverlayIsOpen = true;
+    root.removeAttribute("hidden");
+    root.setAttribute("aria-hidden", "false");
+    document.body.classList.add("ge-credits-overlay-open");
+    setCreditsNavActive(true);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        root.classList.add("is-open");
+        ensureCreditsDeckInitialized();
+        var firstCard = root.querySelector(".friend-card");
+        if (firstCard) firstCard.focus({ preventScroll: true });
+      });
+    });
+  }
+
+  function closeCreditsOverlay() {
+    var root = geCreditsOverlayEl;
+    if (!root || !geCreditsOverlayIsOpen) return;
+    geCreditsOverlayIsOpen = false;
+    root.classList.remove("is-open");
+    document.body.classList.remove("ge-credits-overlay-open");
+    setCreditsNavActive(false);
+    resetCreditsDeckTilt(root.querySelector("#credits-deck-stack"));
+    if (geCreditsCloseTimer) clearTimeout(geCreditsCloseTimer);
+    geCreditsCloseTimer = window.setTimeout(function () {
+      geCreditsCloseTimer = 0;
+      if (geCreditsOverlayIsOpen) return;
+      root.setAttribute("hidden", "");
+      root.setAttribute("aria-hidden", "true");
+    }, prefersCreditsOverlayReducedMotion() ? 0 : 340);
+  }
+
+  function toggleCreditsOverlay() {
+    if (geCreditsOverlayIsOpen) closeCreditsOverlay();
+    else openCreditsOverlay();
+  }
+
+  document.addEventListener(
+    "click",
+    function (e) {
+      var a = e.target.closest('a[href="#credits-overlay"]');
+      if (!a) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var mobileNav = document.querySelector(".mobile-nav");
+      var menuBtn = document.querySelector(".mobile-menu-btn");
+      if (mobileNav) mobileNav.classList.remove("is-open");
+      document.body.classList.remove("mobile-menu-open");
+      if (menuBtn) {
+        menuBtn.setAttribute("aria-expanded", "false");
+        menuBtn.setAttribute("aria-label", "Open menu");
+      }
+      toggleCreditsOverlay();
+    },
+    true
+  );
+
+  document.addEventListener(
+    "keydown",
+    function (e) {
+      if (e.key !== "Escape" || !geCreditsOverlayIsOpen) return;
+      e.preventDefault();
+      e.stopPropagation();
+      closeCreditsOverlay();
+    },
+    true
+  );
+
+  document.addEventListener("ge-open-credits", function () {
+    openCreditsOverlay();
+  });
+
+  /** Friend card fan + motif + tilt on `#credits-deck-stack` (in global overlay). */
+  function initCreditsDeck() {
+    var mount = document.getElementById("credits-deck-stack");
+    if (!mount || mount.dataset.creditsDeckBound === "1") return;
+    mount.dataset.creditsDeckBound = "1";
+
     var ICON_GLYPHS = {
       star: '<polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/>',
       zap: '<polygon points="13,2 3,14 12,14 11,22 21,10 12,10" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/>',
@@ -100,7 +269,7 @@
         return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
       };
     }
-    Array.prototype.forEach.call(fab.querySelectorAll(".friend-card"), function (card) {
+    Array.prototype.forEach.call(mount.querySelectorAll(".friend-card"), function (card) {
       if (card.querySelector(".friend-card-motif")) return;
       var nameEl = card.querySelector(".friend-card-name");
       var seedSrc = (nameEl ? nameEl.textContent : card.textContent || "friend").trim().toLowerCase();
@@ -110,7 +279,6 @@
       var motif = document.createElement("div");
       motif.className = "friend-card-motif";
       motif.setAttribute("aria-hidden", "true");
-      var svgNS = "http://www.w3.org/2000/svg";
       var html = "";
       for (var i = 0; i < count; i++) {
         var key = keys[Math.floor(rand() * keys.length)];
@@ -121,16 +289,15 @@
         var op = (0.6 + rand() * 0.4).toFixed(2);
         html +=
           '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="' + size + '" height="' + size +
-          '" style="position:absolute;left:' + x + '%;top:' + y +
-          '%;transform:translate(-50%,-50%) rotate(' + rot +
-          'deg);opacity:' + op + ';">' + ICON_GLYPHS[key] + "</svg>";
+          '" style="position:absolute;left:' + x + "%;top:" + y +
+          "%;transform:translate(-50%,-50%) rotate(" + rot +
+          "deg);opacity:" + op + ';">' + ICON_GLYPHS[key] + "</svg>";
       }
       motif.innerHTML = html;
       card.insertBefore(motif, card.firstChild);
     });
 
-    /* 3D parallax tilt on whichever card is currently being hovered. */
-    Array.prototype.forEach.call(fab.querySelectorAll(".friend-card"), function (card) {
+    Array.prototype.forEach.call(mount.querySelectorAll(".friend-card"), function (card) {
       var raf = 0;
       var lastEv = null;
       function frame() {
@@ -139,8 +306,8 @@
         var r = card.getBoundingClientRect();
         var px = (lastEv.clientX - r.left) / r.width - 0.5;
         var py = (lastEv.clientY - r.top) / r.height - 0.5;
-        card.style.setProperty("--tilt-ry", (px * 3).toFixed(2) + "deg");
-        card.style.setProperty("--tilt-rx", (-py * 3).toFixed(2) + "deg");
+        card.style.setProperty("--tilt-ry", (px * CARD_TILT_DEG_PER_HALF).toFixed(2) + "deg");
+        card.style.setProperty("--tilt-rx", (-py * CARD_TILT_DEG_PER_HALF).toFixed(2) + "deg");
         card.style.setProperty("--mx", (lastEv.clientX - r.left).toFixed(0) + "px");
         card.style.setProperty("--my", (lastEv.clientY - r.top).toFixed(0) + "px");
       }
@@ -171,39 +338,12 @@
       );
     });
 
-    trig.addEventListener(
-      "click",
-      function (e) {
-        e.preventDefault();
-        setOpen(!fab.classList.contains("is-open"));
-      },
-      true
-    );
-
-    fab.addEventListener(
-      "click",
-      function (e) {
-        if (e.target.closest(".friend-card") || e.target.closest(".friends-fab-trigger")) return;
-        setOpen(false);
-      },
-      false
-    );
-
-    document.addEventListener(
-      "click",
-      function (e) {
-        if (!fab.contains(e.target)) setOpen(false);
-      },
-      false
-    );
-
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") setOpen(false);
-    });
-
-    window.addEventListener("themechange", function () {
-      setOpen(false);
-    });
+    if (!window.__geCreditsDeckThemeListener) {
+      window.__geCreditsDeckThemeListener = 1;
+      window.addEventListener("themechange", function () {
+        resetCreditsDeckTilt(document.getElementById("credits-deck-stack"));
+      });
+    }
   }
 
   document.addEventListener("click", function (e) {
@@ -223,9 +363,8 @@
   });
 
   function openCommandPalette() {
-    var trigger = document.querySelector(".search-trigger");
-    if (trigger) {
-      trigger.click();
+    if (window.GECommandPalette && typeof window.GECommandPalette.open === "function") {
+      window.GECommandPalette.open();
       return;
     }
     var isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform || "");
@@ -275,8 +414,9 @@
   });
 
   document.addEventListener("DOMContentLoaded", function () {
+    ensureCreditsOverlay();
     initTheme();
-    initFriendsFab();
+    initCreditsDeck();
 
     // Scroll reveal: fade in elements as they enter viewport
     var reveals = document.querySelectorAll(".scroll-reveal");
@@ -312,6 +452,6 @@
   });
 
   window.addEventListener("pagechange", function () {
-    initFriendsFab();
+    initCreditsDeck();
   });
 })();

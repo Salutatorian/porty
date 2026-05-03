@@ -3,6 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.ico?v=2" sizes="any">
+    <link rel="apple-touch-icon" href="/ge-icon-180x180.png?v=2">
+    <link rel="manifest" href="/site.webmanifest?v=2">
+
     <title>Tools · The Greater Engine</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,7 +18,7 @@
   </head>
   <body>
     <a href="/" class="site-logo" aria-label="Greater Engine — home"><span class="site-logo-mark" aria-hidden="true"></span></a>
-    <div class="site-shell">
+    <div class="site-shell site-shell--tools">
       <aside class="sidebar">
         <a href="/admin" class="sidebar-admin" title="Admin" aria-label="Admin"><svg class="sidebar-admin-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66z"/></svg></a>
         <a href="/" class="brand" aria-label="Greater Engine — home"><img class="brand-logo brand-logo--light" src="/images/greater-engine-logo-light.png" alt="Greater Engine" /><img class="brand-logo brand-logo--dark" src="/images/greater-engine-logo-dark.png" alt="" aria-hidden="true" /></a>
@@ -22,8 +26,10 @@
         <nav class="nav">
           <a href="/" class="nav-link">home</a>
           <a href="/media" class="nav-link">media</a>
+          <a href="/#work" class="nav-link">projects</a>
           <a href="/tools" class="nav-link active">tools</a>
           <a href="/training" class="nav-link">training</a>
+          <a href="#credits-overlay" class="nav-link">credits</a>
           <a href="#search" class="nav-link nav-link--dock-action" data-dock-action="search" aria-label="Search"></a>
           <a href="#theme" class="nav-link nav-link--dock-action" data-dock-action="theme" aria-label="Toggle theme"></a>
           <a href="/admin" class="nav-link">admin</a>
@@ -85,6 +91,7 @@
             <a href="/writing" class="mobile-nav-link">writing</a>
             <a href="/tools" class="mobile-nav-link active">tools</a>
             <a href="/training" class="mobile-nav-link">training</a>
+            <a href="#credits-overlay" class="mobile-nav-link">credits</a>
             <a href="/admin" class="mobile-nav-link">admin</a>
           </div>
           <div class="mobile-nav-socials">
@@ -96,13 +103,17 @@
           </div>
         </nav>
 
-        <div class="page page-tools">
-          <h1 class="page-title">tools</h1>
+        <div class="page page-tools ge-site">
+          <header class="ge-page-header">
+            <p class="ge-page-eyebrow font-dot">utilities</p>
+            <h1 class="ge-page-title">tools</h1>
+            <p class="ge-page-subtitle">Browser-side helpers — same craft as the rest of the site.</p>
+          </header>
 
           <div class="about-blocks">
-            <section class="about-block tools-panel scroll-reveal" id="photo-converter">
+            <section class="about-block tools-panel scroll-reveal ge-page-card" id="photo-converter">
               <div id="tool-photo-raw">
-              <h2>photo converter</h2>
+              <h2 class="ge-section-label">photo converter</h2>
               <p class="tools-lede">
                 Turn camera RAW files (ARW, CR2, NEF, DNG, and more) into JPEG or PNG. Everything runs in your browser—nothing is uploaded to this site.
               </p>
@@ -143,8 +154,8 @@
               </div>
               </div>
 
-              <div class="tools-privacy" id="photo-converter-privacy">
-                <h3>Privacy &amp; limits</h3>
+              <div class="tools-privacy ge-page-card" id="photo-converter-privacy">
+                <h3 class="ge-section-label">privacy &amp; limits</h3>
                 <p>
                   Your files stay on your device. This page only loads static scripts and the decoder from this site’s own hosting—there is no upload step and no server-side conversion or storage.
                 </p>

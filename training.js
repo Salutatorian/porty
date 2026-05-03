@@ -1,28 +1,116 @@
 /**
- * Training analytics dashboard — loads real data from /api/training (Strava) or uses placeholder.
+ * Training profile — premium dashboard powered by /api/training (Strava).
+ * Falls back to placeholder data if the API is unreachable so the layout still demos.
  */
 (function () {
-  // Muted palette for charts (works in light/dark)
-  var COLORS = {
-    cycling: "rgba(70, 130, 180, 0.85)",
-    running: "rgba(100, 149, 100, 0.85)",
-    swimming: "rgba(160, 120, 140, 0.85)",
-    cyclingMuted: "rgba(70, 130, 180, 0.6)",
-    runningMuted: "rgba(100, 149, 100, 0.6)",
-    swimmingMuted: "rgba(160, 120, 140, 0.6)",
+  // Consistent sport palette (matches sport card accents).
+  // cycling: blue · running: green · swimming: purple
+  var SPORT = {
+    cycling: {
+      solid: "#4a90e2",
+      fill: "rgba(74, 144, 226, 0.28)",
+      edge: "rgba(74, 144, 226, 0.9)",
+    },
+    running: {
+      solid: "#5bbf6c",
+      fill: "rgba(91, 191, 108, 0.28)",
+      edge: "rgba(91, 191, 108, 0.9)",
+    },
+    swimming: {
+      solid: "#9b7dd8",
+      fill: "rgba(155, 125, 216, 0.28)",
+      edge: "rgba(155, 125, 216, 0.9)",
+    },
   };
 
-  // Data (set from API or placeholder)
-  var PLACEHOLDER_WEEKS = [];
-  var weekLabels = [];
-  var totals = { cyclingHours: 0, runningHours: 0, swimmingHours: 0, totalHours: 0 };
-  var CONSISTENCY_DAYS = 365;
-  var consistencyCols = 53;
-  var consistencyData = [];
-  var trainingDays = 0;
-  var longestStreak = 0;
-  var currentStreak = 0;
+  var state = {
+    weeks: [],
+    weekLabels: [],
+    totals: null,
+    consistencyData: [],
+    consistencyCols: 53,
+    consistencyDays: 365,
+    trainingDays: 0,
+    restDays: 0,
+    longestStreak: 0,
+    currentStreak: 0,
+    highlights: null,
+  };
   var chartInstances = [];
+
+  // ---------------- helpers ----------------
+
+  function formatHours(h) {
+    if (!h || h < 0) h = 0;
+    var hours = Math.floor(h);
+    var mins = Math.round((h - hours) * 60);
+    if (hours === 0) return mins + "m";
+    return hours + "h " + (mins > 0 ? mins + "m" : "");
+  }
+
+  function formatInt(n) {
+    return Math.round(n || 0).toLocaleString("en-US");
+  }
+
+  function formatMiles(n) {
+    return formatInt(n) + " mi";
+  }
+
+  function formatDays(n) {
+    var v = Math.round(n || 0);
+    return v + (v === 1 ? " day" : " days");
+  }
+
+  function formatYards(miles) {
+    // Swim distances shown as yards (swim pool convention)
+    var yards = (miles || 0) * 1760;
+    return formatInt(yards) + " yd";
+  }
+
+  function formatDate(iso) {
+    if (!iso) return "—";
+    var d = new Date(iso);
+    if (isNaN(d)) return "—";
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  }
+
+  function prefersReducedMotion() {
+    try {
+      return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Animated count-up; respects reduced-motion.
+  function animateValue(el, to, formatter, duration) {
+    if (!el) return;
+    var from = 0;
+    var d = duration == null ? 900 : duration;
+    if (prefersReducedMotion() || d <= 0) {
+      el.textContent = formatter(to);
+      return;
+    }
+    var start = performance.now();
+    function tick(now) {
+      var p = Math.min(1, (now - start) / d);
+      // easeOutCubic
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = formatter(from + (to - from) * eased);
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function formatterFor(name) {
+    if (name === "hoursMin") return formatHours;
+    if (name === "miles") return formatMiles;
+    if (name === "int") return formatInt;
+    if (name === "days") return formatDays;
+    return formatInt;
+  }
+
+  // ---------------- placeholder ----------------
 
   function buildPlaceholderData() {
     var weeks = [];
@@ -42,19 +130,32 @@
         cyclingMiles: 60 + Math.random() * 80,
         runningMiles: 15 + Math.random() * 25,
         swimmingMiles: 1 + Math.random() * 3,
-        sessions: Math.floor(4 + Math.random() * 6),
         cyclingSessions: Math.floor(2 + Math.random() * 3),
         runningSessions: Math.floor(1 + Math.random() * 2),
         swimmingSessions: Math.floor(0 + Math.random() * 2),
       });
     }
-    var t = { cyclingHours: 0, runningHours: 0, swimmingHours: 0, totalHours: 0 };
+    var totals = {
+      cyclingHours: 0, runningHours: 0, swimmingHours: 0, totalHours: 0,
+      cyclingMiles: 0, runningMiles: 0, swimmingMiles: 0, totalMiles: 0,
+      cyclingSessions: 0, runningSessions: 0, swimmingSessions: 0, totalSessions: 0,
+      weeksCount: weeks.length,
+    };
     weeks.forEach(function (row) {
-      t.cyclingHours += row.cyclingHours;
-      t.runningHours += row.runningHours;
-      t.swimmingHours += row.swimmingHours;
+      totals.cyclingHours += row.cyclingHours;
+      totals.runningHours += row.runningHours;
+      totals.swimmingHours += row.swimmingHours;
+      totals.cyclingMiles += row.cyclingMiles;
+      totals.runningMiles += row.runningMiles;
+      totals.swimmingMiles += row.swimmingMiles;
+      totals.cyclingSessions += row.cyclingSessions;
+      totals.runningSessions += row.runningSessions;
+      totals.swimmingSessions += row.swimmingSessions;
     });
-    t.totalHours = t.cyclingHours + t.runningHours + t.swimmingHours;
+    totals.totalHours = totals.cyclingHours + totals.runningHours + totals.swimmingHours;
+    totals.totalMiles = totals.cyclingMiles + totals.runningMiles + totals.swimmingMiles;
+    totals.totalSessions = totals.cyclingSessions + totals.runningSessions + totals.swimmingSessions;
+
     var cons = [];
     for (var i = 0; i < 365; i++) {
       var r = Math.random();
@@ -64,114 +165,170 @@
       else if (r < 0.95) cons.push(3);
       else cons.push(4);
     }
+    var trainingDays = cons.filter(function (v) { return v > 0; }).length;
     return {
       weeks: weeks,
       weekLabels: labels,
-      totals: t,
+      totals: totals,
       consistencyData: cons,
       consistencyCols: 53,
-      trainingDays: cons.filter(function (v) { return v > 0; }).length,
+      consistencyDays: 365,
+      trainingDays: trainingDays,
+      restDays: 365 - trainingDays,
       longestStreak: 12,
       currentStreak: 3,
+      highlights: {
+        longestRide: { distanceMi: 58.2, hours: 3.4, date: "2026-04-12", name: "Long Sunday ride" },
+        longestRun: { distanceMi: 16.1, hours: 2.2, date: "2026-03-22", name: "Half-marathon build" },
+        longestSwim: { distanceMi: 1.5, hours: 0.9, date: "2026-02-18", name: "Pool set" },
+        biggestWeek: { hours: 14.8, weekLabel: labels[labels.length - 2] },
+        lastActivity: { date: new Date().toISOString(), sport: "cycling", distanceMi: 24.4, hours: 1.3, name: "Easy ride" },
+      },
     };
   }
 
   function setData(data) {
-    PLACEHOLDER_WEEKS = data.weeks || [];
-    weekLabels = data.weekLabels || [];
-    totals = data.totals || { cyclingHours: 0, runningHours: 0, swimmingHours: 0, totalHours: 0 };
-    consistencyData = data.consistencyData || [];
-    CONSISTENCY_DAYS = consistencyData.length;
-    consistencyCols = data.consistencyCols != null ? data.consistencyCols : Math.ceil(CONSISTENCY_DAYS / 7);
-    trainingDays = data.trainingDays != null ? data.trainingDays : 0;
-    longestStreak = data.longestStreak != null ? data.longestStreak : 0;
-    currentStreak = data.currentStreak != null ? data.currentStreak : 0;
+    state.weeks = data.weeks || [];
+    state.weekLabels = data.weekLabels || [];
+    state.totals = data.totals || { cyclingHours: 0, runningHours: 0, swimmingHours: 0, totalHours: 0, totalMiles: 0, weeksCount: 0 };
+    state.consistencyData = data.consistencyData || [];
+    state.consistencyDays = data.consistencyDays || state.consistencyData.length;
+    state.consistencyCols = data.consistencyCols != null ? data.consistencyCols : Math.ceil(state.consistencyDays / 7);
+    state.trainingDays = data.trainingDays || 0;
+    state.restDays = data.restDays != null ? data.restDays : Math.max(0, state.consistencyDays - state.trainingDays);
+    state.longestStreak = data.longestStreak || 0;
+    state.currentStreak = data.currentStreak || 0;
+    state.highlights = data.highlights || null;
   }
 
-  function formatHours(h) {
-    var hours = Math.floor(h);
-    var mins = Math.round((h - hours) * 60);
-    if (hours === 0) return mins + "m";
-    return hours + "h " + (mins > 0 ? mins + "m" : "");
+  // ---------------- renderers ----------------
+
+  function renderHero() {
+    var totals = state.totals || {};
+    var map = {
+      totalHours: totals.totalHours || 0,
+      totalMiles: totals.totalMiles || 0,
+      trainingDays: state.trainingDays,
+      currentStreak: state.currentStreak,
+    };
+    var els = document.querySelectorAll("#training-hero-stats .training-hero-stat");
+    els.forEach(function (el) {
+      var stat = el.getAttribute("data-stat");
+      var valueEl = el.querySelector(".training-hero-stat-value");
+      if (!valueEl || !(stat in map)) return;
+      var fmtName = valueEl.getAttribute("data-format") || "int";
+      animateValue(valueEl, map[stat], formatterFor(fmtName));
+    });
   }
 
-  function renderTimeSpentStats() {
-    var el = document.getElementById("time-spent-stats");
-    if (!el) return;
-    var rows = [
-      { label: "Cycling", value: formatHours(totals.cyclingHours) },
-      { label: "Running", value: formatHours(totals.runningHours) },
-      { label: "Swimming", value: formatHours(totals.swimmingHours) },
-      { label: "Total", value: formatHours(totals.totalHours) },
-    ];
-    el.innerHTML = rows
-      .map(
-        function (r) {
-          return (
-            '<div class="stat-row">' +
-            '<span class="stat-label">' + r.label + "</span>" +
-            '<span class="stat-value">' + r.value + "</span>" +
-            "</div>"
-          );
-        }
-      )
-      .join("");
+  function renderSportCards() {
+    var totals = state.totals || {};
+    var weeks = Math.max(1, totals.weeksCount || state.weeks.length || 1);
+    var sports = ["cycling", "running", "swimming"];
+    sports.forEach(function (sport) {
+      var card = document.querySelector('.sport-card[data-sport="' + sport + '"]');
+      if (!card) return;
+      var hours = totals[sport + "Hours"] || 0;
+      var miles = totals[sport + "Miles"] || 0;
+      var sessions = totals[sport + "Sessions"] || 0;
+      var avg = hours / weeks;
+      var primary = card.querySelector('[data-sport-field="hours"]');
+      if (primary) primary.textContent = formatHours(hours);
+      var milesEl = card.querySelector('[data-sport-field="miles"]');
+      if (milesEl) milesEl.textContent = formatMiles(miles);
+      var yardsEl = card.querySelector('[data-sport-field="yards"]');
+      if (yardsEl) yardsEl.textContent = formatYards(miles);
+      var sessEl = card.querySelector('[data-sport-field="sessions"]');
+      if (sessEl) sessEl.textContent = formatInt(sessions);
+      var avgEl = card.querySelector('[data-sport-field="avg"]');
+      if (avgEl) avgEl.textContent = formatHours(avg);
+    });
   }
 
-  function renderConsistencyGrid() {
+  function renderConsistency() {
     var grid = document.getElementById("consistency-grid");
-    var summary = document.getElementById("consistency-summary");
-    if (!grid) return;
-    var cols = consistencyCols;
-    var rows = 7;
-    grid.innerHTML = "";
-    for (var c = 0; c < cols; c++) {
-      for (var r = 0; r < rows; r++) {
-        var dayIndex = c * 7 + r;
-        var level = dayIndex < CONSISTENCY_DAYS ? consistencyData[dayIndex] : 0;
-        var cell = document.createElement("div");
-        cell.className = "consistency-cell consistency-cell--level-" + level;
-        cell.setAttribute("title", "Week " + (c + 1) + " · level " + level);
-        grid.appendChild(cell);
+    if (grid) {
+      var cols = state.consistencyCols;
+      grid.innerHTML = "";
+      for (var c = 0; c < cols; c++) {
+        for (var r = 0; r < 7; r++) {
+          var dayIndex = c * 7 + r;
+          var level = dayIndex < state.consistencyDays ? state.consistencyData[dayIndex] : 0;
+          var cell = document.createElement("div");
+          cell.className = "consistency-cell consistency-cell--level-" + (level || 0);
+          cell.setAttribute("title", "Week " + (c + 1) + " · level " + level);
+          grid.appendChild(cell);
+        }
       }
     }
-    if (summary) {
-      summary.textContent =
-        trainingDays + " training days · longest streak " + longestStreak + " · current " + currentStreak;
-    }
+    var cur = document.getElementById("cons-current");
+    if (cur) cur.textContent = formatDays(state.currentStreak);
+    var lng = document.getElementById("cons-longest");
+    if (lng) lng.textContent = formatDays(state.longestStreak);
+    var tr = document.getElementById("cons-training");
+    if (tr) tr.textContent = formatInt(state.trainingDays);
+    var rs = document.getElementById("cons-rest");
+    if (rs) rs.textContent = formatInt(state.restDays);
   }
 
-  function getChartOptions(hasLegend) {
-    var isDark = document.documentElement.getAttribute("data-theme") === "dark";
-    var gridColor = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)";
-    var textColor = isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.5)";
-    var isMobile = window.innerWidth < 641;
-    var fontSize = isMobile ? 7 : 10;
-    var legendSize = isMobile ? 8 : 11;
-    var legendPadding = isMobile ? 4 : 12;
-    return {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: hasLegend
-          ? {
-              display: true,
-              position: "bottom",
-              labels: { color: textColor, font: { size: legendSize }, padding: legendPadding },
-            }
-          : { display: false },
-      },
-      scales: {
-        x: {
-          grid: { color: gridColor },
-          ticks: { color: textColor, maxTicksLimit: isMobile ? 5 : 10, font: { size: fontSize } },
-        },
-        y: {
-          grid: { color: gridColor },
-          ticks: { color: textColor, maxTicksLimit: isMobile ? 4 : void 0, font: { size: fontSize } },
-        },
-      },
-    };
+  function renderHighlights() {
+    var container = document.getElementById("highlights-grid");
+    if (!container) return;
+    var h = state.highlights || {};
+    var cards = [];
+
+    if (h.biggestWeek) {
+      cards.push({
+        eyebrow: "biggest week",
+        primary: formatHours(h.biggestWeek.hours),
+        meta: h.biggestWeek.weekLabel || "",
+        accent: "mixed",
+      });
+    }
+    if (h.longestRide) {
+      cards.push({
+        eyebrow: "longest ride",
+        primary: (h.longestRide.distanceMi).toFixed(1) + " mi",
+        meta: formatDate(h.longestRide.date) + (h.longestRide.name ? " · " + h.longestRide.name : ""),
+        accent: "cycling",
+      });
+    }
+    if (h.longestRun) {
+      cards.push({
+        eyebrow: "longest run",
+        primary: (h.longestRun.distanceMi).toFixed(1) + " mi",
+        meta: formatDate(h.longestRun.date) + (h.longestRun.name ? " · " + h.longestRun.name : ""),
+        accent: "running",
+      });
+    }
+    if (h.longestSwim) {
+      cards.push({
+        eyebrow: "longest swim",
+        primary: formatInt(h.longestSwim.distanceMi * 1760) + " yd",
+        meta: formatDate(h.longestSwim.date) + (h.longestSwim.name ? " · " + h.longestSwim.name : ""),
+        accent: "swimming",
+      });
+    }
+    if (h.lastActivity) {
+      cards.push({
+        eyebrow: "last activity",
+        primary: (h.lastActivity.distanceMi).toFixed(1) + " mi",
+        meta: formatDate(h.lastActivity.date) + " · " + h.lastActivity.sport,
+        accent: h.lastActivity.sport || "mixed",
+      });
+    }
+
+    container.innerHTML = cards
+      .map(function (c) {
+        return (
+          '<article class="highlight-card highlight-card--' + c.accent + '">' +
+          '<p class="highlight-card-eyebrow font-dot">' + c.eyebrow + "</p>" +
+          '<p class="highlight-card-primary">' + c.primary + "</p>" +
+          '<p class="highlight-card-meta">' + (c.meta || "") + "</p>" +
+          "</article>"
+        );
+      })
+      .join("");
   }
 
   function destroyCharts() {
@@ -179,179 +336,115 @@
     chartInstances = [];
   }
 
-  function initCharts() {
-    var isDark = document.documentElement.getAttribute("data-theme") === "dark";
-    var textColor = isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.5)";
+  function renderMainChart() {
+    var canvas = document.getElementById("chart-training-trends");
+    if (!canvas || typeof Chart === "undefined") return;
 
-    var numWeeks = PLACEHOLDER_WEEKS.length || 1;
-    var avgHours =
-      Math.round((totals.totalHours / numWeeks) * 10) / 10;
-    var avgH = Math.floor(avgHours);
-    var avgM = Math.round((avgHours - avgH) * 60);
-    var summaryEl = document.getElementById("training-trends-summary");
-    if (summaryEl)
-      summaryEl.textContent =
-        "avg: " + avgH + "h " + (avgM > 0 ? avgM + "m" : "") + " / week · total: " + Math.round(totals.totalHours) + "h";
-    var breakdownEl = document.getElementById("sport-breakdown-summary");
-    if (breakdownEl) breakdownEl.textContent = "Total: " + Math.round(totals.totalHours) + "h";
-    var distEl = document.getElementById("distance-trends-summary");
-    if (distEl) {
-      var totalMiles = PLACEHOLDER_WEEKS.reduce(function (sum, w) {
-        return sum + w.cyclingMiles + w.runningMiles + w.swimmingMiles;
-      }, 0);
-      var avgMiles = Math.round(totalMiles / numWeeks);
-      distEl.textContent = "avg: " + avgMiles + " mi / week";
+    var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    var gridColor = isDark ? "rgba(180, 200, 230, 0.06)" : "rgba(20, 40, 80, 0.06)";
+    var textColor = isDark ? "rgba(220, 230, 245, 0.55)" : "rgba(30, 40, 60, 0.55)";
+    var isMobile = window.innerWidth < 641;
+
+    var avgH = state.totals.totalHours / Math.max(1, state.totals.weeksCount || state.weeks.length || 1);
+    var summary = document.getElementById("training-trends-summary");
+    if (summary) {
+      summary.textContent =
+        "avg " + formatHours(avgH) + " / week · " + formatHours(state.totals.totalHours || 0) + " total";
     }
 
-    var ctxTrends = document.getElementById("chart-training-trends");
-    if (ctxTrends && typeof Chart !== "undefined") {
-      chartInstances.push(new Chart(ctxTrends, {
+    function dataset(label, key, color) {
+      return {
+        label: label,
+        data: state.weeks.map(function (w) { return w[key]; }),
+        backgroundColor: color.fill,
+        borderColor: color.edge,
+        borderWidth: 1.5,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        fill: true,
+        tension: 0.35,
+        stack: "load",
+      };
+    }
+
+    chartInstances.push(
+      new Chart(canvas, {
         type: "line",
         data: {
-          labels: weekLabels,
+          labels: state.weekLabels,
           datasets: [
-            {
-              label: "Cycling",
-              data: PLACEHOLDER_WEEKS.map(function (w) { return w.cyclingHours; }),
-              backgroundColor: COLORS.cycling,
-              borderColor: COLORS.cycling,
-              fill: true,
-              tension: 0.3,
-              stack: "stack0",
-            },
-            {
-              label: "Running",
-              data: PLACEHOLDER_WEEKS.map(function (w) { return w.runningHours; }),
-              backgroundColor: COLORS.running,
-              borderColor: COLORS.running,
-              fill: true,
-              tension: 0.3,
-              stack: "stack0",
-            },
-            {
-              label: "Swimming",
-              data: PLACEHOLDER_WEEKS.map(function (w) { return w.swimmingHours; }),
-              backgroundColor: COLORS.swimming,
-              borderColor: COLORS.swimming,
-              fill: true,
-              tension: 0.3,
-              stack: "stack0",
-            },
-          ],
-        },
-        options: Object.assign({}, getChartOptions(true), {
-          scales: {
-            x: Object.assign({}, getChartOptions().scales.x, { stacked: true }),
-            y: Object.assign({}, getChartOptions().scales.y, { stacked: true }),
-          },
-        }),
-      }));
-    }
-
-    var ctxDonut = document.getElementById("chart-sport-breakdown");
-    if (ctxDonut && typeof Chart !== "undefined") {
-      chartInstances.push(new Chart(ctxDonut, {
-        type: "doughnut",
-        data: {
-          labels: ["Cycling", "Running", "Swimming"],
-          datasets: [
-            {
-              data: [totals.cyclingHours, totals.runningHours, totals.swimmingHours],
-              backgroundColor: [COLORS.cycling, COLORS.running, COLORS.swimming],
-              borderWidth: 0,
-            },
+            dataset("Cycling", "cyclingHours", SPORT.cycling),
+            dataset("Running", "runningHours", SPORT.running),
+            dataset("Swimming", "swimmingHours", SPORT.swimming),
           ],
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          cutout: "60%",
+          interaction: { mode: "index", intersect: false },
           plugins: {
             legend: {
               display: true,
               position: "bottom",
               labels: {
                 color: textColor,
-                font: { size: window.innerWidth < 641 ? 8 : 11 },
-                padding: window.innerWidth < 641 ? 4 : 12,
+                font: { size: isMobile ? 10 : 11 },
+                padding: isMobile ? 8 : 14,
+                boxWidth: 10,
+                boxHeight: 10,
+                usePointStyle: true,
+                pointStyle: "circle",
+              },
+            },
+            tooltip: {
+              backgroundColor: isDark ? "rgba(10, 16, 28, 0.95)" : "rgba(255,255,255,0.96)",
+              titleColor: isDark ? "#eef2f7" : "#111",
+              bodyColor: isDark ? "#c9d4e2" : "#333",
+              borderColor: isDark ? "rgba(160,190,220,0.18)" : "rgba(0,0,0,0.08)",
+              borderWidth: 1,
+              padding: 10,
+              callbacks: {
+                label: function (ctx) {
+                  return ctx.dataset.label + ": " + formatHours(ctx.parsed.y);
+                },
+              },
+            },
+          },
+          scales: {
+            x: {
+              stacked: true,
+              grid: { color: gridColor, drawBorder: false },
+              ticks: {
+                color: textColor,
+                maxTicksLimit: isMobile ? 6 : 12,
+                font: { size: isMobile ? 9 : 10 },
+              },
+            },
+            y: {
+              stacked: true,
+              beginAtZero: true,
+              grid: { color: gridColor, drawBorder: false },
+              ticks: {
+                color: textColor,
+                font: { size: isMobile ? 9 : 10 },
+                callback: function (v) { return v + "h"; },
               },
             },
           },
         },
-      }));
-    }
+      })
+    );
+  }
 
-    var ctxDistance = document.getElementById("chart-distance-trends");
-    if (ctxDistance && typeof Chart !== "undefined") {
-      chartInstances.push(new Chart(ctxDistance, {
-        type: "bar",
-        data: {
-          labels: weekLabels,
-          datasets: [
-            {
-              label: "Cycling mi",
-              data: PLACEHOLDER_WEEKS.map(function (w) { return Math.round(w.cyclingMiles); }),
-              backgroundColor: COLORS.cyclingMuted,
-              stack: "stack1",
-            },
-            {
-              label: "Running mi",
-              data: PLACEHOLDER_WEEKS.map(function (w) { return Math.round(w.runningMiles); }),
-              backgroundColor: COLORS.runningMuted,
-              stack: "stack1",
-            },
-            {
-              label: "Swim mi",
-              data: PLACEHOLDER_WEEKS.map(function (w) { return Math.round(w.swimmingMiles * 10) / 10; }),
-              backgroundColor: COLORS.swimmingMuted,
-              stack: "stack1",
-            },
-          ],
-        },
-        options: Object.assign({}, getChartOptions(true), {
-          scales: {
-            x: Object.assign({}, getChartOptions().scales.x, { stacked: true }),
-            y: Object.assign({}, getChartOptions().scales.y, { stacked: true }),
-          },
-        }),
-      }));
-    }
+  // ---------------- boot ----------------
 
-    var ctxSessions = document.getElementById("chart-session-count");
-    if (ctxSessions && typeof Chart !== "undefined") {
-      chartInstances.push(new Chart(ctxSessions, {
-        type: "bar",
-        data: {
-          labels: weekLabels,
-          datasets: [
-            {
-              label: "Cycling",
-              data: PLACEHOLDER_WEEKS.map(function (w) { return w.cyclingSessions; }),
-              backgroundColor: COLORS.cyclingMuted,
-              stack: "stack2",
-            },
-            {
-              label: "Running",
-              data: PLACEHOLDER_WEEKS.map(function (w) { return w.runningSessions; }),
-              backgroundColor: COLORS.runningMuted,
-              stack: "stack2",
-            },
-            {
-              label: "Swimming",
-              data: PLACEHOLDER_WEEKS.map(function (w) { return w.swimmingSessions; }),
-              backgroundColor: COLORS.swimmingMuted,
-              stack: "stack2",
-            },
-          ],
-        },
-        options: Object.assign({}, getChartOptions(true), {
-          scales: {
-            x: Object.assign({}, getChartOptions().scales.x, { stacked: true }),
-            y: Object.assign({}, getChartOptions().scales.y, { stacked: true }),
-          },
-        }),
-      }));
-    }
+  function renderAll() {
+    renderHero();
+    renderSportCards();
+    renderConsistency();
+    renderHighlights();
+    destroyCharts();
+    renderMainChart();
   }
 
   function getActiveRange() {
@@ -360,19 +453,16 @@
   }
 
   function fetchAndRender(range) {
-    var apiBase = window.location.origin;
-    var url = apiBase + "/api/training" + (range ? "?range=" + encodeURIComponent(range) : "");
+    var url = window.location.origin + "/api/training" + (range ? "?range=" + encodeURIComponent(range) : "");
     fetch(url)
       .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error(r.status)); })
       .then(function (data) {
-        destroyCharts();
         setData(data);
-        init();
+        renderAll();
       })
       .catch(function () {
         setData(buildPlaceholderData());
-        destroyCharts();
-        init();
+        renderAll();
       });
   }
 
@@ -382,22 +472,14 @@
       btn.addEventListener("click", function () {
         buttons.forEach(function (b) { b.classList.remove("active"); });
         btn.classList.add("active");
-        var range = btn.getAttribute("data-range");
-        if (range) fetchAndRender(range);
+        fetchAndRender(btn.getAttribute("data-range"));
       });
     });
   }
 
-  function init() {
-    renderTimeSpentStats();
-    renderConsistencyGrid();
-    initCharts();
-  }
-
   function boot() {
     wireFilters();
-    var range = getActiveRange();
-    fetchAndRender(range);
+    fetchAndRender(getActiveRange());
   }
 
   function bootWhenReady() {
@@ -408,13 +490,13 @@
     var s = document.createElement("script");
     s.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
     s.onload = boot;
-    s.onerror = function () { setData(buildPlaceholderData()); boot(); };
+    s.onerror = function () { setData(buildPlaceholderData()); renderAll(); };
     document.head.appendChild(s);
   }
 
   window.addEventListener("themechange", function () {
     destroyCharts();
-    initCharts();
+    renderMainChart();
   });
 
   if (document.readyState === "loading") {

@@ -15,6 +15,7 @@
     "/#work": "Projects",
     "/tools": "Tools",
     "/training": "Training",
+    "#credits-overlay": "Credits",
     "/admin": "Admin",
     "#search": "Search",
     "#theme": "Theme",
@@ -119,6 +120,7 @@
 
     insertSepAfterHref("/media");
     insertSepAfterHref("/training");
+    insertSepAfterHref("#credits-overlay");
 
     var mouseX = Infinity;
     var hoveredSlot = null;

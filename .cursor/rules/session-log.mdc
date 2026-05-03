@@ -1,24 +1,29 @@
 ---
-description: Always update SESSION_LOG.md when changing porty so git pushes include a current log.
+description: SESSION_LOG.md is the cross-machine handoff; update it whenever the user messages the agent in this repo.
 alwaysApply: true
 ---
 
 # Session log (SESSION_LOG.md)
 
-The maintainer relies on **`SESSION_LOG.md`** staying current when work is merged or pushed. They will forget to update it—the agent must not.
+The maintainer works on **Mac and Windows**; **Cursor chat history does not sync** between machines. They rely on **`SESSION_LOG.md`** (committed with the repo) as the **shared notebook** so the other machine always knows what happened, what was decided, and what to do next.
 
 ## When to update
 
-Whenever this repo gets **meaningful changes** (features, fixes, new routes, env/setup shifts, notable refactors), **append or edit `SESSION_LOG.md`** in the same change batch—preferably **before** committing or advising a push.
+**On every user message you respond to in this repo:** before you finish the turn, **append** to **`SESSION_LOG.md`** (new dated stub or add bullets under today’s heading).
+
+- **Code / config / content changed:** same batch as the diff; include files touched and operational notes.
+- **No repo changes (question-only, diagnosis, “run this”):** still append a **short handoff** (what was asked, answer/decision, any commands run, blockers). One tight paragraph is enough.
+
+Also keep the existing habit: any **meaningful** change batch should include an updated log **before** commit or push.
 
 ## What to include
 
-- **Date** (and short session title if helpful).
-- **Summary bullets** of what changed and why it matters.
+- **Date** (and short session title if helpful). Optional: **machine** if the user said (e.g. Windows 11).
+- **Summary bullets** of what changed or what was discussed.
 - **Files touched** (added / updated) when useful for handoff.
 - **Operational notes** (env vars, restart steps, deploy caveats) when relevant.
+- **Next steps** for the other machine when non-obvious.
 
 ## Out of scope
 
-- Do not log trivial one-line typo fixes unless the user asks.
 - Never commit **`.env.local`**—session log may mention env **names** only.
