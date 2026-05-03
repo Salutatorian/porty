@@ -164,6 +164,8 @@
           card.classList.remove("is-tilting");
           card.style.setProperty("--tilt-rx", "0deg");
           card.style.setProperty("--tilt-ry", "0deg");
+          card.style.setProperty("--mx", "-9999px");
+          card.style.setProperty("--my", "-9999px");
         },
         { passive: true }
       );
