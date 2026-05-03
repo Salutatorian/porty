@@ -454,33 +454,6 @@
       </div>
     </div>
 
-    <script>
-      (function(){
-        var fab = document.getElementById('friends-fab');
-        var trig = document.getElementById('friends-fab-trigger');
-        if (!fab || !trig) return;
-        function setOpen(o){
-          fab.classList.toggle('is-open', o);
-          trig.setAttribute('aria-expanded', o ? 'true' : 'false');
-        }
-        trig.addEventListener('click', function(e){
-          e.preventDefault();
-          e.stopPropagation();
-          setOpen(!fab.classList.contains('is-open'));
-        });
-        fab.addEventListener('click', function(e){
-          if (e.target.closest('.friend-card') || e.target.closest('.friends-fab-trigger')) return;
-          setOpen(false);
-        });
-        document.addEventListener('click', function(e){
-          if (!fab.contains(e.target)) setOpen(false);
-        });
-        document.addEventListener('keydown', function(e){
-          if (e.key === 'Escape') setOpen(false);
-        });
-      })();
-    </script>
-    <script src="script.js"></script>
     <script src="dock-nav.js"></script>
     <script src="app-router.js"></script>
     <script src="page-ripple.js"></script>

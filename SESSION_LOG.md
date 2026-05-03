@@ -349,3 +349,14 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
 ### Files Updated
 - `script.js`, `styles.css`, `command-palette.js`, `admin/index.html`, all 15 sidebar pages + `admin/home-projects.html` (inline boot script), `SESSION_LOG.md`
+
+---
+
+## 2026-05-03 — Friends FAB: reliable after theme toggle
+
+### Session Summary
+- **Bugfix:** Friends FAB click handler moved into **`script.js`** and registered in the **capture** phase so the dock theme control’s **`stopPropagation`** cannot block reopening after switching light ↔ dark without refresh.
+- **Behavior:** Closing the FAB on **`themechange`** so overlays never get stuck visually.
+
+### Files Updated
+- `script.js`, `index.html`, `SESSION_LOG.md`

@@ -44,6 +44,54 @@
     try { window.dispatchEvent(new CustomEvent("themechange", { detail: { theme: next } })); } catch (e) {}
   }
 
+  /* Friends FAB: use capture phase so theme-button handlers (stopPropagation) never block this. */
+  function initFriendsFab() {
+    var fab = document.getElementById("friends-fab");
+    var trig = document.getElementById("friends-fab-trigger");
+    if (!fab || !trig) return;
+    if (fab.dataset.friendsFabBound === "1") return;
+    fab.dataset.friendsFabBound = "1";
+
+    function setOpen(o) {
+      fab.classList.toggle("is-open", o);
+      trig.setAttribute("aria-expanded", o ? "true" : "false");
+    }
+
+    trig.addEventListener(
+      "click",
+      function (e) {
+        e.preventDefault();
+        setOpen(!fab.classList.contains("is-open"));
+      },
+      true
+    );
+
+    fab.addEventListener(
+      "click",
+      function (e) {
+        if (e.target.closest(".friend-card") || e.target.closest(".friends-fab-trigger")) return;
+        setOpen(false);
+      },
+      false
+    );
+
+    document.addEventListener(
+      "click",
+      function (e) {
+        if (!fab.contains(e.target)) setOpen(false);
+      },
+      false
+    );
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") setOpen(false);
+    });
+
+    window.addEventListener("themechange", function () {
+      setOpen(false);
+    });
+  }
+
   document.addEventListener("click", function (e) {
     var trigger = e.target.closest(".theme-toggle, .nav-link[data-dock-action=\"theme\"], .nav-link[href=\"#theme\"]");
     if (trigger) {
@@ -114,6 +162,7 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     initTheme();
+    initFriendsFab();
 
     // Scroll reveal: fade in elements as they enter viewport
     var reveals = document.querySelectorAll(".scroll-reveal");
@@ -146,5 +195,9 @@
         if (active) link.classList.add("active");
       });
     }
+  });
+
+  window.addEventListener("pagechange", function () {
+    initFriendsFab();
   });
 })();
