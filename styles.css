@@ -7193,3 +7193,124 @@ body.dark .heroContent h1 {
     height: 36px;
   }
 }
+
+/* =========================================================
+   Depth-stacked carousel (home projects)
+   ========================================================= */
+.stack-carousel {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  margin: 8px 0 4px;
+}
+
+.stack-viewport {
+  position: relative;
+  flex: 1;
+  min-height: 280px;
+  perspective: 1100px;
+}
+
+.stack-track {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  min-height: inherit;
+}
+
+.stack-card {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: min(100%, 520px);
+  transform-origin: center center;
+  transform: translate3d(
+      calc(-50% + var(--stack-tx, 0px)),
+      var(--stack-ty, 0px),
+      0
+    )
+    scale(var(--stack-scale, 1))
+    rotateX(var(--stack-rx, 0deg))
+    rotateY(var(--stack-ry, 0deg));
+  transform-style: preserve-3d;
+  transition:
+    transform 480ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 320ms ease,
+    box-shadow 320ms ease;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+.stack-card.is-active {
+  transition:
+    transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 320ms ease,
+    box-shadow 320ms ease;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+}
+
+html[data-theme="dark"] .stack-card.is-active,
+html.dark .stack-card.is-active {
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+.stack-card.is-leaving {
+  transition:
+    transform 300ms cubic-bezier(0.4, 0, 0.6, 1),
+    opacity 280ms ease;
+}
+
+.stack-arrow {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 22px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  user-select: none;
+  z-index: 5;
+}
+
+.stack-arrow:hover {
+  background: var(--bg-alt);
+  border-color: var(--text-muted);
+}
+
+.stack-arrow:active {
+  transform: scale(0.94);
+}
+
+.stack-arrow span {
+  display: inline-block;
+  margin-top: -2px;
+}
+
+@media (max-width: 640px) {
+  .stack-viewport {
+    min-height: 320px;
+  }
+  .stack-arrow {
+    width: 34px;
+    height: 34px;
+    font-size: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stack-card,
+  .stack-card.is-active,
+  .stack-card.is-leaving {
+    transition: opacity 200ms ease;
+  }
+}

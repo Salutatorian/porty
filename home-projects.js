@@ -22,12 +22,27 @@
     return x || "";
   }
 
+  function wrapStack(cardsHtml, kind) {
+    return (
+      '<div class="stack-carousel" data-stack="' + kind + '">' +
+        '<button type="button" class="stack-arrow stack-prev" aria-label="Previous project">' +
+          '<span aria-hidden="true">&#8249;</span>' +
+        '</button>' +
+        '<div class="stack-viewport">' +
+          '<ul class="stack-track" role="list">' + cardsHtml + '</ul>' +
+        '</div>' +
+        '<button type="button" class="stack-arrow stack-next" aria-label="Next project">' +
+          '<span aria-hidden="true">&#8250;</span>' +
+        '</button>' +
+      '</div>'
+    );
+  }
+
   function renderCurrentCards(items) {
     if (!items.length) {
       return '<p class="home-projects-empty">No active projects listed yet.</p>';
     }
-    return (
-      '<ul class="home-projects-grid" role="list">' +
+    return wrapStack(
       items
         .map(function (p) {
           var links = (p.links || [])
@@ -48,7 +63,7 @@
             })
             .join("");
           return (
-            '<li class="home-project-card">' +
+            '<li class="home-project-card stack-card">' +
             '<div class="home-project-card-head">' +
             "<h3 class=\"home-project-title\">" +
             escapeHtml(p.title) +
@@ -65,8 +80,8 @@
             "</li>"
           );
         })
-        .join("") +
-      "</ul>"
+        .join(""),
+      "current"
     );
   }
 
@@ -74,8 +89,7 @@
     if (!items.length) {
       return '<p class="home-projects-empty">No future ideas listed yet.</p>';
     }
-    return (
-      '<ul class="home-projects-grid" role="list">' +
+    return wrapStack(
       items
         .map(function (p) {
           var pr = formatPriority(p.priority);
@@ -85,7 +99,7 @@
             })
             .join("");
           return (
-            '<li class="home-project-card home-project-card--future">' +
+            '<li class="home-project-card home-project-card--future stack-card">' +
             '<div class="home-project-card-head">' +
             "<h3 class=\"home-project-title\">" +
             escapeHtml(p.title) +
@@ -110,9 +124,94 @@
             "</li>"
           );
         })
-        .join("") +
-      "</ul>"
+        .join(""),
+      "future"
     );
+  }
+
+  function initStack(stackEl) {
+    if (!stackEl || stackEl.dataset.stackBound === "1") return;
+    stackEl.dataset.stackBound = "1";
+
+    var track = stackEl.querySelector(".stack-track");
+    var prevBtn = stackEl.querySelector(".stack-prev");
+    var nextBtn = stackEl.querySelector(".stack-next");
+    if (!track) return;
+
+    var cards = Array.prototype.slice.call(track.querySelectorAll(".stack-card"));
+    var n = cards.length;
+
+    function applyLayout() {
+      cards.forEach(function (card, i) {
+        var depth = Math.min(i, 3);
+        var scale = 1 - depth * 0.05;
+        var tx = depth * 22;
+        var ty = depth * 6;
+        var z = 100 - i;
+        var op = i < 4 ? 1 : 0;
+        var pe = i === 0 ? "auto" : "none";
+        card.style.zIndex = String(z);
+        card.style.opacity = String(op);
+        card.style.pointerEvents = pe;
+        card.classList.toggle("is-active", i === 0);
+        card.style.setProperty("--stack-tx", tx + "px");
+        card.style.setProperty("--stack-ty", ty + "px");
+        card.style.setProperty("--stack-scale", String(scale));
+        if (i !== 0) {
+          card.style.setProperty("--stack-rx", "0deg");
+          card.style.setProperty("--stack-ry", "0deg");
+        }
+      });
+    }
+
+    function cycle(direction) {
+      if (n < 2) return;
+      var leaving = cards[0];
+      leaving.classList.add("is-leaving");
+      leaving.style.setProperty("--stack-rx", "0deg");
+      leaving.style.setProperty("--stack-ry", "0deg");
+      leaving.style.setProperty("--stack-tx", direction === "next" ? "-340px" : "340px");
+      leaving.style.opacity = "0";
+
+      window.setTimeout(function () {
+        if (direction === "next") cards.push(cards.shift());
+        else cards.unshift(cards.pop());
+        cards.forEach(function (c) { c.classList.remove("is-leaving"); });
+        cards.forEach(function (c) { track.appendChild(c); });
+        applyLayout();
+      }, 320);
+    }
+
+    if (prevBtn) prevBtn.addEventListener("click", function () { cycle("prev"); });
+    if (nextBtn) nextBtn.addEventListener("click", function () { cycle("next"); });
+
+    track.addEventListener("mousemove", function (e) {
+      var active = cards[0];
+      if (!active || active.classList.contains("is-leaving")) return;
+      var r = active.getBoundingClientRect();
+      var px = (e.clientX - r.left) / r.width - 0.5;
+      var py = (e.clientY - r.top) / r.height - 0.5;
+      active.style.setProperty("--stack-ry", (px * 12).toFixed(2) + "deg");
+      active.style.setProperty("--stack-rx", (-py * 12).toFixed(2) + "deg");
+    });
+    track.addEventListener("mouseleave", function () {
+      var active = cards[0];
+      if (!active) return;
+      active.style.setProperty("--stack-rx", "0deg");
+      active.style.setProperty("--stack-ry", "0deg");
+    });
+
+    track.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowRight") cycle("next");
+      else if (e.key === "ArrowLeft") cycle("prev");
+    });
+
+    applyLayout();
+  }
+
+  function initStacksIn(rootEl) {
+    if (!rootEl) return;
+    rootEl.querySelectorAll(".stack-carousel").forEach(initStack);
   }
 
   var lastTab = "current";
@@ -168,6 +267,8 @@
         var sp = splitItems(items);
         panelCurrent.innerHTML = renderCurrentCards(sp.cur);
         panelFuture.innerHTML = renderFutureCards(sp.fut);
+        initStacksIn(panelCurrent);
+        initStacksIn(panelFuture);
         wireTabsOnce();
         setTabVisual(lastTab);
       })

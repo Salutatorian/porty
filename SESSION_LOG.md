@@ -370,3 +370,17 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
 ### Files Updated
 - `index.html`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-03 — Home projects: depth-stacked carousel + 3D tilt
+
+### Session Summary
+- **`home-projects.js`:** project cards (Current and Future tabs) now render inside a **`.stack-carousel`** with **prev/next arrow buttons**. Cards are absolutely stacked with descending **scale / translate / z-index** so back cards peek out behind the active one.
+- **3D parallax hover** on the active card only — `mousemove` over the track maps cursor offset to subtle `rotateX` / `rotateY` (~12deg max) via CSS variables; resets on `mouseleave`.
+- **Carousel cycling:** prev/next animates the top card out (±340px, opacity 0), then **reorders the array** and re-applies depth layout; CSS transitions handle the snap into new depths.
+- **A11y / motion:** arrow keys (←/→) cycle when the track is focused; `prefers-reduced-motion` collapses to opacity-only transitions.
+- **`styles.css`:** added `.stack-carousel`, `.stack-viewport` (perspective 1100px), `.stack-track`, `.stack-card` (transform via CSS vars), `.stack-arrow`, dark-mode active-card shadow, reduced-motion fallback.
+
+### Files Updated
+- `home-projects.js`, `styles.css`, `SESSION_LOG.md`
