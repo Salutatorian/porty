@@ -55,6 +55,72 @@
     function setOpen(o) {
       fab.classList.toggle("is-open", o);
       trig.setAttribute("aria-expanded", o ? "true" : "false");
+      if (o) applyLayout();
+      else resetTilt();
+    }
+
+    var stack = fab.querySelector(".friends-fab-stack");
+    var cards = stack
+      ? Array.prototype.slice.call(stack.querySelectorAll(".friend-card"))
+      : [];
+
+    var controls = document.createElement("div");
+    controls.className = "friends-fab-controls";
+    controls.setAttribute("aria-label", "Friend cards navigation");
+    controls.innerHTML =
+      '<button type="button" class="ff-arrow ff-prev" aria-label="Previous friend"><span aria-hidden="true">&#8249;</span></button>' +
+      '<button type="button" class="ff-arrow ff-next" aria-label="Next friend"><span aria-hidden="true">&#8250;</span></button>';
+    fab.appendChild(controls);
+    var prevBtn = controls.querySelector(".ff-prev");
+    var nextBtn = controls.querySelector(".ff-next");
+
+    function applyLayout() {
+      cards.forEach(function (card, i) {
+        var depth = Math.min(i, 4);
+        card.style.setProperty("--cz", String(50 - i));
+        card.style.setProperty("--cs", String(1 - depth * 0.05));
+        card.style.setProperty("--cx", depth * 32 + "px");
+        card.style.opacity = i > 3 ? "0" : "1";
+        card.style.pointerEvents = i === 0 ? "auto" : "none";
+        card.classList.toggle("is-top", i === 0);
+        if (i !== 0) {
+          card.style.setProperty("--rx", "0deg");
+          card.style.setProperty("--ry", "0deg");
+        }
+      });
+    }
+
+    function resetTilt() {
+      var t = cards[0];
+      if (!t) return;
+      t.style.setProperty("--rx", "0deg");
+      t.style.setProperty("--ry", "0deg");
+    }
+
+    function cycle(dir) {
+      if (cards.length < 2) return;
+      resetTilt();
+      if (dir === "next") cards.push(cards.shift());
+      else cards.unshift(cards.pop());
+      cards.forEach(function (c) { stack.appendChild(c); });
+      applyLayout();
+    }
+
+    if (prevBtn) prevBtn.addEventListener("click", function (e) { e.stopPropagation(); cycle("prev"); });
+    if (nextBtn) nextBtn.addEventListener("click", function (e) { e.stopPropagation(); cycle("next"); });
+
+    if (stack) {
+      stack.addEventListener("mousemove", function (e) {
+        if (!fab.classList.contains("is-open")) return;
+        var top = cards[0];
+        if (!top) return;
+        var r = top.getBoundingClientRect();
+        var px = (e.clientX - r.left) / r.width - 0.5;
+        var py = (e.clientY - r.top) / r.height - 0.5;
+        top.style.setProperty("--ry", (px * 14).toFixed(2) + "deg");
+        top.style.setProperty("--rx", (-py * 14).toFixed(2) + "deg");
+      });
+      stack.addEventListener("mouseleave", resetTilt);
     }
 
     trig.addEventListener(
@@ -69,7 +135,11 @@
     fab.addEventListener(
       "click",
       function (e) {
-        if (e.target.closest(".friend-card") || e.target.closest(".friends-fab-trigger")) return;
+        if (
+          e.target.closest(".friend-card") ||
+          e.target.closest(".friends-fab-trigger") ||
+          e.target.closest(".friends-fab-controls")
+        ) return;
         setOpen(false);
       },
       false
