@@ -465,7 +465,12 @@
         }
         trig.addEventListener('click', function(e){
           e.preventDefault();
+          e.stopPropagation();
           setOpen(!fab.classList.contains('is-open'));
+        });
+        fab.addEventListener('click', function(e){
+          if (e.target.closest('.friend-card') || e.target.closest('.friends-fab-trigger')) return;
+          setOpen(false);
         });
         document.addEventListener('click', function(e){
           if (!fab.contains(e.target)) setOpen(false);

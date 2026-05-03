@@ -311,6 +311,7 @@ a:hover {
 }
 .friends-fab-trigger {
   position: relative;
+  z-index: 2;
   width: 56px;
   height: 56px;
   border-radius: 999px;
@@ -364,6 +365,42 @@ a:hover {
   width: 0;
   height: 0;
   pointer-events: none;
+  transition: transform 0.45s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+/* Backdrop blur — only when open via click */
+.friends-fab::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 10, 14, 0.42);
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+.friends-fab.is-open::before {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 0;
+}
+[data-theme="dark"] .friends-fab::before {
+  background: rgba(0, 0, 0, 0.58);
+}
+
+/* When open via click, center the fan in the viewport.
+   Original fan spans roughly fan-x: 20→740 and fan-y: -430→-380.
+   Shift the stack origin to viewport center, offset by half the spread
+   so the cards appear centered. */
+.friends-fab.is-open .friends-fab-stack {
+  position: fixed;
+  left: 50vw;
+  top: 50vh;
+  bottom: auto;
+  transform: translate(-380px, 200px);
+  z-index: 1;
 }
 .friend-card {
   position: absolute;
@@ -405,9 +442,7 @@ a:hover {
   pointer-events: none;
   will-change: transform;
 }
-.friends-fab.is-open .friend-card,
-.friends-fab:hover .friend-card,
-.friends-fab:focus-within .friend-card {
+.friends-fab.is-open .friend-card {
   --x: var(--fan-x, 0px);
   --y: var(--fan-y, 0px);
   --rot: var(--fan-rot, 0deg);
@@ -418,11 +453,7 @@ a:hover {
 
 /* Per-card hover: lift, grow, flip to dark — like the original deck */
 .friends-fab.is-open .friend-card:hover,
-.friends-fab.is-open .friend-card:focus-visible,
-.friends-fab:hover .friend-card:hover,
-.friends-fab:hover .friend-card:focus-visible,
-.friends-fab:focus-within .friend-card:hover,
-.friends-fab:focus-within .friend-card:focus-visible {
+.friends-fab.is-open .friend-card:focus-visible {
   --lift: 18px;
   --scale: 1.08;
   --rot: 0deg;
