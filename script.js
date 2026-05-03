@@ -103,7 +103,7 @@
       var seedSrc = (nameEl ? nameEl.textContent : card.textContent || "friend").trim().toLowerCase();
       var rand = mulberry32(fnv1aHash(seedSrc));
       var keys = Object.keys(ICON_GLYPHS);
-      var count = 5 + Math.floor(rand() * 3);
+      var count = 14 + Math.floor(rand() * 7);
       var motif = document.createElement("div");
       motif.className = "friend-card-motif";
       motif.setAttribute("aria-hidden", "true");
@@ -111,11 +111,11 @@
       var html = "";
       for (var i = 0; i < count; i++) {
         var key = keys[Math.floor(rand() * keys.length)];
-        var size = 22 + Math.floor(rand() * 28);
-        var x = 6 + Math.floor(rand() * 88);
-        var y = 6 + Math.floor(rand() * 88);
-        var rot = Math.floor(rand() * 60 - 30);
-        var op = (0.55 + rand() * 0.45).toFixed(2);
+        var size = 12 + Math.floor(rand() * 16);
+        var x = 4 + Math.floor(rand() * 92);
+        var y = 4 + Math.floor(rand() * 92);
+        var rot = Math.floor(rand() * 80 - 40);
+        var op = (0.45 + rand() * 0.55).toFixed(2);
         html +=
           '<svg viewBox="0 0 24 24" width="' + size + '" height="' + size +
           '" style="position:absolute;left:' + x + '%;top:' + y +
