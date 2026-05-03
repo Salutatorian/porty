@@ -390,26 +390,18 @@ a:hover {
   background: rgba(0, 0, 0, 0.58);
 }
 
-/* When open via click, lay cards out as a perfectly centered, upright row
-   covering the full viewport (true crosshair center on any device). */
+/* When open via click, center the fan in the viewport.
+   Cards have transform-origin bottom-left; fan-x spans 20→740 (span 720),
+   each card 260 wide → visual horizontal center sits ~510px right of stack origin.
+   fan-y spans -430→-380, each card 380 tall → visual vertical center sits
+   ~615px above stack origin. Shift the stack origin from viewport center. */
 .friends-fab.is-open .friends-fab-stack {
   position: fixed;
-  inset: 0;
-  left: 0;
-  top: 0;
-  width: 100vw;
-  height: 100vh;
+  left: 50vw;
+  top: 50vh;
   bottom: auto;
-  transform: none;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(10px, 1.6vw, 22px);
-  padding: clamp(16px, 4vw, 48px);
-  box-sizing: border-box;
+  transform: translate(-510px, 615px);
   z-index: 1;
-  pointer-events: auto;
 }
 .friend-card {
   position: absolute;
@@ -452,28 +444,19 @@ a:hover {
   will-change: transform;
 }
 .friends-fab.is-open .friend-card {
-  position: relative;
-  left: auto;
-  bottom: auto;
-  margin-left: 0;
-  width: clamp(150px, 16vw, 220px);
-  height: auto;
-  aspect-ratio: 260 / 380;
-  transform-origin: center center;
-  --x: 0px;
-  --y: 0px;
-  --rot: 0deg;
+  --x: var(--fan-x, 0px);
+  --y: var(--fan-y, 0px);
+  --rot: var(--fan-rot, 0deg);
   --scale: 1;
-  transform: translateY(calc(-1 * var(--lift))) scale(var(--scale));
   opacity: 1;
   pointer-events: auto;
 }
 
-/* Per-card hover: lift + grow + flip to dark, no rotation */
+/* Per-card hover: lift, grow, flip to dark — like the original deck */
 .friends-fab.is-open .friend-card:hover,
 .friends-fab.is-open .friend-card:focus-visible {
-  --lift: 14px;
-  --scale: 1.06;
+  --lift: 18px;
+  --scale: 1.08;
   --rot: 0deg;
   background: #0f1116;
   color: #fff;
