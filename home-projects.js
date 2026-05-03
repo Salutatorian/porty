@@ -22,27 +22,12 @@
     return x || "";
   }
 
-  function wrapStack(cardsHtml, kind) {
-    return (
-      '<div class="stack-carousel" data-stack="' + kind + '">' +
-        '<button type="button" class="stack-arrow stack-prev" aria-label="Previous project">' +
-          '<span aria-hidden="true">&#8249;</span>' +
-        '</button>' +
-        '<div class="stack-viewport">' +
-          '<ul class="stack-track" role="list">' + cardsHtml + '</ul>' +
-        '</div>' +
-        '<button type="button" class="stack-arrow stack-next" aria-label="Next project">' +
-          '<span aria-hidden="true">&#8250;</span>' +
-        '</button>' +
-      '</div>'
-    );
-  }
-
   function renderCurrentCards(items) {
     if (!items.length) {
       return '<p class="home-projects-empty">No active projects listed yet.</p>';
     }
-    return wrapStack(
+    return (
+      '<ul class="home-projects-grid" role="list">' +
       items
         .map(function (p) {
           var links = (p.links || [])
@@ -63,7 +48,7 @@
             })
             .join("");
           return (
-            '<li class="home-project-card stack-card">' +
+            '<li class="home-project-card">' +
             '<div class="home-project-card-head">' +
             "<h3 class=\"home-project-title\">" +
             escapeHtml(p.title) +
@@ -80,8 +65,8 @@
             "</li>"
           );
         })
-        .join(""),
-      "current"
+        .join("") +
+      "</ul>"
     );
   }
 
@@ -89,7 +74,8 @@
     if (!items.length) {
       return '<p class="home-projects-empty">No future ideas listed yet.</p>';
     }
-    return wrapStack(
+    return (
+      '<ul class="home-projects-grid" role="list">' +
       items
         .map(function (p) {
           var pr = formatPriority(p.priority);
@@ -99,7 +85,7 @@
             })
             .join("");
           return (
-            '<li class="home-project-card home-project-card--future stack-card">' +
+            '<li class="home-project-card home-project-card--future">' +
             '<div class="home-project-card-head">' +
             "<h3 class=\"home-project-title\">" +
             escapeHtml(p.title) +
@@ -124,8 +110,8 @@
             "</li>"
           );
         })
-        .join(""),
-      "future"
+        .join("") +
+      "</ul>"
     );
   }
 
@@ -267,8 +253,6 @@
         var sp = splitItems(items);
         panelCurrent.innerHTML = renderCurrentCards(sp.cur);
         panelFuture.innerHTML = renderFutureCards(sp.fut);
-        initStacksIn(panelCurrent);
-        initStacksIn(panelFuture);
         wireTabsOnce();
         setTabVisual(lastTab);
       })
