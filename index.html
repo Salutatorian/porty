@@ -408,6 +408,71 @@
       </main>
     </div>
 
+    <div class="friends-fab" id="friends-fab" aria-label="Friends — shoutouts">
+      <button type="button" class="friends-fab-trigger" aria-expanded="false" aria-controls="friends-fab-stack" id="friends-fab-trigger">
+        <span class="friends-fab-tip">Friends</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </button>
+      <div class="friends-fab-stack" id="friends-fab-stack" role="list" aria-label="Friend shoutouts">
+        <article class="friend-card" role="listitem" style="--rest-x:-2px; --rest-y:-6px; --rest-rot:-3deg; --fan-x:8px; --fan-y:-260px; --fan-rot:-12deg; --z:1; --stagger:3;">
+          <div class="friend-card-avatar" aria-hidden="true">SN</div>
+          <p class="friend-card-eyebrow font-dot">growth</p>
+          <h3 class="friend-card-name">Sara Nova</h3>
+          <p class="friend-card-blurb">Edit me — friend shoutout goes here.</p>
+        </article>
+        <article class="friend-card" role="listitem" style="--rest-x:0px; --rest-y:-3px; --rest-rot:-1deg; --fan-x:138px; --fan-y:-280px; --fan-rot:-6deg; --z:2; --stagger:2;">
+          <div class="friend-card-avatar" aria-hidden="true">MC</div>
+          <p class="friend-card-eyebrow font-dot">design</p>
+          <h3 class="friend-card-name">Mia Chen</h3>
+          <p class="friend-card-blurb">Edit me — friend shoutout goes here.</p>
+        </article>
+        <article class="friend-card friend-card--featured" role="listitem" style="--rest-x:0px; --rest-y:0px; --rest-rot:0deg; --fan-x:268px; --fan-y:-300px; --fan-rot:0deg; --z:3; --stagger:0;">
+          <div class="friend-card-avatar friend-card-avatar--dark" aria-hidden="true">AR</div>
+          <p class="friend-card-eyebrow font-dot">founder</p>
+          <h3 class="friend-card-name">Alex Rivera</h3>
+          <p class="friend-card-blurb">Edit me — friend shoutout goes here.</p>
+        </article>
+        <article class="friend-card" role="listitem" style="--rest-x:0px; --rest-y:-3px; --rest-rot:1deg; --fan-x:398px; --fan-y:-280px; --fan-rot:6deg; --z:2; --stagger:2;">
+          <div class="friend-card-avatar" aria-hidden="true">JO</div>
+          <p class="friend-card-eyebrow font-dot">engineer</p>
+          <h3 class="friend-card-name">Jordan Osei</h3>
+          <p class="friend-card-blurb">Edit me — friend shoutout goes here.</p>
+        </article>
+        <article class="friend-card" role="listitem" style="--rest-x:2px; --rest-y:-6px; --rest-rot:3deg; --fan-x:528px; --fan-y:-260px; --fan-rot:12deg; --z:1; --stagger:3;">
+          <div class="friend-card-avatar" aria-hidden="true">LR</div>
+          <p class="friend-card-eyebrow font-dot">friend</p>
+          <h3 class="friend-card-name">Lina R.</h3>
+          <p class="friend-card-blurb">Edit me — friend shoutout goes here.</p>
+        </article>
+      </div>
+    </div>
+
+    <script>
+      (function(){
+        var fab = document.getElementById('friends-fab');
+        var trig = document.getElementById('friends-fab-trigger');
+        if (!fab || !trig) return;
+        function setOpen(o){
+          fab.classList.toggle('is-open', o);
+          trig.setAttribute('aria-expanded', o ? 'true' : 'false');
+        }
+        trig.addEventListener('click', function(e){
+          e.preventDefault();
+          setOpen(!fab.classList.contains('is-open'));
+        });
+        document.addEventListener('click', function(e){
+          if (!fab.contains(e.target)) setOpen(false);
+        });
+        document.addEventListener('keydown', function(e){
+          if (e.key === 'Escape') setOpen(false);
+        });
+      })();
+    </script>
     <script src="script.js"></script>
     <script src="dock-nav.js"></script>
     <script src="app-router.js"></script>
