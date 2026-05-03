@@ -55,7 +55,45 @@
     function setOpen(o) {
       fab.classList.toggle("is-open", o);
       trig.setAttribute("aria-expanded", o ? "true" : "false");
+      if (!o) {
+        Array.prototype.forEach.call(fab.querySelectorAll(".friend-card"), function (c) {
+          c.style.setProperty("--tilt-rx", "0deg");
+          c.style.setProperty("--tilt-ry", "0deg");
+        });
+      }
     }
+
+    /* 3D parallax tilt on whichever card is currently being hovered. */
+    Array.prototype.forEach.call(fab.querySelectorAll(".friend-card"), function (card) {
+      var raf = 0;
+      var lastEv = null;
+      function frame() {
+        raf = 0;
+        if (!lastEv) return;
+        var r = card.getBoundingClientRect();
+        var px = (lastEv.clientX - r.left) / r.width - 0.5;
+        var py = (lastEv.clientY - r.top) / r.height - 0.5;
+        card.style.setProperty("--tilt-ry", (px * 16).toFixed(2) + "deg");
+        card.style.setProperty("--tilt-rx", (-py * 16).toFixed(2) + "deg");
+      }
+      card.addEventListener(
+        "mousemove",
+        function (e) {
+          lastEv = e;
+          if (!raf) raf = requestAnimationFrame(frame);
+        },
+        { passive: true }
+      );
+      card.addEventListener(
+        "mouseleave",
+        function () {
+          lastEv = null;
+          card.style.setProperty("--tilt-rx", "0deg");
+          card.style.setProperty("--tilt-ry", "0deg");
+        },
+        { passive: true }
+      );
+    });
 
     trig.addEventListener(
       "click",
