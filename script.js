@@ -73,9 +73,14 @@
         var r = card.getBoundingClientRect();
         var px = (lastEv.clientX - r.left) / r.width - 0.5;
         var py = (lastEv.clientY - r.top) / r.height - 0.5;
-        card.style.setProperty("--tilt-ry", (px * 16).toFixed(2) + "deg");
-        card.style.setProperty("--tilt-rx", (-py * 16).toFixed(2) + "deg");
+        card.style.setProperty("--tilt-ry", (px * 9).toFixed(2) + "deg");
+        card.style.setProperty("--tilt-rx", (-py * 9).toFixed(2) + "deg");
       }
+      card.addEventListener(
+        "mouseenter",
+        function () { card.classList.add("is-tilting"); },
+        { passive: true }
+      );
       card.addEventListener(
         "mousemove",
         function (e) {
@@ -88,6 +93,7 @@
         "mouseleave",
         function () {
           lastEv = null;
+          card.classList.remove("is-tilting");
           card.style.setProperty("--tilt-rx", "0deg");
           card.style.setProperty("--tilt-ry", "0deg");
         },
