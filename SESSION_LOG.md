@@ -2,6 +2,16 @@
 
 Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
+## 2026-05-04 — Git push (Windows / porty-1 clone)
+
+### Session Summary
+- Pushed local **`main`** to **`origin`** at **`https://github.com/Salutatorian/porty.git`** (commit `f11fe01`). Local folder name (`porty-1`) does not change the remote; **`origin`** is the repo URL.
+
+### Files / ops
+- `git push -v origin main` — output showed `Pushing to https://github.com/Salutatorian/porty.git` and `main -> main`.
+
+---
+
 ## 2026-05-04 — Command palette: visible search field + solid warm card
 
 ### Session Summary
