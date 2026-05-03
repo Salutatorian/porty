@@ -67,18 +67,21 @@
        FNV-1a hash → mulberry32 PRNG → pick 5-7 lucide-ish SVG glyphs at
        seeded positions/sizes/rotations. Same name = same layout, forever. */
     var ICON_GLYPHS = {
-      star: '<polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" fill="currentColor"/>',
-      zap: '<polygon points="13,2 3,14 12,14 11,22 21,10 12,10" fill="currentColor"/>',
-      circle: '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>',
-      triangle: '<polygon points="12,3 22,21 2,21" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
-      hexagon: '<polygon points="17.5,3 6.5,3 1,12 6.5,21 17.5,21 23,12" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
-      square: '<rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>',
-      plus: '<path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>',
-      moon: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor"/>',
-      diamond: '<polygon points="12,2 22,12 12,22 2,12" fill="currentColor"/>',
-      asterisk: '<path d="M12 2v20M3.5 6.5l17 11M3.5 17.5l17-11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
-      target: '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/>',
-      cross: '<path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>'
+      star: '<polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/>',
+      zap: '<polygon points="13,2 3,14 12,14 11,22 21,10 12,10" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/>',
+      circle: '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1"/>',
+      triangle: '<polygon points="12,3 22,21 2,21" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/>',
+      hexagon: '<polygon points="17.5,3 6.5,3 1,12 6.5,21 17.5,21 23,12" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/>',
+      square: '<rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1"/>',
+      plus: '<path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>',
+      moon: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/>',
+      diamond: '<polygon points="12,2 22,12 12,22 2,12" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/>',
+      asterisk: '<path d="M12 2v20M3.5 6.5l17 11M3.5 17.5l17-11" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>',
+      target: '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1"/>',
+      cross: '<path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>',
+      code: '<path d="M9 8l-5 4 5 4M15 8l5 4-5 4" stroke="currentColor" stroke-width="1" stroke-linecap="round" fill="none"/>',
+      orbit: '<circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1"/><ellipse cx="12" cy="12" rx="10" ry="4" fill="none" stroke="currentColor" stroke-width="1" transform="rotate(30 12 12)"/>',
+      atom: '<circle cx="12" cy="12" r="2" fill="currentColor"/><ellipse cx="12" cy="12" rx="10" ry="4" fill="none" stroke="currentColor" stroke-width="1"/><ellipse cx="12" cy="12" rx="10" ry="4" fill="none" stroke="currentColor" stroke-width="1" transform="rotate(60 12 12)"/>'
     };
     function fnv1aHash(str) {
       var h = 2166136261 >>> 0;
@@ -103,7 +106,7 @@
       var seedSrc = (nameEl ? nameEl.textContent : card.textContent || "friend").trim().toLowerCase();
       var rand = mulberry32(fnv1aHash(seedSrc));
       var keys = Object.keys(ICON_GLYPHS);
-      var count = 14 + Math.floor(rand() * 7);
+      var count = 18 + Math.floor(rand() * 8);
       var motif = document.createElement("div");
       motif.className = "friend-card-motif";
       motif.setAttribute("aria-hidden", "true");
@@ -111,11 +114,11 @@
       var html = "";
       for (var i = 0; i < count; i++) {
         var key = keys[Math.floor(rand() * keys.length)];
-        var size = 12 + Math.floor(rand() * 16);
+        var size = 10 + Math.floor(rand() * 6);
         var x = 4 + Math.floor(rand() * 92);
         var y = 4 + Math.floor(rand() * 92);
         var rot = Math.floor(rand() * 80 - 40);
-        var op = (0.45 + rand() * 0.55).toFixed(2);
+        var op = (0.6 + rand() * 0.4).toFixed(2);
         html +=
           '<svg viewBox="0 0 24 24" width="' + size + '" height="' + size +
           '" style="position:absolute;left:' + x + '%;top:' + y +
@@ -138,6 +141,8 @@
         var py = (lastEv.clientY - r.top) / r.height - 0.5;
         card.style.setProperty("--tilt-ry", (px * 3).toFixed(2) + "deg");
         card.style.setProperty("--tilt-rx", (-py * 3).toFixed(2) + "deg");
+        card.style.setProperty("--mx", (lastEv.clientX - r.left).toFixed(0) + "px");
+        card.style.setProperty("--my", (lastEv.clientY - r.top).toFixed(0) + "px");
       }
       card.addEventListener(
         "mouseenter",

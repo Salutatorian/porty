@@ -488,15 +488,33 @@ a:hover {
   outline-offset: 4px;
 }
 
-/* Per-friend deterministic icon motif — sits behind card content. */
+/* Per-friend deterministic icon motif — only visible inside the spotlight
+   that follows the cursor (CSS radial mask driven by --mx/--my). */
 .friend-card { overflow: hidden; }
 .friend-card-motif {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  color: rgba(0, 0, 0, 0.07);
-  transition: color 0.3s ease, opacity 0.3s ease;
+  color: rgba(255, 255, 255, 0.55);
   z-index: 0;
+  opacity: 0;
+  --mx: 50%;
+  --my: 50%;
+  transition: opacity 0.25s ease, color 0.3s ease;
+  -webkit-mask-image: radial-gradient(
+    150px circle at var(--mx) var(--my),
+    #000 0%,
+    rgba(0, 0, 0, 0.7) 35%,
+    transparent 75%
+  );
+  mask-image: radial-gradient(
+    150px circle at var(--mx) var(--my),
+    #000 0%,
+    rgba(0, 0, 0, 0.7) 35%,
+    transparent 75%
+  );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
 }
 .friend-card-avatar,
 .friend-card-eyebrow,
@@ -504,8 +522,9 @@ a:hover {
 .friend-card-blurb { position: relative; z-index: 1; }
 .friends-fab.is-open .friend-card:hover .friend-card-motif,
 .friends-fab.is-open .friend-card:focus-visible .friend-card-motif {
-  color: rgba(255, 255, 255, 0.18);
+  opacity: 1;
 }
+[data-theme="light"] .friend-card-motif { color: rgba(0, 0, 0, 0.45); }
 
 .friend-card-avatar {
   width: 100%;
