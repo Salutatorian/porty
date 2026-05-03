@@ -519,6 +519,10 @@ a:hover {
 .friend-card-name,
 .friend-card-blurb { position: relative; z-index: 1; }
 [data-theme="light"] .friend-card-motif { color: rgba(0, 0, 0, 0.45); }
+.friends-fab.is-open .friend-card:hover .friend-card-motif,
+.friends-fab.is-open .friend-card:focus-visible .friend-card-motif {
+  color: rgba(255, 255, 255, 0.62);
+}
 
 .friend-card-avatar {
   width: 100%;

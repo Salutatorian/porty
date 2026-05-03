@@ -384,3 +384,14 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
 ### Files Updated
 - `home-projects.js`, `styles.css`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-03 — Friends FAB: spotlight reveal visible on hover
+
+### Session Summary
+- **`.friend-card-motif`:** on **light theme** the motif was still **black** while the card flips to a **dark** background on hover, so the masked symbols were effectively invisible. Added an override so the motif is **light** when the open FAB card is **hovered / focus-visible**, matching the dark card surface.
+- **`script.js`:** increased deterministic scatter density (**~36–48** tiny SVG glyphs) and slightly smaller icon sizes so the flashlight always has content to reveal.
+
+### Files Updated
+- `styles.css`, `script.js`, `SESSION_LOG.md`
