@@ -110,17 +110,28 @@
     if (nextBtn) nextBtn.addEventListener("click", function (e) { e.stopPropagation(); cycle("next"); });
 
     if (stack) {
-      stack.addEventListener("mousemove", function (e) {
-        if (!fab.classList.contains("is-open")) return;
+      var tiltRaf = 0;
+      var lastEv = null;
+      function tiltFrame() {
+        tiltRaf = 0;
+        if (!lastEv || !fab.classList.contains("is-open")) return;
         var top = cards[0];
         if (!top) return;
         var r = top.getBoundingClientRect();
-        var px = (e.clientX - r.left) / r.width - 0.5;
-        var py = (e.clientY - r.top) / r.height - 0.5;
+        var px = (lastEv.clientX - r.left) / r.width - 0.5;
+        var py = (lastEv.clientY - r.top) / r.height - 0.5;
         top.style.setProperty("--ry", (px * 14).toFixed(2) + "deg");
         top.style.setProperty("--rx", (-py * 14).toFixed(2) + "deg");
-      });
-      stack.addEventListener("mouseleave", resetTilt);
+      }
+      stack.addEventListener(
+        "mousemove",
+        function (e) {
+          lastEv = e;
+          if (!tiltRaf) tiltRaf = requestAnimationFrame(tiltFrame);
+        },
+        { passive: true }
+      );
+      stack.addEventListener("mouseleave", resetTilt, { passive: true });
     }
 
     trig.addEventListener(

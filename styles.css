@@ -373,9 +373,9 @@ a:hover {
   content: "";
   position: fixed;
   inset: 0;
-  background: rgba(8, 10, 14, 0.42);
-  backdrop-filter: blur(14px) saturate(120%);
-  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  background: rgba(8, 10, 14, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
@@ -504,13 +504,14 @@ a:hover {
   z-index: var(--cz);
   opacity: 1;
   pointer-events: none;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
   transition:
-    transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1),
-    opacity 0.4s ease,
-    box-shadow 0.4s ease,
-    background 0.3s ease,
-    color 0.3s ease,
-    border-color 0.3s ease;
+    transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.35s ease,
+    background 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease;
   transition-delay: 0s;
 }
 
