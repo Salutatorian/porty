@@ -490,7 +490,11 @@ a:hover {
 
 /* Per-friend deterministic icon motif — only visible inside the spotlight
    that follows the cursor (CSS radial mask driven by --mx/--my). */
-.friend-card { overflow: hidden; }
+.friend-card {
+  overflow: hidden;
+  --mx: -9999px;
+  --my: -9999px;
+}
 .friend-card-motif {
   position: absolute;
   inset: 0;
@@ -498,9 +502,6 @@ a:hover {
   color: rgba(255, 255, 255, 0.55);
   z-index: 0;
   opacity: 1;
-  /* Default spotlight parked far off-card → nothing visible until cursor enters. */
-  --mx: -9999px;
-  --my: -9999px;
   transition: color 0.3s ease;
   -webkit-mask-image: radial-gradient(
     circle 150px at var(--mx) var(--my),
