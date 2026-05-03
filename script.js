@@ -63,6 +63,69 @@
       }
     }
 
+    /* Deterministic per-friend icon motif (stable across reloads).
+       FNV-1a hash → mulberry32 PRNG → pick 5-7 lucide-ish SVG glyphs at
+       seeded positions/sizes/rotations. Same name = same layout, forever. */
+    var ICON_GLYPHS = {
+      star: '<polygon points="12,2 15,9 22,9 17,14 19,21 12,17 5,21 7,14 2,9 9,9" fill="currentColor"/>',
+      zap: '<polygon points="13,2 3,14 12,14 11,22 21,10 12,10" fill="currentColor"/>',
+      circle: '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>',
+      triangle: '<polygon points="12,3 22,21 2,21" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+      hexagon: '<polygon points="17.5,3 6.5,3 1,12 6.5,21 17.5,21 23,12" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+      square: '<rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>',
+      plus: '<path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>',
+      moon: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor"/>',
+      diamond: '<polygon points="12,2 22,12 12,22 2,12" fill="currentColor"/>',
+      asterisk: '<path d="M12 2v20M3.5 6.5l17 11M3.5 17.5l17-11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+      target: '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/>',
+      cross: '<path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>'
+    };
+    function fnv1aHash(str) {
+      var h = 2166136261 >>> 0;
+      for (var i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return h >>> 0;
+    }
+    function mulberry32(seed) {
+      return function () {
+        seed = (seed + 0x6D2B79F5) >>> 0;
+        var t = seed;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    Array.prototype.forEach.call(fab.querySelectorAll(".friend-card"), function (card) {
+      if (card.querySelector(".friend-card-motif")) return;
+      var nameEl = card.querySelector(".friend-card-name");
+      var seedSrc = (nameEl ? nameEl.textContent : card.textContent || "friend").trim().toLowerCase();
+      var rand = mulberry32(fnv1aHash(seedSrc));
+      var keys = Object.keys(ICON_GLYPHS);
+      var count = 5 + Math.floor(rand() * 3);
+      var motif = document.createElement("div");
+      motif.className = "friend-card-motif";
+      motif.setAttribute("aria-hidden", "true");
+      var svgNS = "http://www.w3.org/2000/svg";
+      var html = "";
+      for (var i = 0; i < count; i++) {
+        var key = keys[Math.floor(rand() * keys.length)];
+        var size = 22 + Math.floor(rand() * 28);
+        var x = 6 + Math.floor(rand() * 88);
+        var y = 6 + Math.floor(rand() * 88);
+        var rot = Math.floor(rand() * 60 - 30);
+        var op = (0.55 + rand() * 0.45).toFixed(2);
+        html +=
+          '<svg viewBox="0 0 24 24" width="' + size + '" height="' + size +
+          '" style="position:absolute;left:' + x + '%;top:' + y +
+          '%;transform:translate(-50%,-50%) rotate(' + rot +
+          'deg);opacity:' + op + ';">' + ICON_GLYPHS[key] + "</svg>";
+      }
+      motif.innerHTML = html;
+      card.insertBefore(motif, card.firstChild);
+    });
+
     /* 3D parallax tilt on whichever card is currently being hovered. */
     Array.prototype.forEach.call(fab.querySelectorAll(".friend-card"), function (card) {
       var raf = 0;

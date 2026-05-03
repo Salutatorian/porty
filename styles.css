@@ -488,6 +488,25 @@ a:hover {
   outline-offset: 4px;
 }
 
+/* Per-friend deterministic icon motif — sits behind card content. */
+.friend-card { overflow: hidden; }
+.friend-card-motif {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  color: rgba(0, 0, 0, 0.07);
+  transition: color 0.3s ease, opacity 0.3s ease;
+  z-index: 0;
+}
+.friend-card-avatar,
+.friend-card-eyebrow,
+.friend-card-name,
+.friend-card-blurb { position: relative; z-index: 1; }
+.friends-fab.is-open .friend-card:hover .friend-card-motif,
+.friends-fab.is-open .friend-card:focus-visible .friend-card-motif {
+  color: rgba(255, 255, 255, 0.12);
+}
+
 .friend-card-avatar {
   width: 100%;
   aspect-ratio: 1 / 1;
