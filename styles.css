@@ -393,55 +393,16 @@ a:hover {
 /* When open via click, center the fan in the viewport.
    Cards have transform-origin bottom-left; fan-x spans 20→740 (span 720),
    each card 260 wide → visual horizontal center sits ~510px right of stack origin.
-   When open: stacked carousel — cards centered dead-on viewport, depth via
-   scale + x-offset, top card pivots in 3D on mousemove. */
+   When open via click, center the fan in the viewport. Cards pivot
+   from bottom-center so the fan stays symmetric. */
 .friends-fab.is-open .friends-fab-stack {
   position: fixed;
   left: 50vw;
   top: 50vh;
   bottom: auto;
-  transform: translate(-50%, -50%);
-  width: clamp(240px, 28vw, 320px);
-  height: clamp(360px, 44vw, 470px);
-  perspective: 1200px;
-  pointer-events: auto;
+  transform: translate(-510px, 615px);
   z-index: 1;
 }
-
-.friends-fab-controls {
-  position: fixed;
-  left: 50vw;
-  top: calc(50vh + clamp(210px, 24vw, 270px));
-  transform: translateX(-50%);
-  display: none;
-  gap: 14px;
-  z-index: 2;
-}
-.friends-fab.is-open .friends-fab-controls { display: inline-flex; }
-
-.ff-arrow {
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.25);
-  background: rgba(255,255,255,0.14);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  color: #fff;
-  font-size: 22px;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
-}
-.ff-arrow:hover {
-  background: rgba(255,255,255,0.24);
-  border-color: rgba(255,255,255,0.4);
-}
-.ff-arrow:active { transform: translateZ(0) scale(0.94); }
-.ff-arrow span { display: inline-block; margin-top: -2px; }
 .friend-card {
   position: absolute;
   left: 0;
@@ -483,49 +444,20 @@ a:hover {
   will-change: transform;
 }
 .friends-fab.is-open .friend-card {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  bottom: auto;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  --cx: 0px;
-  --cs: 1;
-  --cz: 50;
-  --rx: 0deg;
-  --ry: 0deg;
-  transform-origin: center center;
-  transform: translate(-50%, -50%)
-    translate3d(var(--cx), 0, 0)
-    scale(var(--cs))
-    rotateX(var(--rx))
-    rotateY(var(--ry));
-  z-index: var(--cz);
+  --x: var(--fan-x, 0px);
+  --y: var(--fan-y, 0px);
+  --rot: var(--fan-rot, 0deg);
+  --scale: 1;
   opacity: 1;
-  pointer-events: none;
-  will-change: transform, opacity;
-  backface-visibility: hidden;
-  transition:
-    transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
-    opacity 0.35s ease,
-    background 0.25s ease,
-    color 0.25s ease,
-    border-color 0.25s ease;
-  transition-delay: 0s;
-}
-
-.friends-fab.is-open .friend-card.is-top {
   pointer-events: auto;
-  transition:
-    transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
-    opacity 0.4s ease,
-    box-shadow 0.4s ease;
 }
 
-/* Top-card hover: flip to dark deck look (no scale/lift — handled by tilt) */
-.friends-fab.is-open .friend-card.is-top:hover,
-.friends-fab.is-open .friend-card.is-top:focus-visible {
+/* Per-card hover: lift, grow, flip to dark — like the original deck */
+.friends-fab.is-open .friend-card:hover,
+.friends-fab.is-open .friend-card:focus-visible {
+  --lift: 18px;
+  --scale: 1.08;
+  --rot: 0deg;
   background: #0f1116;
   color: #fff;
   border-color: rgba(255,255,255,0.08);
