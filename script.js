@@ -73,8 +73,8 @@
         var r = card.getBoundingClientRect();
         var px = (lastEv.clientX - r.left) / r.width - 0.5;
         var py = (lastEv.clientY - r.top) / r.height - 0.5;
-        card.style.setProperty("--tilt-ry", (px * 9).toFixed(2) + "deg");
-        card.style.setProperty("--tilt-rx", (-py * 9).toFixed(2) + "deg");
+        card.style.setProperty("--tilt-ry", (px * 5).toFixed(2) + "deg");
+        card.style.setProperty("--tilt-rx", (-py * 5).toFixed(2) + "deg");
       }
       card.addEventListener(
         "mouseenter",

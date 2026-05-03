@@ -401,7 +401,7 @@ a:hover {
   top: 50vh;
   bottom: auto;
   transform: translate(-510px, 615px);
-  perspective: 1100px;
+  perspective: 2200px;
   z-index: 1;
 }
 .friend-card {
@@ -431,9 +431,9 @@ a:hover {
   --lift: 0px;
   transform-origin: 50% 100%;
   transform: translate(var(--x), calc(var(--y) - var(--lift)))
-    rotate(var(--rot))
     rotateX(var(--tilt-rx, 0deg))
     rotateY(var(--tilt-ry, 0deg))
+    rotate(var(--rot))
     scale(var(--scale));
   transform-style: preserve-3d;
   transition:
@@ -454,7 +454,7 @@ a:hover {
    so the tilt follows the mouse instead of bouncing behind it. */
 .friend-card.is-tilting {
   transition:
-    transform 70ms linear,
+    transform 50ms linear,
     box-shadow 0.3s ease,
     background 0.3s ease,
     color 0.3s ease,
