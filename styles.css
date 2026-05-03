@@ -503,20 +503,16 @@ a:hover {
   z-index: 0;
   opacity: 1;
   transition: color 0.3s ease;
-  -webkit-mask-image: radial-gradient(
-    circle 150px at var(--mx) var(--my),
+  -webkit-mask: radial-gradient(
+    circle at var(--mx) var(--my),
     #000 0%,
-    rgba(0, 0, 0, 0.7) 35%,
-    transparent 75%
+    rgba(0, 0, 0, 0) 120px
   );
-  mask-image: radial-gradient(
-    circle 150px at var(--mx) var(--my),
+  mask: radial-gradient(
+    circle at var(--mx) var(--my),
     #000 0%,
-    rgba(0, 0, 0, 0.7) 35%,
-    transparent 75%
+    rgba(0, 0, 0, 0) 120px
   );
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
 }
 .friend-card-avatar,
 .friend-card-eyebrow,

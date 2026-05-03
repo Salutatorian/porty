@@ -120,7 +120,7 @@
         var rot = Math.floor(rand() * 80 - 40);
         var op = (0.6 + rand() * 0.4).toFixed(2);
         html +=
-          '<svg viewBox="0 0 24 24" width="' + size + '" height="' + size +
+          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="' + size + '" height="' + size +
           '" style="position:absolute;left:' + x + '%;top:' + y +
           '%;transform:translate(-50%,-50%) rotate(' + rot +
           'deg);opacity:' + op + ';">' + ICON_GLYPHS[key] + "</svg>";
