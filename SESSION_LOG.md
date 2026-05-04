@@ -1034,4 +1034,4 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 ## 2026-05-04 — Push GitHub / Vercel
 
 ### Handoff
-- User asked to push so **GitHub + Vercel** update. **`main`** was already **up to date** with **`origin/main`** (clean working tree); **`git push origin main`** reported **Everything up-to-date** (latest **`ca8f7da`** already on remote). Vercel Production should auto-build from **`Salutatorian/porty`** on each push — if a deploy is missing, use **Vercel Dashboard → Redeploy** or push an empty commit only if needed.
+- User asked again to push **GitHub + Vercel**. **`git status`** clean, **`git push origin main`** → **Everything up-to-date**; **`origin/main`** at **`85d5344`**. Vercel should auto-deploy from **`Salutatorian/porty`**; if no new build appears (no new commits), open **Vercel → Redeploy** for the latest Production deployment.
