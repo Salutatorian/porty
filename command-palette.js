@@ -26,14 +26,6 @@
       keywords: "books movies photos videos media"
     },
     {
-      label: "Tools",
-      href: "/tools",
-      icon: "wrench",
-      group: "Navigation",
-      subtitle: "Raw convert, utilities & labs",
-      keywords: "tools raw convert photo utilities"
-    },
-    {
       label: "Training",
       href: "/training",
       icon: "chart",

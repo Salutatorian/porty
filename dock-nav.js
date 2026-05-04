@@ -13,7 +13,6 @@
     "/": "Home",
     "/media": "Media",
     "/#work": "Projects",
-    "/tools": "Tools",
     "/training": "Training",
     "#credits-overlay": "Credits",
     "/admin": "Admin",

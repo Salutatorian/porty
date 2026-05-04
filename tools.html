@@ -15,6 +15,34 @@
     <script>
       (function(){var k='greater-engine-theme';try{var t=localStorage.getItem(k);if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
     </script>
+    <script>
+      (function () {
+        try {
+          if (new URLSearchParams(location.search).get("embed") === "1") {
+            document.documentElement.classList.add("tools-embed");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      html.tools-embed .site-logo,
+      html.tools-embed .site-shell--tools aside.sidebar,
+      html.tools-embed .site-shell--tools .header-actions {
+        display: none !important;
+      }
+      html.tools-embed .site-shell--tools .main {
+        padding-top: max(20px, env(safe-area-inset-top));
+        padding-left: max(16px, env(safe-area-inset-left));
+        padding-right: max(16px, env(safe-area-inset-right));
+        padding-bottom: max(24px, env(safe-area-inset-bottom));
+      }
+      html.tools-embed .page-tools .ge-page-header {
+        display: none !important;
+      }
+      html.tools-embed .about-blocks {
+        margin-top: 0;
+      }
+    </style>
   </head>
   <body>
     <a href="/" class="site-logo" aria-label="Greater Engine — home"><span class="site-logo-mark" aria-hidden="true"></span></a>
@@ -27,7 +55,6 @@
           <a href="/" class="nav-link">home</a>
           <a href="/media" class="nav-link">media</a>
           <a href="/#work" class="nav-link">projects</a>
-          <a href="/tools" class="nav-link active">tools</a>
           <a href="/training" class="nav-link">training</a>
           <a href="#credits-overlay" class="nav-link">credits</a>
           <a href="#search" class="nav-link nav-link--dock-action" data-dock-action="search" aria-label="Search"></a>
@@ -89,7 +116,6 @@
             <a href="/media" class="mobile-nav-link">media</a>
             <a href="/#work" class="mobile-nav-link">projects</a>
             <a href="/writing" class="mobile-nav-link">writing</a>
-            <a href="/tools" class="mobile-nav-link active">tools</a>
             <a href="/training" class="mobile-nav-link">training</a>
             <a href="#credits-overlay" class="mobile-nav-link">credits</a>
             <a href="/admin" class="mobile-nav-link">admin</a>

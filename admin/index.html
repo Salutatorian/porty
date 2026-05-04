@@ -7,7 +7,7 @@
     <link rel="apple-touch-icon" href="/ge-icon-180x180.png?v=2">
     <link rel="manifest" href="/site.webmanifest?v=2">
 
-    <title>Admin · The Greater Engine</title>
+    <title>Studio · Greater Engine</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Inter:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
@@ -24,12 +24,13 @@
     <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet" />
     <style>
       /* ---- admin shell ---- */
-      .admin-page {
-        max-width: min(100%, 980px);
+      .studio-form-surface.admin-page-inner {
+        max-width: none;
+        width: 100%;
         margin: 0 auto;
-        padding: 112px 32px max(120px, calc(96px + env(safe-area-inset-bottom)));
+        padding: 20px max(26px, env(safe-area-inset-right)) max(96px, calc(40px + env(safe-area-inset-bottom))) max(26px, env(safe-area-inset-left));
         font-family: var(--font-main), system-ui, -apple-system, sans-serif;
-        min-height: 100vh;
+        min-height: 0;
         box-sizing: border-box;
       }
 
@@ -108,45 +109,45 @@
       }
 
       /* ---- typography ---- */
-      .admin-page h2 {
+      .studio-form-surface h2 {
         font-size: 0.85rem; margin: 32px 0 12px; color: var(--text);
         font-weight: 600; letter-spacing: -0.01em;
       }
-      .admin-page label {
+      .studio-form-surface label {
         display: block; font-size: 12px; margin-bottom: 6px;
         color: var(--text-muted); font-weight: 500; letter-spacing: 0.03em;
         text-transform: uppercase;
       }
 
       /* ---- inputs ---- */
-      .admin-page input, .admin-page select, .admin-page textarea {
+      .studio-form-surface input, .admin-page select, .admin-page textarea {
         width: 100%; padding: 10px 14px; margin-bottom: 16px;
         border: 1px solid var(--border); border-radius: 10px;
         background: var(--bg); color: var(--text);
         font-size: 14px; box-sizing: border-box; font-family: inherit;
         transition: border-color 0.2s ease, box-shadow 0.2s ease;
       }
-      .admin-page input:focus, .admin-page select:focus, .admin-page textarea:focus {
+      .studio-form-surface input:focus, .admin-page select:focus, .admin-page textarea:focus {
         outline: none; border-color: var(--text-muted);
         box-shadow: 0 0 0 3px rgba(128, 128, 128, 0.08);
       }
-      .admin-page input::placeholder, .admin-page textarea::placeholder {
+      .studio-form-surface input::placeholder, .admin-page textarea::placeholder {
         color: var(--text-muted); opacity: 0.5;
       }
-      .admin-page input[type="file"] { padding: 10px; }
-      .admin-page textarea { min-height: 80px; resize: vertical; }
+      .studio-form-surface input[type="file"] { padding: 10px; }
+      .studio-form-surface textarea { min-height: 80px; resize: vertical; }
 
       /* ---- buttons ---- */
-      .admin-page button {
+      .studio-form-surface button {
         padding: 10px 22px; background: var(--text); color: var(--bg);
         border: none; border-radius: 10px; font-weight: 600; cursor: pointer;
         font-family: inherit; font-size: 13px; letter-spacing: 0.01em;
         min-height: 44px; -webkit-tap-highlight-color: transparent;
         transition: opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
       }
-      .admin-page button:hover { opacity: 0.88; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
-      .admin-page button:active { transform: translateY(0); box-shadow: none; }
-      .admin-page button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+      .studio-form-surface button:hover { opacity: 0.88; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+      .studio-form-surface button:active { transform: translateY(0); box-shadow: none; }
+      .studio-form-surface button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
 
       /* ---- logout ---- */
       .admin-logout { position: absolute; top: 48px; right: 32px; }
@@ -157,9 +158,9 @@
       .admin-logout button:hover { color: #dc2626; border-color: #dc2626; background: transparent; transform: none; box-shadow: none; }
 
       /* ---- messages ---- */
-      .admin-page .msg { margin-top: 12px; font-size: 13px; font-weight: 500; }
-      .admin-page .msg.err { color: #dc2626; }
-      .admin-page .msg.ok { color: #16a34a; }
+      .studio-form-surface .msg { margin-top: 12px; font-size: 13px; font-weight: 500; }
+      .studio-form-surface .msg.err { color: #dc2626; }
+      .studio-form-surface .msg.ok { color: #16a34a; }
 
       /* ---- writing audio waveform trimmer ---- */
       .audio-trim-panel {
@@ -277,114 +278,262 @@
       .audio-trim-fallback summary { cursor: pointer; font-size: 12px; color: var(--text-muted); }
       .audio-trim-fallback[open] summary { margin-bottom: 8px; }
 
-      /* ---- OTP login — themed to match site tokens (Home-style card) ---- */
-      .admin-login {
-        margin: 0 auto 32px; max-width: 430px; text-align: left;
-        padding: 0; background: transparent;
-      }
-      .admin-login-card {
-        border-radius: 24px; padding: 32px 28px;
-        background: var(--bg-alt);
+      body.studio-body {
+        margin: 0;
+        background-color: var(--bg);
+        background-image: var(--surface-atmosphere);
+        background-attachment: fixed;
         color: var(--text);
+      }
+      body.studio-body .site-shell { display: contents; }
+
+      /* ---- Studio password gate ---- */
+      .studio-login-shell {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px 20px 48px;
+        box-sizing: border-box;
+      }
+      .studio-login-shell[hidden],
+      #studio-dashboard[hidden] { display: none !important; }
+      .studio-login-back {
+        position: fixed;
+        top: calc(16px + env(safe-area-inset-top));
+        left: calc(16px + env(safe-area-inset-left));
+        z-index: 2;
+        font-size: 13px;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: color 0.15s ease;
+      }
+      .studio-login-back:hover {
+        color: var(--text);
+      }
+      .studio-login-card {
+        width: 100%;
+        max-width: 380px;
+        border-radius: 20px;
+        padding: 30px 28px 26px;
+        background: color-mix(in srgb, var(--bg-alt) 92%, var(--border) 8%);
         border: 1px solid var(--border);
-        box-shadow: 0 26px 80px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.08);
       }
-      [data-theme="dark"] .admin-login-card {
-        box-shadow: 0 26px 80px rgba(0, 0, 0, 0.35);
+      [data-theme="dark"] .studio-login-card {
+        background: rgba(10, 20, 38, 0.55);
+        box-shadow: 0 28px 64px rgba(0, 0, 0, 0.4);
       }
-      .admin-login label {
-        color: var(--text-muted); text-align: left;
-        font-family: var(--font-dot);
-        font-size: 11px;
-        letter-spacing: 0.18em;
+      .studio-login-mark {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 18px;
+      }
+      .studio-login-mark .site-logo-mark {
+        width: 48px;
+        height: 48px;
+      }
+      .studio-login-heading {
+        margin: 0 0 18px;
+        text-align: center;
+        font-size: 17px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: var(--text);
+      }
+      .studio-login-field-label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text-muted);
+        font-size: 10px;
+        letter-spacing: 0.2em;
         text-transform: lowercase;
       }
-      .admin-login input {
-        margin-bottom: 16px;
-        background: var(--bg); color: var(--text);
-        border-color: var(--border);
-      }
-      .admin-login input:focus {
-        border-color: var(--text-muted);
-        box-shadow: 0 0 0 3px rgba(128, 128, 128, 0.12);
-      }
-      .admin-login button {
+      .studio-login-input {
         width: 100%;
-        background: var(--text); color: var(--bg);
+        box-sizing: border-box;
+        padding: 12px 14px;
+        margin-bottom: 16px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text);
+        font-size: 15px;
+        font-family: inherit;
       }
-      .admin-login button:hover { opacity: 0.9; }
-      .admin-login-step[hidden] { display: none !important; }
-      .otp-art {
-        width: 96px; height: 96px; border-radius: 50%; margin: 0 auto 20px;
-        display: grid; place-items: center; position: relative;
-        background:
-          radial-gradient(circle at 32% 24%,
-            rgba(255, 255, 255, 0.9) 0 8%,
-            rgba(168, 198, 224, 0.55) 9% 32%,
-            rgba(74, 144, 226, 0.55) 33% 62%,
-            rgba(22, 52, 94, 0.85) 63% 100%);
-        box-shadow:
-          inset 0 0 0 6px rgba(255, 255, 255, 0.06),
-          0 10px 32px rgba(74, 144, 226, 0.18);
+      .studio-login-input:focus {
+        outline: none;
+        border-color: var(--text-muted);
+        box-shadow: 0 0 0 3px rgba(128, 128, 128, 0.1);
       }
-      [data-theme="light"] .otp-art,
-      :root:not([data-theme="dark"]) .otp-art {
-        box-shadow:
-          inset 0 0 0 6px rgba(255, 255, 255, 0.35),
-          0 10px 32px rgba(74, 144, 226, 0.22);
+      .studio-login-submit {
+        width: 100%;
+        padding: 12px 18px;
+        border-radius: 12px;
+        border: none;
+        background: var(--text);
+        color: var(--bg);
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: opacity 0.15s ease, transform 0.15s ease;
       }
-      .otp-art::after {
-        content: ""; width: 30px; height: 20px;
-        border-left: 5px solid #fff; border-bottom: 5px solid #fff;
-        transform: rotate(-45deg) translate(2px, -3px); border-radius: 2px;
+      .studio-login-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+      .studio-login-msg {
+        margin: 12px 0 0 !important;
+        min-height: 1.35em;
+        text-align: center;
+        font-size: 13px;
       }
-      .otp-title {
-        margin: 0 0 8px; text-align: center; font-size: 28px;
-        letter-spacing: -0.03em; line-height: 1.05;
+
+      /* ---- Dashboard shell ---- */
+      .studio-dashboard {
+        display: flex;
+        width: 100%;
+        max-width: 100%;
+        min-height: 100vh;
+        overflow: hidden;
+      }
+      .studio-sidebar {
+        flex-shrink: 0;
+        width: 192px;
+        padding: 20px 10px calc(96px + env(safe-area-inset-bottom));
+        border-right: 1px solid var(--border);
+        background: color-mix(in srgb, var(--bg-alt) 88%, transparent);
+        box-sizing: border-box;
+      }
+      .studio-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-top: 8px;
+      }
+      .studio-nav-item {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        text-align: left;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        font-family: var(--font-dot);
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        transition: background 0.14s ease, color 0.14s ease;
+      }
+      .studio-nav-item:hover {
+        background: rgba(0, 0, 0, 0.04);
         color: var(--text);
       }
-      .otp-helper {
-        margin: 0 0 22px; text-align: center; color: var(--text-muted);
-        font-size: 14px; line-height: 1.55;
+      [data-theme="dark"] .studio-nav-item:hover {
+        background: rgba(255, 255, 255, 0.05);
       }
-      .otp-email-row {
-        margin: -8px 0 18px; text-align: center; font-size: 13px;
+      .studio-nav-item.active {
+        background: color-mix(in srgb, var(--text) 8%, transparent);
+        color: var(--text);
+      }
+      .studio-main-column {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        max-height: 100vh;
+        overflow: hidden;
+      }
+      .studio-dash-header {
+        flex-shrink: 0;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 22px 14px;
+        border-bottom: 1px solid var(--border);
+        background: color-mix(in srgb, var(--bg) 96%, transparent);
+      }
+      .studio-dash-title {
+        margin: 0;
+        font-size: clamp(17px, 2.2vw, 22px);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        color: var(--text);
+      }
+      .studio-dash-tagline {
+        margin: 4px 0 0;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: lowercase;
         color: var(--text-muted);
       }
-      .otp-code-row {
-        display: flex; justify-content: center; gap: 8px; margin-bottom: 16px;
+      .studio-dash-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
       }
-      .admin-page .otp-input {
-        width: 48px; height: 54px; margin: 0; padding: 0;
-        text-align: center; font-size: 24px; font-weight: 700;
-        border-radius: 14px;
-        background: var(--bg); color: var(--text);
+      .studio-logout-btn {
+        padding: 8px 14px;
+        min-height: 36px;
+        border-radius: 10px;
         border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text-muted);
+        font-size: 11px;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: color 0.15s ease, border-color 0.15s ease;
       }
-      .admin-page .otp-input:focus {
-        border-color: var(--text-muted);
-        box-shadow: 0 0 0 3px rgba(128, 128, 128, 0.12);
+      .studio-logout-btn:hover {
+        color: #dc2626;
+        border-color: #dc2626;
       }
-      .otp-dots {
-        display: flex; justify-content: center; gap: 8px; margin-bottom: 18px;
+
+      .studio-form-surface {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
       }
-      .otp-dots span {
-        width: 6px; height: 6px; border-radius: 999px; background: var(--border);
+
+      .studio-tools-card {
+        max-width: 960px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 20px 22px;
+        background: color-mix(in srgb, var(--bg-alt) 90%, transparent);
       }
-      .otp-help {
-        display: flex; justify-content: center; gap: 6px; margin-top: 18px;
-        font-size: 13px; color: var(--text-muted);
+      .studio-tools-iframe {
+        width: 100%;
+        min-height: min(560px, 72vh);
+        border: none;
+        border-radius: 12px;
+        background: var(--bg);
+        overflow: hidden;
       }
-      .otp-help a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
-      .otp-verified {
-        text-align: center; padding-top: 4px;
-      }
-      .otp-verified[hidden] { display: none !important; }
-      .admin-login.is-shaking .otp-code-row { animation: otp-shake 0.28s ease; }
-      @keyframes otp-shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-8px); }
-        75% { transform: translateX(8px); }
+
+      @media (max-width: 840px) {
+        .studio-dashboard { flex-direction: column; overflow: visible; max-height: none; }
+        .studio-sidebar {
+          width: 100%;
+          border-right: none;
+          border-bottom: 1px solid var(--border);
+          padding: 14px 12px calc(86px + env(safe-area-inset-bottom));
+        }
+        .studio-nav {
+          flex-direction: row;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        .studio-nav-item {
+          flex: 1 1 44%;
+          justify-content: center;
+        }
+        .studio-main-column { max-height: none; overflow: visible; }
       }
       .admin-form { display: none; }
       .admin-form.visible { display: block; }
@@ -400,64 +549,64 @@
       .admin-media-subtabs-bar { display: none; align-items: center; flex-shrink: 0; }
       .admin-media-subtabs-bar.is-visible { display: flex; }
 
-      .admin-page .admin-tabs--segmented,
-      .admin-page .admin-project-subtabs--segmented,
-      .admin-page .admin-media-subtabs--segmented {
+      .studio-form-surface .admin-tabs--segmented,
+      .studio-form-surface .admin-project-subtabs--segmented,
+      .studio-form-surface .admin-media-subtabs--segmented {
         display: inline-flex; flex-wrap: nowrap;
         border: 1px solid var(--border); border-radius: 10px;
         overflow: hidden; background: var(--bg-alt); padding: 3px;
         gap: 2px;
       }
-      .admin-page .admin-project-subtabs--segmented { margin-bottom: 20px; }
+      .studio-form-surface .admin-project-subtabs--segmented { margin-bottom: 20px; }
 
-      .admin-page .admin-tabs--segmented button.admin-tab,
-      .admin-page .admin-project-subtabs--segmented button.admin-project-subtab,
-      .admin-page .admin-media-subtabs--segmented button.admin-media-subtab {
+      .studio-form-surface .admin-tabs--segmented button.admin-tab,
+      .studio-form-surface .admin-project-subtabs--segmented button.admin-project-subtab,
+      .studio-form-surface .admin-media-subtabs--segmented button.admin-media-subtab {
         border: none; border-radius: 8px; margin: 0; min-height: 36px;
         padding: 6px 16px; background: transparent; color: var(--text-muted);
         font-size: 13px; font-weight: 500; cursor: pointer;
         transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
       }
-      .admin-page .admin-project-subtabs--segmented button.admin-project-subtab {
+      .studio-form-surface .admin-project-subtabs--segmented button.admin-project-subtab {
         font-size: 12px; padding: 6px 14px;
       }
-      .admin-page .admin-tabs--segmented button.admin-tab { padding: 6px 18px; }
+      .studio-form-surface .admin-tabs--segmented button.admin-tab { padding: 6px 18px; }
 
       /* remove old dividers between tabs */
-      .admin-page .admin-tabs--segmented button.admin-tab:not(:last-child),
-      .admin-page .admin-project-subtabs--segmented button.admin-project-subtab:not(:last-child),
-      .admin-page .admin-media-subtabs--segmented button.admin-media-subtab:not(:last-child) {
+      .studio-form-surface .admin-tabs--segmented button.admin-tab:not(:last-child),
+      .studio-form-surface .admin-project-subtabs--segmented button.admin-project-subtab:not(:last-child),
+      .studio-form-surface .admin-media-subtabs--segmented button.admin-media-subtab:not(:last-child) {
         border-right: none;
       }
 
-      .admin-page .admin-tabs--segmented button.admin-tab:hover:not(.active),
-      .admin-page .admin-project-subtabs--segmented button.admin-project-subtab:hover:not(.active),
-      .admin-page .admin-media-subtabs--segmented button.admin-media-subtab:hover:not(.active) {
+      .studio-form-surface .admin-tabs--segmented button.admin-tab:hover:not(.active),
+      .studio-form-surface .admin-project-subtabs--segmented button.admin-project-subtab:hover:not(.active),
+      .studio-form-surface .admin-media-subtabs--segmented button.admin-media-subtab:hover:not(.active) {
         color: var(--text); background: var(--bg);
       }
-      .admin-page .admin-tabs--segmented button.admin-tab.active,
-      .admin-page .admin-project-subtabs--segmented button.admin-project-subtab.active,
-      .admin-page .admin-media-subtabs--segmented button.admin-media-subtab.active {
+      .studio-form-surface .admin-tabs--segmented button.admin-tab.active,
+      .studio-form-surface .admin-project-subtabs--segmented button.admin-project-subtab.active,
+      .studio-form-surface .admin-media-subtabs--segmented button.admin-media-subtab.active {
         background: var(--text); color: var(--bg);
         box-shadow: 0 1px 4px rgba(0,0,0,0.15); border-radius: 8px;
       }
-      .admin-page .admin-tabs--segmented button.admin-tab.active:hover,
-      .admin-page .admin-project-subtabs--segmented button.admin-project-subtab.active:hover,
-      .admin-page .admin-media-subtabs--segmented button.admin-media-subtab.active:hover {
+      .studio-form-surface .admin-tabs--segmented button.admin-tab.active:hover,
+      .studio-form-surface .admin-project-subtabs--segmented button.admin-project-subtab.active:hover,
+      .studio-form-surface .admin-media-subtabs--segmented button.admin-media-subtab.active:hover {
         opacity: 0.95; color: var(--bg);
       }
 
       @media (max-width: 560px) {
         .admin-nav-row { flex-direction: column; align-items: stretch; }
         .admin-nav-row .admin-tabs--segmented { width: 100%; }
-        .admin-page .admin-tabs--segmented button.admin-tab {
+        .studio-form-surface .admin-tabs--segmented button.admin-tab {
           flex: 1; min-width: 0; padding: 6px 8px; font-size: 12px;
         }
         .admin-media-subtabs-bar.is-visible { width: 100%; }
-        .admin-page .admin-media-subtabs--segmented { width: 100%; }
-        .admin-page .admin-media-subtabs--segmented button.admin-media-subtab { flex: 1; text-align: center; }
-        .admin-page .admin-project-subtabs--segmented { width: 100%; }
-        .admin-page .admin-project-subtabs--segmented button.admin-project-subtab { flex: 1; text-align: center; }
+        .studio-form-surface .admin-media-subtabs--segmented { width: 100%; }
+        .studio-form-surface .admin-media-subtabs--segmented button.admin-media-subtab { flex: 1; text-align: center; }
+        .studio-form-surface .admin-project-subtabs--segmented { width: 100%; }
+        .studio-form-surface .admin-project-subtabs--segmented button.admin-project-subtab { flex: 1; text-align: center; }
       }
 
       /* ---- panes ---- */
@@ -473,10 +622,10 @@
       .admin-pane .admin-writings-layout > div > h2:first-child,
       .admin-pane .admin-photos-layout > div > h2:first-child { margin-top: 0; }
 
-      .admin-page .project-item,
-      .admin-page .photo-item,
-      .admin-page .video-item,
-      .admin-page .writing-item { border-radius: 10px; }
+      .studio-form-surface .project-item,
+      .studio-form-surface .photo-item,
+      .studio-form-surface .video-item,
+      .studio-form-surface .writing-item { border-radius: 10px; }
 
       /* ---- media subpanes ---- */
       .admin-media-subpane { display: none; }
@@ -621,11 +770,11 @@
 
       /* ---- mobile ---- */
       @media (max-width: 480px) {
-        .admin-page { padding: 24px 16px; padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+        .studio-form-surface.admin-page-inner { padding: 24px 16px; padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
         .admin-header { flex-direction: column; align-items: flex-start; gap: 16px; }
         .admin-header-right { width: 100%; justify-content: space-between; }
         .admin-logout { position: static; }
-        .admin-page input, .admin-page select, .admin-page textarea { font-size: 16px; }
+        .studio-form-surface input, .admin-page select, .admin-page textarea { font-size: 16px; }
         .admin-projects-layout > div:first-child,
         .admin-writings-layout > div:first-child,
         .admin-photos-layout > div:first-child { padding: 16px; border-radius: 10px; }
@@ -634,89 +783,55 @@
       }
     </style>
   </head>
-  <body>
-    <a href="/" class="site-logo" aria-label="Greater Engine — home"><span class="site-logo-mark" aria-hidden="true"></span></a>
-    <div class="admin-page">
-      <div class="admin-header">
-        <div class="admin-header-left">
-          <p class="admin-back"><a href="/">← back to site</a></p>
-          <h1>Admin</h1>
-          <p class="admin-tagline">manage content</p>
-        </div>
-        <div class="admin-header-right">
-          <div class="admin-logout" id="admin-logout-wrap" style="display:none">
-            <button type="button" id="logout-btn">Log out</button>
-          </div>
-          <button type="button" class="admin-theme-toggle" id="admin-theme-toggle" aria-label="Toggle theme">
-            <span class="admin-sun" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z"/></svg></span>
-            <span class="admin-moon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z"/></svg></span>
-          </button>
-        </div>
+  <body class="studio-body">
+    <div id="studio-login-shell" class="studio-login-shell">
+      <a href="/" class="studio-login-back font-dot" aria-label="Back to site">←</a>
+      <div class="studio-login-card">
+        <div class="studio-login-mark" aria-hidden="true"><span class="site-logo-mark"></span></div>
+        <h1 class="studio-login-heading">Studio access</h1>
+        <label class="studio-login-field-label" for="studio-password">password</label>
+        <input type="password" id="studio-password" autocomplete="current-password" class="studio-login-input" />
+        <button type="button" id="studio-unlock-btn" class="studio-login-submit">Unlock</button>
+        <p id="studio-login-msg" class="studio-login-msg msg" role="status"></p>
       </div>
+    </div>
 
-      <div id="login-form" class="admin-login">
-        <div class="admin-login-card">
-          <div id="otp-email-step" class="admin-login-step">
-            <div class="otp-art" aria-hidden="true"></div>
-            <h2 class="otp-title">Admin access</h2>
-            <p class="otp-helper">Enter an email to start the demo OTP flow. No email is sent; use the configured demo code on the next screen.</p>
-            <label for="admin-email">Email</label>
-            <input type="email" id="admin-email" placeholder="you@example.com" autocomplete="email" />
-            <button type="button" id="otp-email-btn">Send demo code</button>
-            <p class="msg" id="login-msg"></p>
+    <div id="studio-dashboard" class="studio-dashboard" hidden>
+      <aside class="studio-sidebar" aria-label="Studio sections">
+        <nav class="studio-nav font-dot" role="tablist">
+          <button type="button" class="studio-nav-item active" role="tab" data-studio-pane="projects" aria-selected="true">Projects</button>
+          <button type="button" class="studio-nav-item" role="tab" data-studio-pane="writing" aria-selected="false">Writing</button>
+          <button type="button" class="studio-nav-item" role="tab" data-studio-pane="photos" aria-selected="false">Photos</button>
+          <button type="button" class="studio-nav-item" role="tab" data-studio-pane="media" aria-selected="false">Media</button>
+          <button type="button" class="studio-nav-item" role="tab" data-studio-pane="tools" aria-selected="false">Tools</button>
+          <button type="button" class="studio-nav-item" role="tab" data-studio-pane="settings" aria-selected="false">Settings</button>
+        </nav>
+      </aside>
+      <div class="studio-main-column">
+        <header class="studio-dash-header">
+          <div>
+            <h1 class="studio-dash-title">Greater Engine Studio</h1>
+            <p class="studio-dash-tagline font-dot">edit site content</p>
           </div>
-          <div id="otp-code-step" class="admin-login-step" hidden>
-            <div class="otp-art" aria-hidden="true"></div>
-            <h2 class="otp-title">Enter the code</h2>
-            <p class="otp-helper">Use the 5-digit demo code to verify this admin session.</p>
-            <p class="otp-email-row" id="otp-email-display"></p>
-            <div class="otp-code-row" id="otp-code-row" aria-label="One-time passcode">
-              <input class="otp-input" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 1" />
-              <input class="otp-input" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 2" />
-              <input class="otp-input" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 3" />
-              <input class="otp-input" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 4" />
-              <input class="otp-input" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 5" />
-            </div>
-            <div class="otp-dots" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
-            <button type="button" id="otp-verify-btn">Verify</button>
-            <p class="msg" id="otp-msg"></p>
-            <p class="otp-help">Need Help? <a href="mailto:contactjoshuawaldo@gmail.com">Contact us</a></p>
+          <div class="studio-dash-actions">
+            <button type="button" class="admin-theme-toggle" id="admin-theme-toggle" aria-label="Toggle theme">
+              <span class="admin-sun" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z"/></svg></span>
+              <span class="admin-moon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69a.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z"/></svg></span>
+            </button>
+            <button type="button" class="studio-logout-btn" id="logout-btn">Log out</button>
           </div>
-          <div id="otp-verified" class="otp-verified" hidden>
-            <div class="otp-art" aria-hidden="true"></div>
-            <h2 class="otp-title">Verified</h2>
-            <p class="otp-helper">Demo code accepted. Enter the existing admin password once so content saves still use the protected API.</p>
-            <label for="admin-password-after-otp">Admin password</label>
-            <input type="password" id="admin-password-after-otp" placeholder="Existing admin password" autocomplete="current-password" />
-            <button type="button" id="admin-password-unlock-btn">Open dashboard</button>
-            <p class="msg" id="admin-password-msg"></p>
-          </div>
-        </div>
-      </div>
+        </header>
 
-      <div id="admin-forms" class="admin-form">
-        <div class="admin-nav-row">
-        <div class="admin-tabs admin-tabs--segmented" role="tablist">
-          <button type="button" class="admin-tab active" role="tab" data-pane="portfolio" aria-selected="true">Portfolio</button>
-          <button type="button" class="admin-tab" role="tab" data-pane="media" aria-selected="false">Media</button>
-          <button type="button" class="admin-tab" role="tab" data-pane="writings" aria-selected="false">Writings</button>
-        </div>
-        <div id="admin-media-subtabs-bar" class="admin-media-subtabs-bar" aria-hidden="true">
-          <div class="admin-media-subtabs admin-media-subtabs--segmented" role="tablist" aria-label="Photos or videos">
-            <button type="button" class="admin-media-subtab active" role="tab" aria-selected="true" data-media-sub="photos">Photos</button>
-            <button type="button" class="admin-media-subtab" role="tab" aria-selected="false" data-media-sub="videos">Videos</button>
-          </div>
-        </div>
-        </div>
+        <div id="admin-forms" class="admin-form studio-form-surface admin-page-inner">
+        <div id="pane-projects" class="admin-pane studio-pane active">
         <div class="admin-homepage-projects-banner" style="margin-bottom: 28px; padding: 16px 20px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-alt); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;">
           <div style="min-width: 0;">
             <p class="font-dot" style="font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 6px;">Homepage</p>
             <p style="margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -0.02em;">Projects section (Current / Future)</p>
-            <p style="margin: 6px 0 0; font-size: 13px; color: var(--text-muted); line-height: 1.45;">Edit the projects on the home page. This is separate from the <strong>Portfolio</strong> code projects tab.</p>
+            <p style="margin: 6px 0 0; font-size: 13px; color: var(--text-muted); line-height: 1.45;">Edit the projects on the home page (separate from portfolio code builds below).</p>
           </div>
           <a href="/admin/home-projects" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; background: var(--text); color: var(--bg); text-decoration: none; border-radius: 10px; font-size: 13px; font-weight: 600; white-space: nowrap;">Open editor →</a>
         </div>
-        <div id="pane-portfolio" class="admin-pane active">
         <div class="admin-projects-layout">
         <div>
         <h2>Add portfolio project</h2>
@@ -757,8 +872,7 @@
         </div>
         </div>
         </div>
-        <div id="pane-media" class="admin-pane">
-        <div id="admin-media-photos" class="admin-media-subpane active">
+        <div id="pane-photos" class="admin-pane studio-pane">
         <div class="admin-photos-layout">
         <div>
         <h2>Add photo</h2>
@@ -793,7 +907,17 @@
         </div>
         </div>
         </div>
-        <div id="admin-media-videos" class="admin-media-subpane">
+        <div id="pane-media" class="admin-pane studio-pane">
+        <p class="font-dot" style="font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 8px;">library</p>
+        <p style="margin: 0 0 20px; font-size: 13px; color: var(--text-muted); line-height: 1.45;">Videos below. Books and movies syndicate from external feeds — open public pages when you want to QA what visitors see.</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px 12px; margin-bottom: 24px;">
+          <a href="/media" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); text-decoration: none; font-size: 13px; color: inherit;">Media hub →</a>
+          <a href="/photos" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); text-decoration: none; font-size: 13px; color: inherit;">Photos →</a>
+          <a href="/videos" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); text-decoration: none; font-size: 13px; color: inherit;">Videos →</a>
+          <a href="/books" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); text-decoration: none; font-size: 13px; color: inherit;">Books →</a>
+          <a href="/movies" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); text-decoration: none; font-size: 13px; color: inherit;">Movies →</a>
+        </div>
+        <div id="admin-media-videos">
         <div class="admin-photos-layout">
         <div>
         <h2>Add video</h2>
@@ -818,7 +942,7 @@
         </div>
         </div>
         </div>
-        <div id="pane-writings" class="admin-pane">
+        <div id="pane-writing" class="admin-pane studio-pane">
         <div class="admin-writings-layout">
         <div>
         <h2>New writing</h2>
@@ -892,6 +1016,29 @@
         </div>
         </div>
         </div>
+
+        <div id="pane-tools" class="admin-pane studio-pane">
+          <div class="studio-tools-card">
+            <p class="font-dot" style="font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 8px;">utilities</p>
+            <h2 style="margin: 0 0 10px; font-size: 1.1rem;">RAW photo converter</h2>
+            <p style="margin: 0 0 16px; font-size: 13px; color: var(--text-muted); line-height: 1.45;">Runs entirely in-browser (COOP/COEP). Same workflow as <a href="/tools">/tools</a> · slim chrome inside Studio.</p>
+            <iframe class="studio-tools-iframe" src="/tools?embed=1" title="RAW photo converter" loading="lazy"></iframe>
+          </div>
+        </div>
+
+        <div id="pane-settings" class="admin-pane studio-pane">
+          <div style="max-width: 620px; border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; background: color-mix(in srgb, var(--bg-alt) 92%, transparent);">
+            <p class="font-dot" style="font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 8px;">settings</p>
+            <p style="margin: 0 0 14px; font-size: 14px; line-height: 1.55; color: var(--text); font-weight: 500;">Branding helpers &amp; environment</p>
+            <p style="margin: 0; font-size: 13px; line-height: 1.55; color: var(--text-muted);">Site copy, hero, contact, booking embed, sidebar socials, and resume path still ship with the static templates (typically <code>index.html</code> and shared layout snippets). Rotate secrets in Vercel or <code>.env.local</code> — nothing here stores live keys.</p>
+            <ul style="margin: 16px 0 0; padding-left: 1.1rem; font-size: 13px; line-height: 1.55; color: var(--text-muted);">
+              <li><strong>Contact email / Resend</strong> · <code>RESEND_*</code> + optional <code>CONTACT_TO_EMAIL</code></li>
+              <li><strong>Booking</strong> · Cal / Pixel loader in homepage contact grid</li>
+              <li><strong>Resume</strong> · <code>/resume.pdf</code> in repo root</li>
+            </ul>
+          </div>
+        </div>
+      </div>
       </div>
     </div>
 
@@ -900,25 +1047,14 @@
     <script type="module">
       (function(){
         var STORAGE_KEY = "admin_pw";
-        var DEMO_OTP_CODE = "12345";
-        var DEMO_ADMIN_PASSWORD = "";
         var pw = "";
         try { pw = sessionStorage.getItem(STORAGE_KEY) || ""; } catch (e) {}
-        var loginForm = document.getElementById("login-form");
         var adminForms = document.getElementById("admin-forms");
-        var emailStep = document.getElementById("otp-email-step");
-        var codeStep = document.getElementById("otp-code-step");
-        var verifiedStep = document.getElementById("otp-verified");
-        var emailInput = document.getElementById("admin-email");
-        var emailBtn = document.getElementById("otp-email-btn");
-        var emailDisplay = document.getElementById("otp-email-display");
-        var otpInputs = Array.prototype.slice.call(document.querySelectorAll(".otp-input"));
-        var otpVerifyBtn = document.getElementById("otp-verify-btn");
-        var passwordAfterOtp = document.getElementById("admin-password-after-otp");
-        var passwordUnlockBtn = document.getElementById("admin-password-unlock-btn");
-        var passwordMsg = document.getElementById("admin-password-msg");
-        var loginMsg = document.getElementById("login-msg");
-        var otpMsg = document.getElementById("otp-msg");
+        var studioLoginShell = document.getElementById("studio-login-shell");
+        var studioDashboard = document.getElementById("studio-dashboard");
+        var studioPasswordInput = document.getElementById("studio-password");
+        var studioUnlockBtn = document.getElementById("studio-unlock-btn");
+        var studioLoginMsg = document.getElementById("studio-login-msg");
         var logoutBtn = document.getElementById("logout-btn");
         var inactivityTimer = null;
         var INACTIVITY_MS = 4 * 60 * 1000;
@@ -934,7 +1070,14 @@
           try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {}
           if (inactivityTimer) clearTimeout(inactivityTimer);
           inactivityTimer = null;
-          window.location.href = "/";
+          if (adminForms) adminForms.classList.remove("visible");
+          if (studioDashboard) studioDashboard.hidden = true;
+          if (studioLoginShell) studioLoginShell.hidden = false;
+          if (studioPasswordInput) studioPasswordInput.value = "";
+          if (studioLoginMsg) {
+            studioLoginMsg.textContent = "";
+            studioLoginMsg.className = "studio-login-msg msg";
+          }
         }
 
         function resetInactivityTimer() {
@@ -945,29 +1088,12 @@
           }, INACTIVITY_MS);
         }
 
-        function revealAdmin() {
-          if (verifiedStep) verifiedStep.hidden = false;
-          if (emailStep) emailStep.hidden = true;
-          if (codeStep) codeStep.hidden = true;
-          var storedPw = "";
-          try { storedPw = sessionStorage.getItem(STORAGE_KEY) || ""; } catch (e) {}
-          if (storedPw || DEMO_ADMIN_PASSWORD) {
-            pw = storedPw || DEMO_ADMIN_PASSWORD;
-            openDashboard();
-            return;
-          }
-          setTimeout(function() {
-            if (passwordAfterOtp) passwordAfterOtp.focus();
-          }, 120);
-        }
-
         function openDashboard() {
           if (!pw) return;
           try { sessionStorage.setItem(STORAGE_KEY, pw); } catch (e) {}
-          loginForm.style.display = "none";
-          adminForms.classList.add("visible");
-          var logoutWrap = document.getElementById("admin-logout-wrap");
-          if (logoutWrap) logoutWrap.style.display = "";
+          if (studioLoginShell) studioLoginShell.hidden = true;
+          if (studioDashboard) studioDashboard.hidden = false;
+          if (adminForms) adminForms.classList.add("visible");
           loadPhotosForDelete();
           loadVideosForManage();
           loadWritingsForManage();
@@ -977,91 +1103,12 @@
           resetInactivityTimer();
         }
 
-        function clearOtp() {
-          otpInputs.forEach(function(input){ input.value = ""; });
-          if (otpInputs[0]) otpInputs[0].focus();
-        }
-
-        function currentOtp() {
-          return otpInputs.map(function(input){ return input.value; }).join("");
-        }
-
-        function verifyOtp() {
-          if (!otpMsg) return;
-          otpMsg.textContent = "";
-          if (currentOtp() === DEMO_OTP_CODE) {
-            showMsg(otpMsg, "Code verified.", true);
-            revealAdmin();
-            return;
-          }
-          showMsg(otpMsg, "Invalid demo code. Try " + DEMO_OTP_CODE + ".", false);
-          if (loginForm) {
-            loginForm.classList.remove("is-shaking");
-            void loginForm.offsetWidth;
-            loginForm.classList.add("is-shaking");
-          }
-          clearOtp();
-        }
-
-        if (emailBtn) {
-          emailBtn.addEventListener("click", function() {
-            var email = emailInput ? emailInput.value.trim() : "";
-            loginMsg.textContent = "";
-            if (!email || email.indexOf("@") < 1) {
-              showMsg(loginMsg, "Enter an email address to continue.", false);
-              return;
-            }
-            if (emailDisplay) emailDisplay.textContent = email;
-            if (emailStep) emailStep.hidden = true;
-            if (codeStep) codeStep.hidden = false;
-            clearOtp();
-          });
-        }
-
-        if (emailInput) {
-          emailInput.addEventListener("keydown", function(ev) {
-            if (ev.key === "Enter" && emailBtn) {
-              ev.preventDefault();
-              emailBtn.click();
-            }
-          });
-        }
-
-        otpInputs.forEach(function(input, idx) {
-          input.addEventListener("input", function() {
-            input.value = input.value.replace(/\D/g, "").slice(0, 1);
-            if (input.value && otpInputs[idx + 1]) otpInputs[idx + 1].focus();
-            if (currentOtp().length === DEMO_OTP_CODE.length) verifyOtp();
-          });
-          input.addEventListener("keydown", function(ev) {
-            if (ev.key === "Backspace" && !input.value && otpInputs[idx - 1]) {
-              otpInputs[idx - 1].focus();
-            }
-            if (ev.key === "Enter") {
-              ev.preventDefault();
-              verifyOtp();
-            }
-          });
-          input.addEventListener("paste", function(ev) {
-            var text = (ev.clipboardData || window.clipboardData).getData("text").replace(/\D/g, "").slice(0, DEMO_OTP_CODE.length);
-            if (!text) return;
-            ev.preventDefault();
-            otpInputs.forEach(function(el, i){ el.value = text[i] || ""; });
-            if (text.length === DEMO_OTP_CODE.length) verifyOtp();
-            else if (otpInputs[text.length]) otpInputs[text.length].focus();
-          });
-        });
-
-        if (otpVerifyBtn) {
-          otpVerifyBtn.addEventListener("click", verifyOtp);
-        }
-
-        function unlockWithPassword() {
-          if (!passwordAfterOtp || !passwordMsg) return;
-          var nextPw = passwordAfterOtp.value.trim();
-          passwordMsg.textContent = "";
+        function unlockStudio() {
+          if (!studioPasswordInput || !studioLoginMsg) return;
+          var nextPw = studioPasswordInput.value.trim();
+          studioLoginMsg.textContent = "";
           if (!nextPw) {
-            showMsg(passwordMsg, "Enter the existing admin password to save content.", false);
+            showMsg(studioLoginMsg, "Enter your password.", false);
             return;
           }
           fetch("/api/auth", {
@@ -1072,28 +1119,25 @@
             .then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
             .then(function(result){
               if (!result.ok || !result.data.ok) {
-                showMsg(passwordMsg, result.data.error || "Invalid admin password.", false);
-                passwordAfterOtp.focus();
+                showMsg(studioLoginMsg, (result.data && result.data.error) || "Wrong password.", false);
+                studioPasswordInput.focus();
                 return;
               }
               pw = nextPw;
-              showMsg(passwordMsg, "Admin password accepted.", true);
+              studioLoginMsg.textContent = "";
               openDashboard();
             })
             .catch(function(){
-              showMsg(passwordMsg, "Could not reach server. Run locally (npm run dev) or deploy to Vercel.", false);
+              showMsg(studioLoginMsg, "Could not reach server. Run locally or deploy.", false);
             });
         }
 
-        if (passwordUnlockBtn) {
-          passwordUnlockBtn.addEventListener("click", unlockWithPassword);
-        }
-
-        if (passwordAfterOtp) {
-          passwordAfterOtp.addEventListener("keydown", function(ev) {
+        if (studioUnlockBtn) studioUnlockBtn.addEventListener("click", unlockStudio);
+        if (studioPasswordInput) {
+          studioPasswordInput.addEventListener("keydown", function(ev) {
             if (ev.key === "Enter") {
               ev.preventDefault();
-              unlockWithPassword();
+              unlockStudio();
             }
           });
         }
@@ -1123,36 +1167,26 @@
           document.addEventListener(evt, resetInactivityTimer, { passive: true });
         });
 
-        document.querySelectorAll(".admin-tab").forEach(function(btn) {
+        document.querySelectorAll(".studio-nav-item").forEach(function(btn) {
           btn.addEventListener("click", function() {
-            var pane = this.getAttribute("data-pane");
-            document.querySelectorAll(".admin-tab").forEach(function(b) { b.classList.remove("active"); b.setAttribute("aria-selected", "false"); });
+            var pane = this.getAttribute("data-studio-pane");
+            document.querySelectorAll(".studio-nav-item").forEach(function(b) { b.classList.remove("active"); b.setAttribute("aria-selected", "false"); });
             document.querySelectorAll(".admin-pane").forEach(function(p) { p.classList.remove("active"); });
             this.classList.add("active");
             this.setAttribute("aria-selected", "true");
             var el = document.getElementById("pane-" + pane);
             if (el) el.classList.add("active");
-            var mediaBar = document.getElementById("admin-media-subtabs-bar");
-            if (mediaBar) {
-              if (pane === "media") {
-                mediaBar.classList.add("is-visible");
-                mediaBar.setAttribute("aria-hidden", "false");
-              } else {
-                mediaBar.classList.remove("is-visible");
-                mediaBar.setAttribute("aria-hidden", "true");
-              }
-            }
-            if (pane === "portfolio") {
+            if (pane === "projects") {
               loadPortfolioProjectsForManage();
               syncProjectSubtabUI("portfolio");
               initPortfolioDescQuill();
             }
+            if (pane === "photos") loadPhotosForDelete();
             if (pane === "media") {
-              loadPhotosForDelete();
               loadVideosForManage();
               initVideoDescQuill();
             }
-            if (pane === "writings") {
+            if (pane === "writing") {
               initWritingQuill();
               loadWritingsForManage();
               var d = document.getElementById("writing-date");
@@ -1166,26 +1200,6 @@
                 var n = new Date();
                 t.value = String(n.getHours()).padStart(2, "0") + String(n.getMinutes()).padStart(2, "0");
               }
-            }
-          });
-        });
-
-        document.querySelectorAll(".admin-media-subtab").forEach(function (subBtn) {
-          subBtn.addEventListener("click", function () {
-            var sub = subBtn.getAttribute("data-media-sub");
-            document.querySelectorAll(".admin-media-subtab").forEach(function (b) {
-              b.classList.remove("active");
-              b.setAttribute("aria-selected", "false");
-            });
-            subBtn.classList.add("active");
-            subBtn.setAttribute("aria-selected", "true");
-            document.querySelectorAll(".admin-media-subpane").forEach(function (p) { p.classList.remove("active"); });
-            var subPane = document.getElementById("admin-media-" + sub);
-            if (subPane) subPane.classList.add("active");
-            if (sub === "photos") loadPhotosForDelete();
-            if (sub === "videos") {
-              loadVideosForManage();
-              initVideoDescQuill();
             }
           });
         });
@@ -1974,9 +1988,28 @@
           });
         });
 
-        if (pw) {
-          openDashboard();
+        function tryRestoreSession() {
+          if (!pw) return;
+          fetch("/api/auth", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password: pw })
+          })
+            .then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+            .then(function(result){
+              if (!result.ok || !result.data.ok) {
+                pw = "";
+                try { sessionStorage.removeItem(STORAGE_KEY); } catch (e2) {}
+                return;
+              }
+              openDashboard();
+            })
+            .catch(function(){
+              pw = "";
+              try { sessionStorage.removeItem(STORAGE_KEY); } catch (e2) {}
+            });
         }
+        tryRestoreSession();
 
         function loadPhotosForDelete() {
           var list = document.getElementById("photos-list");

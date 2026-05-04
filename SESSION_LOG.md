@@ -999,6 +999,20 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
 ---
 
+## 2026-05-04 — Admin studio: password login, OTP removed, Tools out of dock
+
+### Session Summary
+- **`/admin`:** Finished **OTP → `ADMIN_PASSWORD`** flow: **`POST /api/auth`**, **`sessionStorage.admin_pw`** re-validates on load; **`openDashboard`** toggles **`#studio-login-shell`** / **`#studio-dashboard`**; **logout** clears session and returns to the minimal login (**no redirect**).
+- **Nav:** Sidebar uses **`.studio-nav-item`** + **`data-studio-pane`** → **`pane-projects`** … **`pane-settings`**; **Media** pane no longer pulls photo loader (photos have their own pane).
+- **`tools.html`:** **`?embed=1`** adds **`html.tools-embed`** and hides sidebar/header chrome for the Studio iframe.
+- **Public site:** Removed **`/tools`** from sidebar + mobile nav across pages (script batch); removed dock CSS for **`href="/tools"`**; **`dock-nav.js`** + **`command-palette.js`** no longer advertise Tools as primary nav; **`index.html`** homepage stack dropped the Tools fan card (**media** `<a>` repaired after edit).
+- **Files touched:** `admin/index.html`, `tools.html`, `index.html`, `styles.css`, `dock-nav.js`, `command-palette.js`, about/media/training/… HTML batch, **`SESSION_LOG.md`**.
+
+### Verify
+- Set **`ADMIN_PASSWORD`** in `.env.local` / Vercel → visit **`/admin`** → **Unlock** → Studio sections; **`/tools?embed=1`** in iframe.
+
+---
+
 ## 2026-05-04 — Env vars: Strava fallback, Resend missing on prod, UX hints
 
 ### Handoff / diagnosis
