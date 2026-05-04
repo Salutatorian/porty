@@ -1155,4 +1155,10 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 - **`admin/home-projects.html`** (same **`Log out`** behavior for consistency)
 - **`SESSION_LOG.md`** (this entry)
 
+---
+
+## 2026-05-04 — Push GitHub (Vercel)
+
+### Handoff
+- User requested **push** to update **GitHub** / **Vercel**. **`git push origin main`** on **`Salutatorian/porty`** advanced **`origin/main`** from **`8d3b003`** to **`1085eeb`** (commit message: Admin Studio GE skin, **`/api/settings`**, auth/env, logout → **`/`**, **`writing/**`** updates).
 
