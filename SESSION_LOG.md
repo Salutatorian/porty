@@ -1010,6 +1010,7 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
 ### Verify
 - Set **`ADMIN_PASSWORD`** in `.env.local` / Vercel → visit **`/admin`** → **Unlock** → Studio sections; **`/tools?embed=1`** in iframe.
+- **Pushed:** **`34e6f4d`** to **`origin/main`**.
 
 ---
 
