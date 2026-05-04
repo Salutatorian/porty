@@ -1174,3 +1174,6 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 - **`index.html`**, **`about.html`**, **`books.html`**, **`media.html`**, **`movies.html`**, **`photos.html`**, **`portfolio.html`**, **`tools.html`**, **`training.html`**, **`videos.html`**, **`writing/*.html`**, **`writing/post.html`**
 - **`api/settings.js`**
 - **`SESSION_LOG.md`** (this entry)
+
+### Git
+- Pushed **`f0b80d1`** to **`origin/main`** (after this entry was drafted).
