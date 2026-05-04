@@ -2,6 +2,17 @@
 
 Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
+## 2026-05-05 — npm: transitive `uuid@10` deprecation + `engines`
+
+### Summary
+- **`engines.node`** already **`20.x`** in **`package.json`** (avoids Vercel `>=20` major-float warning once deployed); if Vercel still logs `>=20`, push latest **`package.json`**.
+- **`npm overrides`**: pin **`uuid` → `^11.0.0`** so **`resend → svix`** no longer pulls deprecated **`uuid@10`** (**`uuid@11.1.1`** in tree after **`npm install`**).
+
+### Files touched
+- `package.json`, `package-lock.json`, `SESSION_LOG.md`
+
+---
+
 ## 2026-05-05 — Vercel build warnings: Node `engines`, ignored `memory`
 
 ### Summary
