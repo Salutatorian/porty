@@ -2,6 +2,21 @@
 
 Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
+## 2026-05-04 — Background check: Vercel CLI probe (task finished)
+
+### Handoff
+- Earlier **`command -v vercel`** had no global CLI; **`npx vercel --version`** eventually completed (**53.1.0**, exit **0**) after ~85s (~**npx** download latency). Subsequent deploys used **`npx vercel@latest`** successfully—optional follow-up install global **`npm i -g vercel`** only if user wants **`vercel`** on PATH without npx delay.
+
+---
+
+## 2026-05-04 — Advice: legacy v1 portfolio repo (“friend-otter” vs `porty`)
+
+### Handoff
+- User asked whether to **delete** the older **GitHub repo** for portfolio v1 (name similar to **`friendly-otter`** Vercel project) now that **`Salutatorian/porty`** deploys **`friendly-otter`** / **`thegreaterengine.xyz`**.
+- **Recommendation:** **Do not delete** unless sure everything useful is migrated and optionally backed up. **Prefer GitHub “Archive repository”** (read-only history) — old repo unused does **not** affect prod; deleting only frees mental clutter/repo name risk.
+
+---
+
 ## 2026-05-04 — Vercel: link friendly-otter + production deploy (Hobby 12-fn cap)
 
 ### Session Summary
@@ -947,3 +962,22 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
 ### Verify
 - `node --check script.js` passed; lints clean for `script.js` / `styles.css`.
+
+---
+
+## 2026-05-04 — Production 404 on `thegreaterengine.xyz` (static root)
+
+### Session Summary
+- **Symptom:** Vercel **404 NOT_FOUND** for `/`; deploy succeeded and domain aliased but edge had no HTML.
+- **Cause:** Presence of **`public/`** led **`@vercel/static`** to use **`public`** only as **`outputDirectory`**, so **`index.html`** at repo root was never emitted; **`vercel.json`** rewrite **`/` → `/index.html`** then failed (**`check: true`**).
+- **Fix:** **`rm -rf public/`** (assets duplicated at repo **`images/`** and root favicons **`favicon.ico`**, **`ge-icon-*.png`**, **`site.webmanifest`**). Removed **`vercel.json`** rewrites **`/public/...`**; **`serve.json`** now **`{"rewrites":[]}`** (root paths serve icons directly).
+
+### VERIFY
+- Local **`npx vercel build`**: **`.vercel/output/static/index.html`** present.
+- **`curl -sI https://thegreaterengine.xyz/`** → **200**, **`content-type: text/html`** after **`npx vercel deploy --prod`** (**`dpl_GKZH7SVL2ZYuj43shGQ5eWsUDAz7`**).
+
+### Files touched (commit)
+- **Deleted:** `public/**`; **modified:** `vercel.json`, `serve.json`; **log:** `SESSION_LOG.md`.
+
+### NEXT
+- **Commit + push** when ready (**`deleted: public/`** + config). Optional: **`.vercelignore`** trim if too many stray root files ship to static (e.g. **`SESSION_LOG.md`**).

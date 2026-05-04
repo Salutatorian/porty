@@ -1,9 +1,3 @@
 {
-  "rewrites": [
-    { "source": "/favicon.ico", "destination": "/public/favicon.ico" },
-    { "source": "/ge-icon-180x180.png", "destination": "/public/ge-icon-180x180.png" },
-    { "source": "/ge-icon-192x192.png", "destination": "/public/ge-icon-192x192.png" },
-    { "source": "/ge-icon-512x512.png", "destination": "/public/ge-icon-512x512.png" },
-    { "source": "/site.webmanifest", "destination": "/public/site.webmanifest" }
-  ]
+  "rewrites": []
 }

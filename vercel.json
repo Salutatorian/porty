@@ -17,11 +17,6 @@
     { "source": "/index", "destination": "/", "permanent": true }
   ],
   "rewrites": [
-    { "source": "/favicon.ico", "destination": "/public/favicon.ico" },
-    { "source": "/ge-icon-180x180.png", "destination": "/public/ge-icon-180x180.png" },
-    { "source": "/ge-icon-192x192.png", "destination": "/public/ge-icon-192x192.png" },
-    { "source": "/ge-icon-512x512.png", "destination": "/public/ge-icon-512x512.png" },
-    { "source": "/site.webmanifest", "destination": "/public/site.webmanifest" },
     { "source": "/api/movies", "destination": "/api/syndication?__route=movies" },
     { "source": "/api/reading", "destination": "/api/syndication?__route=reading" },
     { "source": "/", "destination": "/index.html" },
