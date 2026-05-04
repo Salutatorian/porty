@@ -1253,3 +1253,10 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
 ### Handoff
 - **`scripts/whoop-exchange-code.js`** — random **`state`** query param (**`crypto.randomBytes(16).toString("hex")`**) on authorize URL per WHOOP OAuth; logs **state** for comparison with redirect.
+
+---
+
+## 2026-05-04 — Push GitHub (WHOOP + training)
+
+### Handoff
+- User requested **git push**. Committed **`8944366`** (**feat: WHOOP recovery API, OAuth helper, training consistency layout**): **`api/whoop.js`**, **`scripts/whoop-exchange-code.js`**, **`training.*`**, **`styles.css`**, **`server.js`**, **`env.example`**, **`vercel.json`**, **`SESSION_LOG.md`**, etc. **`git push origin main`** succeeded (**`46fa97f`..`8944366`**). **`.env.local`** not committed.
