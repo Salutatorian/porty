@@ -1183,5 +1183,5 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 ## 2026-05-04 — Git push (verify)
 
 ### Handoff
-- User asked **`git push`**. Initial check: **`main`** matched **`origin/main`** at **`2599895`**. Appended this log and committed **`ecfbc72`** (**`SESSION_LOG: git push verify (already synced)`**); **`git push origin main`** succeeded (**`2599895`…`ecfbc72`**).
+- User asked **`git push`**. Initial check: **`main`** matched **`origin/main`** at **`2599895`**. Appended this log and committed **`ecfbc72`** (**`SESSION_LOG: git push verify (already synced)`**); **`git push origin main`** succeeded (**`2599895`…`ecfbc72`**). **`e56f2ce`** — corrected this entry after push ( **`SESSION_LOG: note git push ecfbc72`** ); **`origin/main`** tip **`e56f2ce`**.
 
