@@ -2,6 +2,48 @@
 
 Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
+## 2026-05-05 — Vercel build warnings: Node `engines`, ignored `memory`
+
+### Summary
+- **`package.json`** `engines.node`: **`>=20` → `20.x`** so Vercel does not treat the project as “floating” across future major Node releases (see [vercel.link/node-version](https://vercel.link/node-version)).
+- **`vercel.json`**: removed **`memory`** from **`api/upload.js`** and **`api/convert.js`** (ignored on Active CPU / Fluid pricing per Vercel). Kept **`maxDuration`**.
+
+### Files touched
+- `package.json`, `vercel.json`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-05 — Vercel Git UI: user “error” — need exact message
+
+### Handoff
+- User reported an error with only a **Git → Connected `Salutatorian/porty`** screenshot (no error text in crop). **Production `/training` still ~22 001 bytes without `training-whoop`** ⇒ deploy mismatch or failed build still likely. **Ask user to paste Vercel Deployments build log / red banner OR GitHub App permission error.** Typical causes: failed deployment, wrong project for domain, GitHub app repo access.
+
+---
+
+## 2026-05-05 — Prod still old `training.html` after Git reconnect (WHOOP absent)
+
+### Diagnosis (reproducible)
+- **`https://raw.githubusercontent.com/Salutatorian/porty/main/training.html`** (~**24 877** bytes) contains **`training-whoop`** / “strain, sleep readiness”.
+- **`https://thegreaterengine.xyz/training`** returns **22 001** bytes, **0×** `training-whoop`, still has **`// consistency`** eyebrow ⇒ **live HTML is not the current `main` artifact** — not “WHOOP env missing”; the whole section is absent from deployed file.
+
+### Likely fixes
+1. **Vercel → Deployments:** confirm latest deploy for **`porty`** / branch **`main`** is **Ready** and matches **`main` HEAD SHA** (`git rev-parse HEAD` locally vs deploy “Source”).
+2. **Same project owns the domain:** **Settings → Domains** (`thegreaterengine.xyz`) must be on the **same** project that shows **Git = `Salutatorian/porty`** (avoid domain on old **friendly-otter** project).
+3. **Production branch:** **Settings → Git** production branch must be **`main`** if that’s where you push.
+4. **Redeploy:** **Deployments → … → Redeploy** (use “Clear cache” if offered).
+
+### Files touched
+- `SESSION_LOG.md`
+
+---
+
+## 2026-05-04 — Prod vs localhost: WHOOP + training UI mismatch
+
+### Handoff
+- **Why localhost has WHOOP, production doesn’t (and still shows `//` eyebrows):** Production `thegreaterengine.xyz` is serving an **older build** than this **`porty`** working tree. Vercel was connected to **`Salutatorian/friendly-otter`** while development pushes went to **`Salutatorian/porty`** — different histories. **Fix:** Connect Vercel to **`porty`** (or push/merge **`porty` → `friendly-otter`**), then production gets `training.html` with the WHOOP block. **Second step:** In Vercel → Environment variables, set **`WHOOP_CLIENT_ID`**, **`WHOOP_CLIENT_SECRET`**, **`WHOOP_REFRESH_TOKEN`** (and **`WHOOP_REDIRECT_URI`** as used for auth); **`.env.local` is not deployed.**
+
+---
+
 ## 2026-05-04 — Vercel Git: project uses `friendly-otter`, local remote is `porty`
 
 ### Handoff

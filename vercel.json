@@ -45,12 +45,10 @@
   ],
   "functions": {
     "api/upload.js": {
-      "maxDuration": 60,
-      "memory": 1024
+      "maxDuration": 60
     },
     "api/convert.js": {
-      "maxDuration": 60,
-      "memory": 1024
+      "maxDuration": 60
     },
     "api/contact.js": {
       "maxDuration": 15
