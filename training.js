@@ -166,6 +166,7 @@
     message: "",
     range: "all",
     rangeDays: 365,
+    fetchedAt: "",
     latest: null,
     series: [],
     sleep: null,
@@ -223,20 +224,13 @@
     whoopState.enabled = !!data.enabled;
     whoopState.message = typeof data.message === "string" ? data.message : "";
     whoopState.range = data.range || getActiveRange();
-    whoopState.rangeDays = data.rangeDays || 365;
-    whoopState.latest = data.latest || null;
+    whoopState.fetchedAt = typeof data.fetchedAt === "string" ? data.fetchedAt : "";
     whoopState.series = Array.isArray(data.series) ? data.series : [];
     whoopState.sleep = data.sleep || null;
     whoopState.cycle = data.cycle || null;
   }
 
   function renderWhoop() {
-    var label = document.getElementById("whoop-range-label");
-    if (label) {
-      label.textContent =
-        whoopState.rangeDays + "d window · WHOOP";
-    }
-
     var scoreEl = document.getElementById("whoop-score");
     var dateEl = document.getElementById("whoop-recovery-date");
     var meter = document.getElementById("whoop-score-meter");
@@ -321,7 +315,9 @@
     var url =
       window.location.origin +
       "/api/whoop?range=" +
-      encodeURIComponent(range || getActiveRange());
+      encodeURIComponent(range || getActiveRange()) +
+      "&_=" +
+      Date.now();
     fetch(url)
       .then(function (r) {
         return r.text().then(function (text) {

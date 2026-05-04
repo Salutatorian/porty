@@ -2,6 +2,57 @@
 
 Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
+## 2026-05-04 — Vercel Git: project uses `friendly-otter`, local remote is `porty`
+
+### Handoff
+- Vercel Dashboard → **Connected Git Repository** shows **`Salutatorian/friendly-otter`**; local **`git remote -v`** is **`Salutatorian/porty.git`**. Pushes to **`porty`** do **not** trigger this production project — only **`friendly-otter`** does. **Options:** (1) In Vercel → Settings → Git, disconnect and connect **`Salutatorian/porty`** (branch **`main`**), or (2) keep Vercel on **`friendly-otter`** and push the same code there (second remote / mirror). Align “repo you push to” with “repo Vercel is connected to.”
+
+---
+
+## 2026-05-04 — Deploy: changes only on localhost (git not on `origin`)
+
+### Handoff
+- User: pushed / redeployed but production site unchanged. **This repo:** `git status` showed **uncommitted** edits (`api/whoop.js`, `training.html`, `training.js`, `env.example`, `SESSION_LOG.md`) — Vercel builds from **GitHub `main`**, not your working tree. **Fix:** `git add` → `git commit` → `git push origin main`, wait for Vercel build **green**, then hard-refresh or open incognito. Also confirm Vercel → Project → **Git** → connected repo/branch = **`Salutatorian/porty`** / **`main`** (not a fork or wrong branch).
+
+---
+
+## 2026-05-04 — WHOOP refresh 400: retries + token normalization
+
+### Summary
+- **Still seeing `invalid_request`** after restart: treated as likely **missing `redirect_uri`**, **bad pasted token** (quotes/newlines/Bearer prefix), or **wrong/rotated refresh token** — not only in-memory rotation.
+- **`api/whoop.js`**: `normalizeWhoopToken()`, **multiple refresh POST attempts** (scope on/off × `redirect_uri` when `WHOOP_REDIRECT_URI` is set), clearer **error + server logs** (lengths, no secrets), fallback success log.
+- **`env.example`**: note that **`WHOOP_REDIRECT_URI`** should stay set for refresh.
+
+### Ops
+- In **`.env.local`**: set **`WHOOP_REDIRECT_URI`** to the **exact** Redirect URL in the WHOOP app; run **`npm run whoop:auth`** again and replace **`WHOOP_REFRESH_TOKEN`** with the printed refresh token (one line, no `Bearer`).
+
+### Files touched
+- `api/whoop.js`, `env.example`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-04 — WHOOP: fix refresh token rotation (400 invalid_request)
+
+### Summary
+- **Cause:** Each successful WHOOP token refresh returns a **new** `refresh_token` and invalidates the previous one. We always re-read `WHOOP_REFRESH_TOKEN` from env and refreshed on every `/api/whoop` call without saving the new token, so the **second** request (or parallel requests) sent a **dead** token — WHOOP responds with **`400` `invalid_request`** (malformed / unusable refresh).
+- **Fix:** `api/whoop.js` now keeps the **latest** refresh token **in memory** for the process, **single-flights** concurrent refreshes, **trims** env values, and logs when the token rotated so the user can update **`.env.local` / Vercel** for cold starts.
+
+### Files touched
+- `api/whoop.js`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-04 — Training page: remove `//` eyebrows + WHOOP clutter
+
+### Summary
+- Stripped **`// …` code-comment eyebrows** and extra WHOOP chrome (range/refreshed line, “latest recovery” sublabel, trend title, “Powered by WHOOP” footer) for a cleaner layout.
+- Shortened consistency hint; removed **`whoop-range-label`** DOM + JS that populated it.
+
+### Files touched
+- `training.html`, `training.js`, `SESSION_LOG.md`
+
+---
+
 ## 2026-05-04 — Background check: Vercel CLI probe (task finished)
 
 ### Handoff
@@ -1260,3 +1311,14 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
 ### Handoff
 - User requested **git push**. Committed **`8944366`** (**feat: WHOOP recovery API, OAuth helper, training consistency layout**): **`api/whoop.js`**, **`scripts/whoop-exchange-code.js`**, **`training.*`**, **`styles.css`**, **`server.js`**, **`env.example`**, **`vercel.json`**, **`SESSION_LOG.md`**, etc. **`git push origin main`** succeeded (**`46fa97f`..`8944366`**). **`.env.local`** not committed.
+
+---
+
+## 2026-05-04 — WHOOP API: align with app (cycle-based recovery)
+
+### Summary
+- **`api/whoop.js`**: Latest recovery via **`GET /v2/cycle/{id}/recovery`** for the most recently **ended** scored cycle (fallback: join recoveries to cycles by **`cycle_id`**, sort by **`cycle.end`**). Wake **`Y-M-D`** uses **`cycle.end` + `timezone_offset`**. Sleep: prefer **main sleep** (**`!nap`**). Strain from latest scored cycle with strain. Trend series bucketed by wake day from cycle join. Shorter edge cache; pagination cap 800.
+- **`training.js`**: **`fetchedAt`** in subtitle; **`/_=`** cache-bust on **`/api/whoop`** fetch.
+
+### Files touched
+- **`api/whoop.js`**, **`training.js`**, **`SESSION_LOG.md`**

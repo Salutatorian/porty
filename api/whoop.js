@@ -1,9 +1,10 @@
 /**
  * GET /api/whoop — WHOOP recovery / sleep / cycle snapshot for the training page.
  *
- * Env: WHOOP_CLIENT_ID, WHOOP_CLIENT_SECRET, WHOOP_REFRESH_TOKEN
- * OAuth: refresh token comes from authorization code exchange (developer.whoop.com).
+ * Aligns with the WHOOP app by tying recovery to the latest completed *cycle* (wake)
+ * instead of sorting by recovery `updated_at`. Sleep prioritizes main sleep over naps.
  *
+ * Env: WHOOP_CLIENT_ID, WHOOP_CLIENT_SECRET, WHOOP_REFRESH_TOKEN
  * Docs: https://developer.whoop.com/api/
  */
 module.exports = async function handler(req, res) {
@@ -14,9 +15,9 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const clientId = process.env.WHOOP_CLIENT_ID || "";
-  const clientSecret = process.env.WHOOP_CLIENT_SECRET || "";
-  const refreshToken = process.env.WHOOP_REFRESH_TOKEN || "";
+  const clientId = (process.env.WHOOP_CLIENT_ID || "").trim();
+  const clientSecret = (process.env.WHOOP_CLIENT_SECRET || "").trim();
+  const refreshToken = normalizeWhoopToken(process.env.WHOOP_REFRESH_TOKEN);
 
   if (!clientId || !clientSecret || !refreshToken) {
     return res.status(200).json({
@@ -35,7 +36,7 @@ module.exports = async function handler(req, res) {
     { "7d": 7, "1m": 30, "3m": 90, "6m": 180, all: 365 }[rawRange] || 365;
 
   try {
-    const accessToken = await refreshWhoopToken(clientId, clientSecret, refreshToken);
+    const accessToken = await refreshWhoopToken(clientId, clientSecret);
     const end = new Date();
     const start = new Date(end.getTime() - rangeDays * 86400000);
     const startIso = start.toISOString();
@@ -47,20 +48,37 @@ module.exports = async function handler(req, res) {
       fetchAllRecords("/v2/cycle", accessToken, startIso, endIso),
     ]);
 
-    const latestRecovery = pickLatestScoredRecovery(recoveries);
-    const series = buildRecoverySeries(recoveries, rangeDays);
-    const sleepLast = pickLatestScoredSleep(sleeps);
-    const cycleLatest = pickLatestScoredCycle(cycles);
+    const sortedCycles = cyclesSortedByEndDesc(cycles);
 
-    res.setHeader("Cache-Control", "s-maxage=120, max-age=0, stale-while-revalidate");
+    let latestRecovery = null;
+    for (const c of sortedCycles.slice(0, 10)) {
+      if (c.id == null) continue;
+      const direct = await fetchRecoveryForCycle(accessToken, c.id);
+      if (direct && direct.score_state === "SCORED" && direct.score && !direct.score.user_calibrating) {
+        latestRecovery = formatRecoveryRecord(direct, c);
+        break;
+      }
+    }
+    if (!latestRecovery) {
+      const r = pickRecoveryForLatestCycleJoin(recoveries, cycles);
+      latestRecovery = r ? formatRecoveryRecord(r.rec, r.cycle) : null;
+    }
+
+    const series = buildRecoverySeries(recoveries, cycles, rangeDays);
+    const sleepLast = pickLatestMainSleep(sleeps);
+    const cycleForStrain =
+      sortedCycles.find((c) => c.score_state === "SCORED" && c.score && c.score.strain != null) || null;
+
+    res.setHeader("Cache-Control", "s-maxage=60, max-age=0, stale-while-revalidate");
     return res.status(200).json({
       enabled: true,
       range: rawRange,
       rangeDays,
+      fetchedAt: new Date().toISOString(),
       latest: latestRecovery,
       series,
       sleep: formatSleepSummary(sleepLast),
-      cycle: formatCycleSummary(cycleLatest),
+      cycle: formatCycleSummary(cycleForStrain),
     });
   } catch (err) {
     console.error("[whoop]", err);
@@ -74,32 +92,135 @@ module.exports = async function handler(req, res) {
 const WHOOP_TOKEN_URL = "https://api.prod.whoop.com/oauth/oauth2/token";
 const WHOOP_API_BASE = "https://api.prod.whoop.com/developer";
 
-async function refreshWhoopToken(clientId, clientSecret, refreshToken) {
-  const body = new URLSearchParams({
-    grant_type: "refresh_token",
-    refresh_token: refreshToken,
-    client_id: clientId,
-    client_secret: clientSecret,
-    scope: "offline",
-  });
+/** Strip accidental quotes/newlines/Bearer prefix from pasted OAuth tokens. */
+function normalizeWhoopToken(value) {
+  let s = String(value || "").trim();
+  if (!s) return "";
+  if (/^["'].*["']$/.test(s)) s = s.slice(1, -1).trim();
+  if (s.toLowerCase().startsWith("bearer ")) s = s.slice(7).trim();
+  s = s.replace(/[\r\n]+/g, "").trim();
+  return s;
+}
 
-  const res = await fetch(WHOOP_TOKEN_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body,
-    signal: AbortSignal.timeout(15000),
-  });
+/**
+ * WHOOP returns a new refresh_token on every refresh and invalidates the previous one.
+ * We keep the latest in memory so the next /api/whoop call does not resend a dead token.
+ * Serverless cold starts still need WHOOP_REFRESH_TOKEN updated in the dashboard when it rotates.
+ */
+let whoopRefreshTokenCache = "";
+/** Avoid parallel refreshes (two successes would invalidate each other's refresh token). */
+let whoopRefreshInFlight = null;
 
-  if (!res.ok) {
-    const t = await res.text();
-    throw new Error("WHOOP token refresh failed (" + res.status + "): " + t.slice(0, 200));
+function refreshAttemptDescriptors(redirectUri) {
+  const ru = (redirectUri || "").trim();
+  const attempts = [];
+  const withScope = { withScope: true };
+  const noScope = { withScope: false };
+  if (ru) {
+    attempts.push({ ...withScope, redirect: true });
+    attempts.push({ ...withScope, redirect: false });
+    attempts.push({ ...noScope, redirect: true });
+    attempts.push({ ...noScope, redirect: false });
+  } else {
+    attempts.push({ ...withScope, redirect: false });
+    attempts.push({ ...noScope, redirect: false });
   }
+  return attempts.map(({ withScope, redirect }) => {
+    const label =
+      (withScope ? "scope=offline" : "no scope") +
+      (redirect && ru ? " + redirect_uri" : "");
+    return { label, ru: redirect ? ru : "", withScope };
+  });
+}
 
-  const data = await res.json();
-  if (!data.access_token) {
-    throw new Error("WHOOP token response missing access_token.");
+async function refreshWhoopToken(clientId, clientSecret) {
+  if (whoopRefreshInFlight) return whoopRefreshInFlight;
+
+  whoopRefreshInFlight = (async () => {
+    const fromEnv = normalizeWhoopToken(process.env.WHOOP_REFRESH_TOKEN);
+    const refreshToken = normalizeWhoopToken(whoopRefreshTokenCache || fromEnv);
+    if (!refreshToken) {
+      throw new Error("WHOOP_REFRESH_TOKEN is empty after normalization.");
+    }
+
+    const redirectUri = (process.env.WHOOP_REDIRECT_URI || "").trim();
+    let lastText = "";
+    let lastStatus = 0;
+
+    const tryList = refreshAttemptDescriptors(redirectUri);
+    for (let ti = 0; ti < tryList.length; ti++) {
+      const { label, ru, withScope } = tryList[ti];
+      const fields = {
+        grant_type: "refresh_token",
+        refresh_token: refreshToken,
+        client_id: clientId,
+        client_secret: clientSecret,
+      };
+      if (withScope) fields.scope = "offline";
+      if (ru) fields.redirect_uri = ru;
+
+      const body = new URLSearchParams(fields);
+      const res = await fetch(WHOOP_TOKEN_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body,
+        signal: AbortSignal.timeout(15000),
+      });
+
+      const t = await res.text();
+      if (res.ok) {
+        let data;
+        try {
+          data = JSON.parse(t);
+        } catch (e1) {
+          throw new Error("WHOOP token response was not JSON.");
+        }
+        if (!data.access_token) {
+          throw new Error("WHOOP token response missing access_token.");
+        }
+        if (ti > 0) {
+          console.warn('[whoop] Token refresh succeeded on fallback attempt: "' + label + '".');
+        }
+        if (data.refresh_token) {
+          whoopRefreshTokenCache = normalizeWhoopToken(data.refresh_token);
+          if (whoopRefreshTokenCache !== fromEnv) {
+            console.warn(
+              "[whoop] New refresh_token issued — update WHOOP_REFRESH_TOKEN in .env.local / Vercel (required for cold starts)."
+            );
+          }
+        }
+        return data.access_token;
+      }
+
+      lastStatus = res.status;
+      lastText = t;
+      if (res.status !== 400) {
+        break;
+      }
+      console.warn("[whoop] Refresh attempt failed (" + label + "): " + t.slice(0, 160));
+    }
+
+    console.error("[whoop] All refresh attempts failed.", {
+      refreshTokenLength: refreshToken.length,
+      clientIdLength: clientId.length,
+      hasSecret: !!clientSecret,
+      hadRedirectEnv: !!redirectUri,
+    });
+
+    throw new Error(
+      "WHOOP token refresh failed (" +
+        lastStatus +
+        "): " +
+        lastText.slice(0, 280) +
+        " — Re-run `npm run whoop:auth`, paste the new WHOOP_REFRESH_TOKEN, and keep WHOOP_REDIRECT_URI identical to your app’s Redirect URL in the WHOOP dashboard."
+    );
+  })();
+
+  try {
+    return await whoopRefreshInFlight;
+  } finally {
+    whoopRefreshInFlight = null;
   }
-  return data.access_token;
 }
 
 async function fetchAllRecords(path, accessToken, startIso, endIso) {
@@ -128,68 +249,128 @@ async function fetchAllRecords(path, accessToken, startIso, endIso) {
     out.push(...recs);
     nextToken = j.next_token || null;
     if (!nextToken || recs.length === 0) break;
-    if (out.length > 500) break;
+    if (out.length > 800) break;
   }
 
   return out;
 }
 
-function pickLatestScoredRecovery(records) {
-  let best = null;
-  let bestT = -1;
-  for (const r of records) {
-    if (r.score_state !== "SCORED" || !r.score) continue;
-    const sc = r.score;
-    if (sc.user_calibrating) continue;
-    const t = Date.parse(r.updated_at || r.created_at || "");
-    if (isNaN(t) || t <= bestT) continue;
-    bestT = t;
-    best = r;
+/** GET /v2/cycle/:id/recovery — canonical recovery for that sleep/cycle (matches app). */
+async function fetchRecoveryForCycle(accessToken, cycleId) {
+  const res = await fetch(WHOOP_API_BASE + "/v2/cycle/" + cycleId + "/recovery", {
+    headers: { Authorization: "Bearer " + accessToken },
+    signal: AbortSignal.timeout(15000),
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    const t = await res.text();
+    console.warn("[whoop] cycle recovery", cycleId, res.status, t.slice(0, 120));
+    return null;
   }
-  if (!best) return null;
-  const s = best.score;
-  const day = (best.updated_at || best.created_at || "").slice(0, 10);
+  return res.json();
+}
+
+function cyclesSortedByEndDesc(cycles) {
+  return (cycles || [])
+    .filter((c) => c && c.end && c.score_state === "SCORED")
+    .sort((a, b) => Date.parse(b.end) - Date.parse(a.end));
+}
+
+/**
+ * WHOOP offset e.g. "-05:00" → minutes to add to UTC instant for approximate local civil time.
+ */
+function offsetStringToMinutes(offsetStr) {
+  if (!offsetStr || typeof offsetStr !== "string") return 0;
+  const m = offsetStr.match(/^([+-])(\d{2}):(\d{2})$/);
+  if (!m) return 0;
+  const sign = m[1] === "-" ? -1 : 1;
+  const mins = parseInt(m[2], 10) * 60 + parseInt(m[3], 10);
+  return sign * mins;
+}
+
+/** Calendar Y-M-D for cycle wake using WHOOP cycle.end + timezone_offset (matches in-app “day”). */
+function wakeYmdFromCycle(cycle) {
+  if (!cycle || !cycle.end) return "";
+  const utcMs = Date.parse(cycle.end);
+  if (isNaN(utcMs)) return "";
+  const offMin = offsetStringToMinutes(cycle.timezone_offset);
+  const shiftedMs = utcMs + offMin * 60000;
+  return new Date(shiftedMs).toISOString().slice(0, 10);
+}
+
+function formatRecoveryRecord(rec, cycle) {
+  if (!rec || !rec.score) return null;
+  const s = rec.score;
+  const day = cycle ? wakeYmdFromCycle(cycle) : (rec.updated_at || rec.created_at || "").slice(0, 10);
   return {
-    date: day,
+    date: day || (rec.updated_at || "").slice(0, 10),
     recoveryScore: s.recovery_score != null ? Math.round(s.recovery_score) : null,
     restingHeartRate: s.resting_heart_rate != null ? Math.round(s.resting_heart_rate) : null,
-    hrvRmssd:
-      s.hrv_rmssd_milli != null ? Math.round(s.hrv_rmssd_milli * 10) / 10 : null,
+    hrvRmssd: s.hrv_rmssd_milli != null ? Math.round(s.hrv_rmssd_milli * 10) / 10 : null,
   };
 }
 
-function buildRecoverySeries(records, rangeDays) {
+/** Prefer recovery row for the cycle that ended most recently (same ordering as HOME in app). */
+function pickRecoveryForLatestCycleJoin(recoveries, cycles) {
+  const cycleById = new Map();
+  for (const c of cycles || []) {
+    if (c && c.id != null) cycleById.set(c.id, c);
+  }
+  const scored = (recoveries || []).filter(
+    (r) =>
+      r &&
+      r.score_state === "SCORED" &&
+      r.score &&
+      !r.score.user_calibrating &&
+      r.cycle_id != null
+  );
+  scored.sort((a, b) => {
+    const ca = cycleById.get(a.cycle_id);
+    const cb = cycleById.get(b.cycle_id);
+    const ta = ca && ca.end ? Date.parse(ca.end) : 0;
+    const tb = cb && cb.end ? Date.parse(cb.end) : 0;
+    return tb - ta;
+  });
+  const top = scored[0];
+  if (!top) return null;
+  return { rec: top, cycle: cycleById.get(top.cycle_id) || null };
+}
+
+function buildRecoverySeries(recoveries, cycles, rangeDays) {
+  const cycleById = new Map();
+  for (const c of cycles || []) {
+    if (c && c.id != null) cycleById.set(c.id, c);
+  }
   const byDay = new Map();
-  for (const r of records) {
+  for (const r of recoveries || []) {
     if (r.score_state !== "SCORED" || !r.score || r.score.user_calibrating) continue;
-    const sc = r.score;
-    if (sc.recovery_score == null) continue;
-    const day = (r.updated_at || r.created_at || "").slice(0, 10);
+    if (r.score.recovery_score == null) continue;
+    const c = cycleById.get(r.cycle_id);
+    const day = c ? wakeYmdFromCycle(c) : (r.updated_at || r.created_at || "").slice(0, 10);
     if (!day || day.length < 10) continue;
-    const t = Date.parse(r.updated_at || r.created_at || "");
+    const t = c && c.end ? Date.parse(c.end) : Date.parse(r.updated_at || r.created_at || "");
     if (isNaN(t)) continue;
     const prev = byDay.get(day);
     if (!prev || t > prev.t) {
-      byDay.set(day, { t, score: Math.round(sc.recovery_score) });
+      byDay.set(day, { t, score: Math.round(r.score.recovery_score) });
     }
   }
   const arr = Array.from(byDay.entries())
-    .map(function (e) {
-      return { date: e[0], score: e[1].score };
-    })
-    .sort(function (a, b) {
-      return a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
-    });
+    .map((e) => ({ date: e[0], score: e[1].score }))
+    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
 
   const cap = Math.min(14, rangeDays, arr.length);
   return arr.slice(Math.max(0, arr.length - cap));
 }
 
-function pickLatestScoredSleep(records) {
+/** Latest main sleep (not nap) by end time — aligns with nightly % in app. */
+function pickLatestMainSleep(records) {
+  const scored = (records || []).filter((r) => r && r.score_state === "SCORED" && r.score);
+  const mains = scored.filter((r) => !r.nap);
+  const pool = mains.length ? mains : scored;
   let best = null;
   let bestT = -1;
-  for (const r of records) {
-    if (r.score_state !== "SCORED" || !r.score) continue;
+  for (const r of pool) {
     const t = Date.parse(r.end || r.updated_at || r.created_at || "");
     if (isNaN(t) || t <= bestT) continue;
     bestT = t;
@@ -214,40 +395,21 @@ function formatSleepSummary(s) {
   return {
     wakeDate: ended,
     performancePct:
-      sc.sleep_performance_percentage != null
-        ? Math.round(sc.sleep_performance_percentage)
-        : null,
+      sc.sleep_performance_percentage != null ? Math.round(sc.sleep_performance_percentage) : null,
     efficiencyPct:
-      sc.sleep_efficiency_percentage != null
-        ? Math.round(sc.sleep_efficiency_percentage * 10) / 10
-        : null,
+      sc.sleep_efficiency_percentage != null ? Math.round(sc.sleep_efficiency_percentage * 10) / 10 : null,
     estimatedHours: hours,
     nap: !!s.nap,
   };
 }
 
-function pickLatestScoredCycle(records) {
-  let best = null;
-  let bestT = -1;
-  for (const r of records) {
-    if (r.score_state !== "SCORED" || !r.score || r.score.strain == null) continue;
-    const t = Date.parse(r.end || r.updated_at || r.created_at || "");
-    if (isNaN(t) || t <= bestT) continue;
-    bestT = t;
-    best = r;
-  }
-  return best;
-}
-
 function formatCycleSummary(c) {
-  if (!c || !c.score) return null;
+  if (!c || !c.score || c.score.strain == null) return null;
   const ended = (c.end || "").slice(0, 10);
   return {
     day: ended || (c.updated_at || "").slice(0, 10),
     strain: Math.round(c.score.strain * 10) / 10,
     avgHr:
-      c.score.average_heart_rate != null
-        ? Math.round(c.score.average_heart_rate)
-        : null,
+      c.score.average_heart_rate != null ? Math.round(c.score.average_heart_rate) : null,
   };
 }
