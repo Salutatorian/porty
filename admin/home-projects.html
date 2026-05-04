@@ -719,11 +719,7 @@
           try {
             sessionStorage.removeItem(STORAGE_KEY);
           } catch (e) {}
-          appEl.hidden = true;
-          loginEl.hidden = false;
-          logoutBtn.hidden = true;
-          loginMsg.textContent = "";
-          loginPw.value = "";
+          window.location.replace("/");
         }
 
         function sessionLogin(password) {

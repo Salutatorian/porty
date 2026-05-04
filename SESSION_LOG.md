@@ -1048,3 +1048,111 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
 ### Next (maintainer)
 - **Vercel → friendly-otter → Settings → Git**: confirm **`Salutatorian/porty`**, Production branch **`main`**, no bad “Ignored Build Step”; reinstall Git integration if **`git push`** still produces no Production build.
+
+---
+
+## 2026-05-04 — Admin Studio CMS polish (layout + settings + composer flows)
+
+### Summary
+- **/admin** panes use **intro card + ~60/40 split** (editor vs list/preview), **custom file dropzones**, **portfolio** **card list** with **edit-in-composer + PATCH**, **stats chips**, **search**; **writing** **draft/published**, **Save changes** / **Cancel**, **preview card**, **composer edit** (no per-row Quill); **photos** **category filter + search**, **featured** quick toggle, **left composer PATCH**; **media** hub tiles; **tools** **collapsed** embed; **settings** form **`GET/PATCH /api/settings`** + **social preview**.
+- **Dashboard open** runs **`loadStudioSettingsQuiet()`** and **one-time `initStudioUploadZones()`** (includes **`writing-audio`** filename label).
+
+### Files touched
+- **`admin/index.html`**
+- **`SESSION_LOG.md`** (this entry)
+
+### Operational notes
+- **Settings** JSON in blob requires storage env; otherwise GET still returns **defaults** only and PATCH may **503**.
+- New route **`/api/settings`** adds a **Vercel function** if that limit matters.
+
+### Next
+- Smoke **all tabs**: uploads, **edit/save/cancel**, deletes, **settings save**, **tools** open/close.
+
+---
+
+## 2026-05-04 — Admin login screen (logo + heading)
+
+### Summary
+- **Larger logo** on **/admin** login card:** `.studio-login-mark .site-logo-mark` **~288×72** (responsive `min(288px, 92vw)`), replacing the tiny **48×48** override.
+- **Removed** visible **“Studio access”** **`<h1>`** (and related heading styles cleaned up).
+
+### Files touched
+- **`admin/index.html`**
+- **`SESSION_LOG.md`** (this entry)
+
+---
+
+## 2026-05-04 — Admin login (remove subtitle)
+
+### Summary
+- Removed **“Greater Engine Studio”** line under the logo on **`/admin`** login; dropped unused **`.studio-login-brand`** styles.
+
+### Files touched
+- **`admin/index.html`**
+- **`SESSION_LOG.md`** (this entry)
+
+---
+
+## 2026-05-04 — Admin login: ADMIN_PASSWORD troubleshooting
+
+### Diagnosis / answer
+- **`ADMIN_PASSWORD`** in **`.env.local`** is the **correct** variable for **`POST /api/auth`** (admin unlock).
+- **“Invalid password”** if the server process lacks that env: **restart `npm run dev`** after editing **`.env.local`** (**`server.js`** only loads env **at startup**). On **Production**, **`ADMIN_PASSWORD`** must be set in **Vercel** project env (**`.env.local` is not deployed**).
+- **`server.js`** now logs **`ADMIN_PASSWORD loaded:`** **`true`**/**`false`** (no secret printed). **`api/auth.js`** trims **`ADMIN_PASSWORD`** before compare.
+
+### Files touched
+- **`server.js`**, **`api/auth.js`**, **`env.example`**
+- **`SESSION_LOG.md`** (this entry)
+
+---
+
+## 2026-05-04 — Invalid admin password → stale Node on :3000
+
+### Diagnosis (verified locally)
+- **`.env.local`** **`ADMIN_PASSWORD`** parses correctly; a **fresh** **`node server.js`** returns **`200`** for **`POST /api/auth`** with that password.
+- An **already-running** **`node server.js`** on **`:3000`** still returned **`401`** for the same password → that process held **`ADMIN_PASSWORD`** **empty** (started **before** the var was added, or **`.env.local`** was missing then). **`server.js`** loads **`.env.local` once at startup.**
+
+### Behavior / code
+- **`POST /api/auth`**: unset **`ADMIN_PASSWORD`** → **`503`** + explicit “set env + restart / Vercel” message (not lumped under “Invalid password”).
+- **`server.js`**: **`console.warn`** when **`ADMIN_PASSWORD`** empty after loading **`.env.local`**.
+
+### Maintainer / user actions
+- **Restart dev server** after **`ADMIN_PASSWORD`** changes; terminal should show **`ADMIN_PASSWORD loaded: true`**.
+- If port stuck: **`lsof -nP -iTCP:3000 -sTCP:LISTEN`**, quit that process, **`npm run dev`** again.
+- **Production:** **`ADMIN_PASSWORD`** in **Vercel** env + redeploy (**`.env.local`** is not deployed).
+
+### Files touched
+- **`server.js`**, **`api/auth.js`**
+- **`SESSION_LOG.md`** (this entry)
+
+---
+
+## 2026-05-04 — Admin Studio UI: Greater Engine homepage skin
+
+### Summary
+- **`/admin`** restyled around **`--ge-*`** tokens (**warm paper** light / **deep navy + gradients** dark), gradients on **`body.studio-body`** and login shell, **dock‑like** blurred sidebar (**220px grid**), **centered content** (**`max-width: 1180px`**).
+- Shared **primitive classes** (**`adminSectionHero`**, **`adminCard`**, **`adminEyebrow`**, **`adminSectionTitle`**, **`adminGrid`**, **`adminNarrowStack`**, **`adminSidebarLogo`**, **`editor-wrap`/`ql` chrome**, segmented tabs, uploads, previews) applied across **Projects / Writing / Photos / Media / Tools / Settings**; uploads keep **overlay file inputs** (no visible **Choose file** chrome).
+- **Login**: GE card + **`Unlock Studio`** + **`studio-login-submit`** **`primary`**; top-left back control only outside card.
+- **Semantic hook**: **`#studio-dashboard`** carries **`adminShell`** (Vanilla analogue of **`AdminShell`** naming from prompt).
+
+### Files touched
+- **`admin/index.html`** (major CSS + markup class passes)
+- **`SESSION_LOG.md`** (this entry)
+
+### Next
+- Visual smoke **every tab**, **embedded /tools iframe**, Quill editors, segmented filters, photo grid actions, theme toggle.
+
+---
+
+## 2026-05-04 — Admin: Log out → home
+
+### Summary
+- **Log out** button calls **`doLogout({ goHome: true })`**: clears **`sessionStorage`** admin key and **`window.location.replace("/")`** so the user lands on the **homepage**, not **`/admin`** login.
+- **Idle auto-logout** still uses **`doLogout()`** (no navigation) — stays on **`/admin`** with the unlock screen.
+
+### Files touched
+- **`admin/index.html`**
+- **`admin/home-projects.html`** (same **`Log out`** behavior for consistency)
+- **`SESSION_LOG.md`** (this entry)
+
+

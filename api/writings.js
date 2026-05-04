@@ -100,6 +100,10 @@ module.exports = async (req, res) => {
           res.status(404).json({ error: "Post not found" });
           return;
         }
+        if (post.published === false) {
+          res.status(404).json({ error: "Post not found" });
+          return;
+        }
         res.status(200).json(post);
         return;
       }
@@ -180,6 +184,7 @@ module.exports = async (req, res) => {
       if (body.category !== undefined) writing.category = String(body.category);
       if (body.excerpt !== undefined) writing.excerpt = String(body.excerpt);
       if (body.body !== undefined) writing.body = String(body.body);
+      if (body.published !== undefined) writing.published = !!body.published;
       if (body.audioUrl !== undefined) {
         const u = String(body.audioUrl || "").trim();
         if (u) writing.audioUrl = u;
@@ -273,6 +278,7 @@ module.exports = async (req, res) => {
       category: (body.category || "learning").trim().toLowerCase(),
       excerpt: (body.excerpt || body.body || "").trim(),
       body: (body.body || body.excerpt || "").trim(),
+      published: body.published === false ? false : true,
       createdAt: new Date().toISOString(),
     };
     if (audioIn) {

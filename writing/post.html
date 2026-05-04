@@ -161,6 +161,9 @@
             return r.json();
           })
           .then(function(p){
+            if (p && p.published === false) {
+              throw new Error("Not found");
+            }
             document.title = (p.title || "Post") + " · Writing · The Greater Engine";
             var timeMeta = p.time || "";
             if (typeof normalizeClockTimeToHHMM === "function" && timeMeta) {

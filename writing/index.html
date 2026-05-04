@@ -133,6 +133,7 @@
               return;
             }
             posts.forEach(function(p){
+              if (p.published === false) return;
               var slug = p.slug || p.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
               var t = p.time || "";
               if (typeof normalizeClockTimeToHHMM === "function" && t) t = normalizeClockTimeToHHMM(t) || t;

@@ -25,9 +25,18 @@ module.exports = async (req, res) => {
 
   const body = await parseBody(req);
   const pw = (body.password || "").trim();
-  const adminPw = process.env.ADMIN_PASSWORD || "";
+  const adminPw = (process.env.ADMIN_PASSWORD || "").trim();
 
-  if (!adminPw || pw !== adminPw) {
+  if (!adminPw) {
+    res.status(503).json({
+      ok: false,
+      error:
+        "ADMIN_PASSWORD is not set on this server. For local dev, add it to .env.local and restart npm run dev. On Vercel, set it under Project → Settings → Environment Variables.",
+    });
+    return;
+  }
+
+  if (pw !== adminPw) {
     res.status(401).json({ ok: false, error: "Invalid password" });
     return;
   }

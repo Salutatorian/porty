@@ -130,6 +130,17 @@ module.exports = async (req, res) => {
       return;
     }
 
+    function normalizeTags(body) {
+      if (body.tags === undefined) return undefined;
+      if (Array.isArray(body.tags)) {
+        return [...new Set(body.tags.map((t) => String(t).trim()).filter(Boolean))].slice(0, 24);
+      }
+      if (typeof body.tags === "string") {
+        return [...new Set(body.tags.split(/[,#]+/).map((t) => t.trim()).filter(Boolean))].slice(0, 24);
+      }
+      return [];
+    }
+
     if (req.method === "PATCH") {
       const id = body.id;
       if (!id) {
@@ -143,6 +154,8 @@ module.exports = async (req, res) => {
       }
       if (body.title !== undefined) project.title = String(body.title);
       if (body.description !== undefined) project.description = String(body.description);
+      const nextTags = normalizeTags(body);
+      if (nextTags !== undefined) project.tags = nextTags;
       if (body.status !== undefined && ["now", "future", "done"].includes(body.status)) {
         project.status = body.status;
         if (body.status === "done" && !project.endDate) {
@@ -177,6 +190,7 @@ module.exports = async (req, res) => {
     const id = String(Date.now());
     const status = ["now", "future", "done"].includes(body.status) ? body.status : "now";
     const type = ["life", "code"].includes(body.type) ? body.type : "life";
+    const tags = normalizeTags(body) || [];
     const newItem = {
       id,
       title: title || "Untitled",
@@ -189,6 +203,7 @@ module.exports = async (req, res) => {
       endDate: body.endDate ? String(body.endDate) : null,
       createdAt: new Date().toISOString(),
     };
+    if (tags.length) newItem.tags = tags;
     if (status === "now" && !newItem.startDate) {
       const d = new Date();
       newItem.startDate = String(d.getFullYear()) + "-" + String(d.getMonth() + 1).padStart(2, "0");

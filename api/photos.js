@@ -17,6 +17,12 @@ const {
 
 const INDEX_PATH = "gallery/index.json";
 
+const PHOTO_CATEGORIES = ["polaroids", "film", "digital", "travel", "training"];
+function normalizePhotoCategory(cat) {
+  const c = String(cat || "").toLowerCase();
+  return PHOTO_CATEGORIES.includes(c) ? c : "digital";
+}
+
 function getAuth(req) {
   const auth = (req.headers.authorization || "").trim();
   if (auth.startsWith("Bearer ")) return auth.slice(7);
@@ -168,8 +174,8 @@ module.exports = async (req, res) => {
       if (body.date !== undefined) photo.date = String(body.date);
       if (body.time !== undefined) photo.time = String(body.time);
       if (body.caption !== undefined) photo.caption = String(body.caption);
-      if (body.category !== undefined)
-        photo.category = ["polaroids", "film", "digital"].includes(body.category) ? body.category : photo.category;
+      if (body.category !== undefined) photo.category = normalizePhotoCategory(body.category);
+      if (body.featured !== undefined) photo.featured = !!body.featured;
       const prevSrc = photo.src;
       if (body.src !== undefined && body.src) {
         photo.src = String(body.src);
@@ -200,9 +206,8 @@ module.exports = async (req, res) => {
       date: body.date || "",
       time: body.time || "",
       caption: body.caption || "",
-      category: ["polaroids", "film", "digital"].includes(body.category)
-        ? body.category
-        : "digital",
+      category: normalizePhotoCategory(body.category),
+      featured: !!body.featured,
       createdAt: new Date().toISOString(),
     };
 

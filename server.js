@@ -34,6 +34,12 @@ try {
     console.log("STRAVA_CLIENT_SECRET loaded:", !!process.env.STRAVA_CLIENT_SECRET);
     console.log("STRAVA_REFRESH_TOKEN loaded:", !!process.env.STRAVA_REFRESH_TOKEN);
     console.log("GITHUB_TOKEN loaded:", !!process.env.GITHUB_TOKEN);
+    console.log("ADMIN_PASSWORD loaded:", !!process.env.ADMIN_PASSWORD);
+    if (!(process.env.ADMIN_PASSWORD || "").trim()) {
+      console.warn(
+        "\n[admin] ADMIN_PASSWORD missing or empty — /admin login will fail until you set ADMIN_PASSWORD in .env.local and restart this server.\n"
+      );
+    }
   } else {
     console.warn(".env.local was not found.");
   }
