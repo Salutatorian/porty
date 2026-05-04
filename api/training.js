@@ -260,6 +260,13 @@ function processActivitiesToDashboard(activities, rangeDays = 365) {
 
   const consistencyCols = Math.ceil(consistencyDays / 7);
   const restDays = consistencyDays - trainingDays;
+
+  const rangeEnd = new Date();
+  const rangeStart = new Date();
+  rangeStart.setDate(rangeStart.getDate() - (consistencyDays - 1));
+  const consistencyStart = rangeStart.toISOString().slice(0, 10);
+  const consistencyEnd = rangeEnd.toISOString().slice(0, 10);
+
   return {
     weeks,
     weekLabels,
@@ -267,6 +274,8 @@ function processActivitiesToDashboard(activities, rangeDays = 365) {
     consistencyData,
     consistencyCols,
     consistencyDays,
+    consistencyStart,
+    consistencyEnd,
     trainingDays,
     restDays,
     longestStreak,

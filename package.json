@@ -9,7 +9,8 @@
     "build:booking": "esbuild src/booking/booking-entry.jsx --bundle --minify --outfile=booking-pixel.js --format=iife --jsx=automatic --define:process.env.NODE_ENV=\\\"production\\\"",
     "set-r2-cors": "node scripts/set-r2-cors.js",
     "migrate:blob-to-r2": "node scripts/migrate-blob-to-r2.js",
-    "migrate:blob-to-r2:dry": "node scripts/migrate-blob-to-r2.js --dry-run"
+    "migrate:blob-to-r2:dry": "node scripts/migrate-blob-to-r2.js --dry-run",
+    "whoop:auth": "node scripts/whoop-exchange-code.js"
   },
   "keywords": [
     "personal-site",

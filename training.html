@@ -192,6 +192,54 @@
             </article>
           </section>
 
+          <section class="training-whoop" aria-label="WHOOP recovery">
+            <header class="training-feature-head training-whoop-head">
+              <div>
+                <p class="training-feature-eyebrow font-dot">// recovery</p>
+                <h2 class="training-feature-title">strain, sleep &amp; readiness</h2>
+              </div>
+              <p class="training-feature-summary whoop-head-note font-dot" id="whoop-range-label">—</p>
+            </header>
+            <p id="whoop-api-notice" class="training-api-notice font-dot" role="status" hidden></p>
+            <div class="training-whoop-layout">
+              <article class="whoop-hero-card">
+                <p class="whoop-hero-eyebrow font-dot">latest recovery</p>
+                <p class="whoop-hero-score" id="whoop-score">—</p>
+                <p class="whoop-hero-date font-dot" id="whoop-recovery-date">—</p>
+                <div class="whoop-hero-meter" aria-hidden="true">
+                  <div class="whoop-hero-meter-fill" id="whoop-score-meter" style="width: 0%;"></div>
+                </div>
+              </article>
+              <div class="whoop-metric-cards">
+                <article class="whoop-metric">
+                  <p class="font-dot whoop-metric-label">hrv rmssd</p>
+                  <p class="whoop-metric-value" id="whoop-hrv">—</p>
+                  <p class="whoop-metric-unit font-dot">ms</p>
+                </article>
+                <article class="whoop-metric">
+                  <p class="font-dot whoop-metric-label">resting hr</p>
+                  <p class="whoop-metric-value" id="whoop-rhr">—</p>
+                  <p class="whoop-metric-unit font-dot">bpm</p>
+                </article>
+                <article class="whoop-metric">
+                  <p class="font-dot whoop-metric-label">sleep perf</p>
+                  <p class="whoop-metric-value" id="whoop-sleep">—</p>
+                  <p class="whoop-metric-unit font-dot" id="whoop-sleep-sub">%</p>
+                </article>
+                <article class="whoop-metric">
+                  <p class="font-dot whoop-metric-label">cycle strain</p>
+                  <p class="whoop-metric-value" id="whoop-strain">—</p>
+                  <p class="whoop-metric-unit font-dot">recent</p>
+                </article>
+              </div>
+            </div>
+            <div class="whoop-trend-wrap">
+              <p class="whoop-trend-title font-dot">recovery trend · recent days</p>
+              <div class="whoop-trend" id="whoop-trend-bars" role="group" aria-label="Recovery scores by day"></div>
+              <p class="whoop-attrib font-dot">Powered by WHOOP · data delayed vs device</p>
+            </div>
+          </section>
+
           <section class="training-consistency" aria-label="Consistency">
             <header class="training-consistency-head">
               <div>
@@ -205,8 +253,26 @@
                 <div><dt class="font-dot">rest</dt><dd id="cons-rest">—</dd></div>
               </dl>
             </header>
-            <div class="consistency-wrap">
-              <div class="consistency-grid consistency-grid--cockpit" id="consistency-grid" aria-label="Training activity by day"></div>
+            <div class="consistency-chart" id="consistency-chart">
+              <div class="consistency-chart-main" id="consistency-chart-main">
+                <div class="consistency-corner" aria-hidden="true"></div>
+                <div class="consistency-months font-dot" id="consistency-months" aria-hidden="true"></div>
+                <div class="consistency-dow font-dot" id="consistency-dow" aria-hidden="true">
+                  <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+                </div>
+                <div class="consistency-wrap">
+                  <div
+                    class="consistency-grid consistency-grid--cockpit"
+                    id="consistency-grid"
+                    role="group"
+                    aria-label="Training time by day"
+                    aria-describedby="consistency-focus"
+                  ></div>
+                </div>
+              </div>
+              <p class="consistency-focus-hint font-dot" id="consistency-focus" aria-live="polite">
+                Rows are Sun–Sat; columns are calendar weeks (like GitHub). Hover or tap a square for that day’s date.
+              </p>
             </div>
           </section>
 

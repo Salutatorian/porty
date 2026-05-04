@@ -57,6 +57,9 @@
     },
     "api/github-contributions.js": {
       "maxDuration": 20
+    },
+    "api/whoop.js": {
+      "maxDuration": 25
     }
   }
 }

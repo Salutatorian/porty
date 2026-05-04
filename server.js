@@ -1,5 +1,5 @@
 /**
- * Local dev server: serves static site and /api/training (Strava data).
+ * Local dev server: serves static site and /api/training (Strava) and /api/whoop (WHOOP).
  * Run: node server.js  (or npm run dev)
  * Requires .env.local with STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, STRAVA_REFRESH_TOKEN.
  */
@@ -286,6 +286,13 @@ function processActivitiesToDashboard(activities, rangeDays = 365) {
 
   const consistencyCols = Math.ceil(consistencyDays / 7);
   const restDays = consistencyDays - trainingDays;
+
+  const rangeEnd = new Date();
+  const rangeStart = new Date();
+  rangeStart.setDate(rangeStart.getDate() - (consistencyDays - 1));
+  const consistencyStart = rangeStart.toISOString().slice(0, 10);
+  const consistencyEnd = rangeEnd.toISOString().slice(0, 10);
+
   return {
     weeks,
     weekLabels,
@@ -293,6 +300,8 @@ function processActivitiesToDashboard(activities, rangeDays = 365) {
     consistencyData,
     consistencyCols,
     consistencyDays,
+    consistencyStart,
+    consistencyEnd,
     trainingDays,
     restDays,
     longestStreak,
@@ -456,6 +465,11 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (urlPath === "/api/whoop" && req.method === "GET") {
+    const whoopHandler = require("./api/whoop");
+    return whoopHandler(req, res);
+  }
+
   let filePath = path.join(
     __dirname,
     req.url === "/" ? "index.html" : urlPath === "/admin" || urlPath === "/admin/" ? "admin/index.html" : urlPath
@@ -500,4 +514,5 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, () => {
   console.log("Server at http://localhost:" + PORT);
   console.log("Training data: http://localhost:" + PORT + "/api/training");
+  console.log("WHOOP data: http://localhost:" + PORT + "/api/whoop");
 });

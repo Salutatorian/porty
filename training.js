@@ -35,8 +35,12 @@
     longestStreak: 0,
     currentStreak: 0,
     highlights: null,
+    consistencyStart: "",
+    consistencyEnd: "",
   };
   var chartInstances = [];
+  var defaultConsistencyHint =
+    "Rows are Sun–Sat; columns are weeks. Hover or tap a square for that day’s date.";
 
   // ---------------- helpers ----------------
 
@@ -74,6 +78,51 @@
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   }
 
+  function inferConsistencyRangeIso() {
+    var days = state.consistencyDays || 365;
+    var end = new Date();
+    var start = new Date();
+    start.setDate(start.getDate() - (days - 1));
+    return { start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10) };
+  }
+
+  function addDaysIso(isoYmd, n) {
+    var t = Date.parse(isoYmd + "T12:00:00.000Z");
+    if (isNaN(t)) return isoYmd;
+    return new Date(t + n * 86400000).toISOString().slice(0, 10);
+  }
+
+  function formatHeatmapDay(isoYmd) {
+    var t = Date.parse(isoYmd + "T12:00:00.000Z");
+    if (isNaN(t)) return "—";
+    return new Date(t).toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      timeZone: "UTC",
+    });
+  }
+
+  function utcTodayIso() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  /** 0 Sun … 6 Sat (UTC calendar for ISO Y-M-D) */
+  function utcWeekdaySun0(isoYmd) {
+    var t = Date.parse(isoYmd + "T12:00:00.000Z");
+    if (isNaN(t)) return 0;
+    return new Date(t).getUTCDay();
+  }
+
+  function consistencyLevelLabel(level) {
+    if (!level) return "Rest (no logged time)";
+    if (level === 1) return "Training · light (under 20 min)";
+    if (level === 2) return "Training · moderate (20–44 min)";
+    if (level === 3) return "Training · solid (45–89 min)";
+    return "Training · long (90+ min)";
+  }
+
   function prefersReducedMotion() {
     try {
       return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -108,6 +157,211 @@
     if (name === "int") return formatInt;
     if (name === "days") return formatDays;
     return formatInt;
+  }
+
+  // ---------------- WHOOP (recovery) ----------------
+
+  var whoopState = {
+    enabled: false,
+    message: "",
+    range: "all",
+    rangeDays: 365,
+    latest: null,
+    series: [],
+    sleep: null,
+    cycle: null,
+  };
+
+  function buildPlaceholderWhoop() {
+    var series = [];
+    for (var i = 0; i < 12; i++) {
+      series.push({
+        date: addDaysIso(utcTodayIso(), -(11 - i)),
+        score: 38 + ((i * 17) % 45),
+      });
+    }
+    return {
+      enabled: true,
+      range: getActiveRange(),
+      rangeDays: 365,
+      latest: {
+        date: utcTodayIso(),
+        recoveryScore: 64,
+        restingHeartRate: 58,
+        hrvRmssd: 41.2,
+      },
+      series: series,
+      sleep: {
+        wakeDate: utcTodayIso(),
+        performancePct: 92,
+        efficiencyPct: 88.5,
+        estimatedHours: 7.2,
+        nap: false,
+      },
+      cycle: { day: utcTodayIso(), strain: 12.4, avgHr: 118 },
+    };
+  }
+
+  function setWhoopNotice(visible, message) {
+    var el =
+      typeof document !== "undefined" &&
+      document.getElementById &&
+      document.getElementById("whoop-api-notice");
+    if (!el) return;
+    if (!visible) {
+      el.setAttribute("hidden", "");
+      el.textContent = "";
+      return;
+    }
+    var t = message || "";
+    if (t.length > 280) t = t.slice(0, 277) + "…";
+    el.removeAttribute("hidden");
+    el.textContent = t;
+  }
+
+  function setWhoopData(data) {
+    whoopState.enabled = !!data.enabled;
+    whoopState.message = typeof data.message === "string" ? data.message : "";
+    whoopState.range = data.range || getActiveRange();
+    whoopState.rangeDays = data.rangeDays || 365;
+    whoopState.latest = data.latest || null;
+    whoopState.series = Array.isArray(data.series) ? data.series : [];
+    whoopState.sleep = data.sleep || null;
+    whoopState.cycle = data.cycle || null;
+  }
+
+  function renderWhoop() {
+    var label = document.getElementById("whoop-range-label");
+    if (label) {
+      label.textContent =
+        whoopState.rangeDays + "d window · WHOOP";
+    }
+
+    var scoreEl = document.getElementById("whoop-score");
+    var dateEl = document.getElementById("whoop-recovery-date");
+    var meter = document.getElementById("whoop-score-meter");
+    var hrvEl = document.getElementById("whoop-hrv");
+    var rhrEl = document.getElementById("whoop-rhr");
+    var sleepEl = document.getElementById("whoop-sleep");
+    var sleepSubEl = document.getElementById("whoop-sleep-sub");
+    var strainEl = document.getElementById("whoop-strain");
+    var trend = document.getElementById("whoop-trend-bars");
+
+    var L = whoopState.latest;
+    var sl = whoopState.sleep;
+    var cy = whoopState.cycle;
+
+    if (scoreEl)
+      scoreEl.textContent =
+        L && L.recoveryScore != null ? formatInt(L.recoveryScore) : "—";
+
+    if (dateEl)
+      dateEl.textContent =
+        L && L.date
+          ? formatHeatmapDay(L.date + "T12:00:00.000Z")
+          : "no scored recovery";
+
+    if (meter) {
+      var w = L && L.recoveryScore != null ? Math.min(100, Math.max(0, L.recoveryScore)) : 0;
+      meter.style.width = w + "%";
+    }
+
+    if (hrvEl)
+      hrvEl.textContent =
+        L && L.hrvRmssd != null ? String(L.hrvRmssd) : "—";
+
+    if (rhrEl)
+      rhrEl.textContent =
+        L && L.restingHeartRate != null ? formatInt(L.restingHeartRate) : "—";
+
+    if (sleepEl) {
+      if (sl && sl.performancePct != null) {
+        sleepEl.textContent = formatInt(sl.performancePct);
+      } else {
+        sleepEl.textContent = "—";
+      }
+    }
+    if (sleepSubEl) {
+      sleepSubEl.textContent =
+        sl && sl.estimatedHours != null ? sl.estimatedHours + " h sleep" : "%";
+    }
+
+    if (strainEl)
+      strainEl.textContent =
+        cy && cy.strain != null ? String(cy.strain) : "—";
+
+    if (trend) {
+      trend.innerHTML = "";
+      var s = whoopState.series.slice();
+      s.forEach(function (row) {
+        var bar = document.createElement("div");
+        bar.className = "whoop-trend-bar";
+        var sc = typeof row.score === "number" ? row.score : 0;
+        var h = Math.max(6, Math.round((Math.min(100, sc) / 100) * 52));
+        bar.style.height = h + "px";
+        bar.setAttribute("role", "img");
+        bar.setAttribute("aria-label", "Recovery " + sc + " on " + row.date);
+        bar.setAttribute(
+          "title",
+          formatHeatmapDay(row.date + "T12:00:00.000Z") + " · recovery " + sc
+        );
+        trend.appendChild(bar);
+      });
+
+      while (trend.children.length < 14) {
+        var pad = document.createElement("span");
+        pad.className = "whoop-trend-placeholder";
+        pad.setAttribute("aria-hidden", "true");
+        trend.appendChild(pad);
+      }
+    }
+  }
+
+  function fetchWhoop(range) {
+    var url =
+      window.location.origin +
+      "/api/whoop?range=" +
+      encodeURIComponent(range || getActiveRange());
+    fetch(url)
+      .then(function (r) {
+        return r.text().then(function (text) {
+          var parsed = {};
+          try {
+            parsed = text ? JSON.parse(text) : {};
+          } catch (e4) {
+            parsed = {};
+          }
+          if (!r.ok || whoopHadErrorPayload(parsed)) {
+            setWhoopNotice(
+              true,
+              "demo data · WHOOP unavailable (" +
+                (parsed.message || parsed.error || r.status || "?") +
+                ")."
+            );
+            setWhoopData(buildPlaceholderWhoop());
+            renderWhoop();
+            return;
+          }
+          if (!parsed.enabled) {
+            setWhoopNotice(true, "demo data · " + (parsed.message || "Configure WHOOP_* env."));
+            setWhoopData(buildPlaceholderWhoop());
+            renderWhoop();
+            return;
+          }
+          setWhoopNotice(false);
+          setWhoopData(parsed);
+          renderWhoop();
+        });
+      })
+      .catch(function () {
+        setWhoopNotice(true, "demo data · WHOOP network error.");
+        setWhoopData(buildPlaceholderWhoop());
+        renderWhoop();
+      });
+  }
+
+  function whoopHadErrorPayload(j) {
+    return j && j.error && !j.enabled;
   }
 
   // ---------------- placeholder ----------------
@@ -166,6 +420,8 @@
       else cons.push(4);
     }
     var trainingDays = cons.filter(function (v) { return v > 0; }).length;
+    var endIso = new Date().toISOString().slice(0, 10);
+    var startIso = addDaysIso(endIso, -364);
     return {
       weeks: weeks,
       weekLabels: labels,
@@ -173,6 +429,8 @@
       consistencyData: cons,
       consistencyCols: 53,
       consistencyDays: 365,
+      consistencyStart: startIso,
+      consistencyEnd: endIso,
       trainingDays: trainingDays,
       restDays: 365 - trainingDays,
       longestStreak: 12,
@@ -199,6 +457,13 @@
     state.longestStreak = data.longestStreak || 0;
     state.currentStreak = data.currentStreak || 0;
     state.highlights = data.highlights || null;
+    state.consistencyStart = data.consistencyStart || "";
+    state.consistencyEnd = data.consistencyEnd || "";
+    if (!state.consistencyStart || !state.consistencyEnd) {
+      var inferred = inferConsistencyRangeIso();
+      if (!state.consistencyStart) state.consistencyStart = inferred.start;
+      if (!state.consistencyEnd) state.consistencyEnd = inferred.end;
+    }
   }
 
   // ---------------- renderers ----------------
@@ -247,20 +512,123 @@
 
   function renderConsistency() {
     var grid = document.getElementById("consistency-grid");
+    var focusEl = document.getElementById("consistency-focus");
+    var monthsEl = document.getElementById("consistency-months");
+    var chart = document.getElementById("consistency-chart");
+
+    function setFocus(html) {
+      if (focusEl) focusEl.innerHTML = html;
+    }
+
     if (grid) {
-      var cols = state.consistencyCols;
+      var n = state.consistencyDays;
+      var startIso = state.consistencyStart || inferConsistencyRangeIso().start;
+      var todayIso = utcTodayIso();
+      var cellPx = typeof window !== "undefined" && window.innerWidth < 641 ? 6 : 12;
+      var gapPx = cellPx <= 6 ? 2 : 3;
+
+      if (chart) {
+        chart.style.setProperty("--consistency-cell", cellPx + "px");
+        chart.style.setProperty("--consistency-gap", gapPx + "px");
+      }
+
+      var startDow = utcWeekdaySun0(startIso);
+      var gridSunday = addDaysIso(startIso, -startDow);
+      var totalSlots = startDow + n;
+      var cols = Math.ceil(totalSlots / 7);
+
+      grid.style.gridTemplateColumns = "repeat(" + cols + ", " + cellPx + "px)";
       grid.innerHTML = "";
+
+      if (monthsEl) {
+        monthsEl.style.gridTemplateColumns = "repeat(" + cols + ", " + cellPx + "px)";
+        monthsEl.innerHTML = "";
+        var lastM = -1;
+        for (var mc = 0; mc < cols; mc++) {
+          var weekSunIso = addDaysIso(gridSunday, mc * 7);
+          var mT = Date.parse(weekSunIso + "T12:00:00.000Z");
+          var monthIdx = new Date(mT).getUTCMonth();
+          var lab = document.createElement("span");
+          lab.className = "consistency-month-label";
+          if (monthIdx !== lastM) {
+            lab.textContent = new Date(mT).toLocaleDateString("en-US", {
+              month: "short",
+              timeZone: "UTC",
+            });
+            lastM = monthIdx;
+          }
+          monthsEl.appendChild(lab);
+        }
+      }
+
+      grid.setAttribute(
+        "aria-label",
+        "Training time by day, " + formatHeatmapDay(startIso) + " through " + formatHeatmapDay(state.consistencyEnd || utcTodayIso())
+      );
+
       for (var c = 0; c < cols; c++) {
         for (var r = 0; r < 7; r++) {
-          var dayIndex = c * 7 + r;
-          var level = dayIndex < state.consistencyDays ? state.consistencyData[dayIndex] : 0;
+          var slot = c * 7 + r;
+          var dateIso = addDaysIso(gridSunday, slot);
+          var dataIdx = slot - startDow;
+          var inRange = dataIdx >= 0 && dataIdx < n;
+          var level = inRange ? state.consistencyData[dataIdx] : 0;
+
           var cell = document.createElement("div");
           cell.className = "consistency-cell consistency-cell--level-" + (level || 0);
-          cell.setAttribute("title", "Week " + (c + 1) + " · level " + level);
+          if (!inRange) cell.className += " consistency-cell--outside";
+
+          if (inRange && dateIso === todayIso) cell.className += " consistency-cell--today";
+
+          var labelText = inRange
+            ? consistencyLevelLabel(level || 0)
+            : "Outside chart range";
+
+          cell.setAttribute("data-date", dateIso);
+          cell.setAttribute(
+            "title",
+            formatHeatmapDay(dateIso) + " · " + (inRange ? labelText : "outside chart range")
+          );
+
+          (function (iso, inR, trainLbl) {
+            function show() {
+              if (!inR) {
+                setFocus(
+                  "<strong>" +
+                    formatHeatmapDay(iso) +
+                    "</strong> · week padding (not part of the training window)"
+                );
+                return;
+              }
+              var line =
+                "<strong>" +
+                formatHeatmapDay(iso) +
+                "</strong> · " +
+                trainLbl +
+                (iso === utcTodayIso() ? " · today" : "");
+              setFocus(line);
+            }
+            cell.addEventListener("mouseenter", show);
+            cell.addEventListener("click", show);
+          })(dateIso, inRange, labelText);
+
           grid.appendChild(cell);
         }
       }
+
+      if (chart && focusEl && !grid.dataset.behaviorWired) {
+        grid.dataset.behaviorWired = "1";
+        chart.addEventListener("mouseleave", function () {
+          setFocus(defaultConsistencyHint);
+        });
+      }
     }
+
+    if (focusEl && !focusEl.dataset.seeded) {
+      focusEl.dataset.seeded = "1";
+      setFocus(defaultConsistencyHint);
+    }
+
     var cur = document.getElementById("cons-current");
     if (cur) cur.textContent = formatDays(state.currentStreak);
     var lng = document.getElementById("cons-longest");
@@ -472,14 +840,17 @@
   }
 
   function fetchAndRender(range) {
+    var r = range || getActiveRange();
+    fetchWhoop(r);
+
     var url =
       window.location.origin +
       "/api/training" +
-      (range ? "?range=" + encodeURIComponent(range) : "");
+      (r ? "?range=" + encodeURIComponent(r) : "");
     fetch(url)
-      .then(function (r) {
-        return r.text().then(function (text) {
-          if (!r.ok) {
+      .then(function (resp) {
+        return resp.text().then(function (text) {
+          if (!resp.ok) {
             var detail = "";
             try {
               var j = JSON.parse(text);
@@ -489,7 +860,7 @@
             }
             setTrainingApiNotice(
               true,
-              detail || "Could not load Strava (“" + r.status + "”)."
+              detail || "Could not load Strava (“" + resp.status + "”)."
             );
             setData(buildPlaceholderData());
             renderAll();
@@ -541,6 +912,7 @@
       setTrainingApiNotice(true, "Chart library failed to load.");
       setData(buildPlaceholderData());
       renderAll();
+      fetchWhoop(getActiveRange());
     };
     document.head.appendChild(s);
   }

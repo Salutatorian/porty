@@ -1185,3 +1185,71 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 ### Handoff
 - User asked **`git push`**. **`main`** was even with **`origin/main`** at **`2599895`**; **SESSION_LOG** edits produced several small commits, each **`git push origin main`**’d. Use **`git log -1 origin/main`** for the current tip.
 
+---
+
+## 2026-05-04 — Training consistency heatmap: dates + interaction
+
+### Summary
+- **What it is:** **Strava-backed** “GitHub-style” grid on **`/training`**: each tile is **one calendar day** in the lookback window (up to **365** days); **green intensity** = logged **moving time** that day (Strava swim/bike/run buckets: rest, &lt;20m, 20–44, 45–89, 90+ minutes).
+- **Layout (fixed):** **GitHub-style** — **rows = Sun → Sat**; **columns = calendar weeks**. The **Sunday on or before** the oldest data day anchors the grid; **leading/trailing** days are **padding tiles** (`consistency-cell--outside`) so month labels line up with columns. **Data order** unchanged: API **`consistencyData[i]`** is still oldest → newest by index **`i`**.
+- **Interaction:** **Hover** / **tap** updates live hint; padding tiles explain **week padding**. **Dates** in labels use **UTC** to match Strava/API day keys.
+- **API:** **`consistencyStart`** / **`consistencyEnd`** (ISO **YYYY-MM-DD**) on **`GET /api/training`** (and **`server.js`** local) so the client does not guess the window.
+
+### Files touched
+- **`api/training.js`**, **`server.js`**
+- **`training.js`**, **`training.html`**, **`styles.css`**
+- **`SESSION_LOG.md`** (this entry)
+
+---
+
+## 2026-05-04 — WHOOP recovery (`/api/whoop` + training UI)
+
+### Summary
+- **`GET /api/whoop`** (**`api/whoop.js`**) — refresh token → WHOOP **`/v2/recovery`**, **`/v2/activity/sleep`**, **`/v2/cycle`** (paginated **`next_token`**). Same **`range`** query as training (**`7d`…`all`**). Returns **`{ enabled, latest, series, sleep, cycle }`** or **`enabled: false`** + message if env missing / error.
+- **`env.example`** — **`WHOOP_CLIENT_ID`**, **`WHOOP_CLIENT_SECRET`**, **`WHOOP_REFRESH_TOKEN`** + OAuth notes (**`offline`** + read scopes).
+- **`server.js`** — **`/api/whoop`** in dev; startup log line for WHOOP URL.
+- **`training.html` / `training.js`** — **`// recovery`** cockpit section (teal accent, score + meter, HRV / RHR / sleep / strain, trend bars). DEMO placeholder if WHOOP unreachable or not configured (**`#whoop-api-notice`**).
+- **`styles.css`** — **`.training-whoop`** + mobile padding with other cockpit cards.
+
+### Files touched
+- **`api/whoop.js`**, **`server.js`**, **`env.example`**, **`training.html`**, **`training.js`**, **`styles.css`**, **`SESSION_LOG.md`**
+
+---
+
+## 2026-05-04 — `.env.local`: WHOOP placeholders
+
+### Handoff
+- Added **`WHOOP_CLIENT_ID`**, **`WHOOP_CLIENT_SECRET`**, **`WHOOP_REFRESH_TOKEN`** keys to **`.env.local`** (empty values) under the Strava block with a short **`/api/whoop`** reminder. User pastes real values; **restart `npm run dev`** to test. **Never commit** `.env.local`.
+
+---
+
+## 2026-05-04 — WHOOP OAuth helper + `WHOOP_REDIRECT_URI`
+
+### Summary
+- **`scripts/whoop-exchange-code.js`** — **`npm run whoop:auth`** prints authorize URL (uses **`.env.local`**); **`npm run whoop:auth -- <code>`** exchanges **`authorization_code`** for tokens and prints **`WHOOP_REFRESH_TOKEN=`** line.
+- **`env.example`** — **`WHOOP_REDIRECT_URI`** + npm instructions.
+- **`.env.local`** — **`WHOOP_REDIRECT_URI=http://127.0.0.1:8765/whoop/callback`** (must match WHOOP app Redirect URL).
+
+### Files touched
+- **`scripts/whoop-exchange-code.js`**, **`package.json`**, **`env.example`**, **`.env.local`** (ignored by git), **`SESSION_LOG.md`**
+
+---
+
+## 2026-05-04 — WHOOP OAuth: zsh `&` error (authorize URL vs code)
+
+### Handoff
+- User ran **`npm run whoop:auth`** with the full **authorize URL**; **zsh** errors on **`&`**. **Fix:** open that link in **browser only**; after approve, pass only the **`code`** query value: **`npm run whoop:auth -- code`**. **`whoop-exchange-code.js`** now detects **`http…`** argv and prints these steps.
+
+---
+
+## 2026-05-04 — WHOOP redirect_uri invalid_request (dashboard mismatch)
+
+### Handoff
+- WHOOP **invalid_request**: **redirect_uri** must match a pre-registered URL. User must add the exact **WHOOP_REDIRECT_URI** from **`.env.local`** in WHOOP Developer Dashboard. **`npm run whoop:auth`** prints that URI first; **`env.example`** notes **localhost** vs **127.0.0.1**, port, path, trailing slash.
+
+---
+
+## 2026-05-04 — WHOOP OAuth: `state` on authorize URL
+
+### Handoff
+- **`scripts/whoop-exchange-code.js`** — random **`state`** query param (**`crypto.randomBytes(16).toString("hex")`**) on authorize URL per WHOOP OAuth; logs **state** for comparison with redirect.
