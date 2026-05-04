@@ -1,19 +1,94 @@
 (function () {
   var isMac = typeof navigator !== "undefined" && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
-  var modKey = isMac ? "\u2318" : "Ctrl";
-  var apiBase = "";
-
   var staticItems = [
-    { label: "Home", href: "/", icon: "home", group: "Navigation", keywords: "home portfolio main" },
-    { label: "Media", href: "/media", icon: "image", group: "Navigation", keywords: "books movies photos videos media" },
-    { label: "Projects", href: "/#work", icon: "code", group: "Navigation", keywords: "projects current future work" },
-    { label: "Tools", href: "/tools", icon: "wrench", group: "Navigation", keywords: "tools raw convert photo utilities" },
-    { label: "Training", href: "/training", icon: "chart", group: "Navigation", keywords: "training stats triathlon running" },
-    { label: "Admin", href: "/admin", icon: "gear", group: "Navigation", keywords: "admin edit dashboard manage" },
-    { label: "Credits", action: "openCredits", icon: "user", group: "Actions", keywords: "credits friends shoutouts" },
-    { label: "Toggle theme", action: "toggleTheme", icon: "moon", group: "Actions", keywords: "theme dark light" },
-    { label: "GitHub", href: "https://github.com/Salutatorian", icon: "github", group: "Links", keywords: "github code repo" },
-    { label: "Resume", href: "/resume.pdf", icon: "file", group: "Links", keywords: "resume cv download" },
+    {
+      label: "Home",
+      href: "/",
+      icon: "home",
+      group: "Navigation",
+      subtitle: "Main landing page",
+      keywords: "home portfolio main landing page"
+    },
+    {
+      label: "Projects",
+      href: "/#work",
+      icon: "code",
+      group: "Navigation",
+      subtitle: "Current and future builds",
+      keywords: "projects current future work"
+    },
+    {
+      label: "Media",
+      href: "/media",
+      icon: "image",
+      group: "Navigation",
+      subtitle: "Books, movies, photos & videos",
+      keywords: "books movies photos videos media"
+    },
+    {
+      label: "Tools",
+      href: "/tools",
+      icon: "wrench",
+      group: "Navigation",
+      subtitle: "Raw convert, utilities & labs",
+      keywords: "tools raw convert photo utilities"
+    },
+    {
+      label: "Training",
+      href: "/training",
+      icon: "chart",
+      group: "Navigation",
+      subtitle: "Stats, triathlon & running",
+      keywords: "training stats triathlon running"
+    },
+    {
+      label: "Admin",
+      href: "/admin",
+      icon: "gear",
+      group: "Navigation",
+      subtitle: "Edit home & dashboards",
+      keywords: "admin edit dashboard manage"
+    },
+    {
+      label: "Toggle theme",
+      action: "toggleTheme",
+      icon: "moon",
+      group: "Actions",
+      subtitle: "Switch light · dark · reading",
+      keywords: "theme dark light reading mode appearance"
+    },
+    {
+      label: "Open GitHub",
+      href: "https://github.com/Salutatorian",
+      icon: "github",
+      group: "Actions",
+      subtitle: "Repos & source",
+      keywords: "github code repository salutatorian"
+    },
+    {
+      label: "Book a call",
+      href: "/#contact",
+      icon: "calendar",
+      group: "Actions",
+      subtitle: "Jump to scheduler on home",
+      keywords: "book call schedule calendar meeting contact"
+    },
+    {
+      label: "Open credits",
+      action: "openCredits",
+      icon: "user",
+      group: "Actions",
+      subtitle: "Friends & shout-outs",
+      keywords: "credits friends shoutouts team"
+    },
+    {
+      label: "Resume",
+      href: "/resume.pdf",
+      icon: "file",
+      group: "Links",
+      subtitle: "Download PDF",
+      keywords: "resume cv download pdf"
+    }
   ];
 
   var dynamicItems = [];
@@ -120,7 +195,9 @@
     gear: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.66z"/></svg>',
     moon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z"/></svg>',
     book: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M11.25 4.533A9.707 9.707 0 006 3a9.735 9.735 0 00-3 1.875.75.75 0 00-1 1.125v14.25c0 1.035.84 1.875 1.875 1.875 2.25 0 4.5 0 6.375-1.25V4.533zM12.75 19.875A9.732 9.732 0 0118 21c.966 0 1.875-.3 2.625-.875.621-.459 1.125-1.089 1.125-1.625V4.533A9.707 9.707 0 0018 3a9.735 9.735 0 00-3 1.875.75.75 0 00-1 1.125v14.25c0 .536-.504 1.166-1.125 1.625z"/></svg>',
-    film: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path fill-rule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clip-rule="evenodd"/></svg>'
+    film: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path fill-rule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clip-rule="evenodd"/></svg>',
+    search: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z"/></svg>',
+    calendar: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path fill-rule="evenodd" d="M6.75 2.25a.75.75 0 01.75.75v1.5h9V3a.75.75 0 011.5 0v1.5h1.5a2.25 2.25 0 012.25 2.25v12a2.25 2.25 0 01-2.25 2.25H4.5A2.25 2.25 0 012.25 19V6.75A2.25 2.25 0 014.5 4.5H6V3a.75.75 0 01.75-.75zm-1 6V19.5h15V8.25H5.75z" clip-rule="evenodd"/></svg>'
   };
 
   var modal = null;
@@ -140,15 +217,24 @@
     modal.className = "command-palette-overlay";
     modal.setAttribute("role", "dialog");
     modal.setAttribute("aria-label", "Search");
+    var kbdOpen =
+      '<span class="command-palette-kbd-group">' +
+      (isMac
+        ? '<kbd class="command-palette-kbd-pill" aria-hidden="true">' + "\u2318" + '</kbd><kbd class="command-palette-kbd-pill" aria-hidden="true">K</kbd>'
+        : '<kbd class="command-palette-kbd-pill" aria-hidden="true">Ctrl</kbd><kbd class="command-palette-kbd-pill" aria-hidden="true">K</kbd>') +
+      '</span>';
     modal.innerHTML =
       '<div class="command-palette">' +
-      '  <div class="command-palette-header">' +
-      '    <div class="command-palette-search">' +
-      '      <input type="search" class="command-palette-input" placeholder="Search pages, projects, tools, actions..." autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Search site" />' +
+      '  <div class="command-palette-shell">' +
+      '    <div class="command-palette-header">' +
+      '      <label class="command-palette-search">' +
+      '        <span class="command-palette-search-icon">' + icons.search + '</span>' +
+      '        <input type="search" class="command-palette-input" placeholder="Search pages, tools & projects..." autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Search site" />' +
+      '        <span class="command-palette-shortcuts">' + kbdOpen + '<kbd class="command-palette-kbd-pill" aria-hidden="true">Esc</kbd></span>' +
+      '      </label>' +
       '    </div>' +
-      '    <span class="command-palette-hint">' + modKey + '+K · Esc</span>' +
+      '    <div class="command-palette-list" role="listbox" aria-label="Results"></div>' +
       '  </div>' +
-      '  <div class="command-palette-list"></div>' +
       '</div>';
     document.body.appendChild(modal);
     input = modal.querySelector(".command-palette-input");
@@ -169,8 +255,13 @@
     });
 
     document.body.classList.add("command-palette-open");
+    requestAnimationFrame(function () {
+      modal.classList.add("command-palette-overlay--shown");
+    });
     render();
-    setTimeout(function () { input.focus(); }, 50);
+    setTimeout(function () {
+      input.focus({ preventScroll: true });
+    }, 30);
   }
 
   function closePalette() {
@@ -189,7 +280,14 @@
     return all.filter(function (it) {
       var label = (it.label || "").toLowerCase();
       var keywords = (it.keywords || "").toLowerCase();
-      return label.indexOf(q) >= 0 || keywords.indexOf(q) >= 0;
+      var subtitle = ((it.subtitle || "") + "").toLowerCase();
+      var group = ((it.group || "") + "").toLowerCase();
+      return (
+        label.indexOf(q) >= 0 ||
+        keywords.indexOf(q) >= 0 ||
+        subtitle.indexOf(q) >= 0 ||
+        group.indexOf(q) >= 0
+      );
     });
   }
 
@@ -247,17 +345,45 @@
     filtered.forEach(function (it, i) {
       if (it.group !== lastGroup) {
         lastGroup = it.group;
-        html += '<div class="command-palette-group">' + escapeHtml(it.group) + '</div>';
+        html +=
+          '<div class="command-palette-group" role="presentation">' +
+          '  <div class="command-palette-group-rule" aria-hidden="true"></div>' +
+          '  <span class="command-palette-group-label font-dot">' + escapeHtml(it.group) + '</span>' +
+          "</div>";
       }
       var icon = icons[it.icon] || "";
       var cls = "command-palette-item" + (i === 0 ? " selected" : "");
-      html += '<div class="' + cls + '" data-index="' + i + '" role="option">' +
-        '<span class="command-palette-icon">' + icon + '</span>' +
-        '<span class="command-palette-label">' + escapeHtml(it.label) + '</span>' +
-        '</div>';
+      var subBlock = it.subtitle
+        ? '<span class="command-palette-sublabel">' + escapeHtml(it.subtitle) + "</span>"
+        : "";
+      html +=
+        '<div class="' +
+        cls +
+        '" data-index="' +
+        i +
+        '" role="option" tabindex="-1">' +
+        '<span class="command-palette-icon-badge" aria-hidden="true">' +
+        '<span class="command-palette-icon">' +
+        icon +
+        "</span></span>" +
+        '<span class="command-palette-text">' +
+        '<span class="command-palette-label">' +
+        escapeHtml(it.label) +
+        "</span>" +
+        subBlock +
+        "</span>" +
+        '<span class="command-palette-enter-hint font-dot" aria-hidden="true">↵</span>' +
+        "</div>";
     });
     if (filtered.length === 0) {
-      html = '<div class="command-palette-empty">No results</div>';
+      html =
+        '<div class="command-palette-empty">' +
+        '  <div class="command-palette-empty-icon" aria-hidden="true">' +
+        icons.search +
+        "</div>" +
+        '  <p class="command-palette-empty-title">No matches found</p>' +
+        '  <p class="command-palette-empty-hint">Try searching pages, tools, projects, or actions.</p>' +
+        "</div>";
     }
     listEl.innerHTML = html;
 

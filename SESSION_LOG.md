@@ -981,3 +981,18 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
 ### NEXT
 - **Commit + push** when ready (**`deleted: public/`** + config). Optional: **`.vercelignore`** trim if too many stray root files ship to static (e.g. **`SESSION_LOG.md`**).
+
+---
+
+## 2026-05-04 — Command palette UI: Greater Engine branded
+
+### Session Summary
+- **User ask:** Polish **⌘K** palette so it matches portfolio (warm ivory / dark navy), not a generic system modal.
+- **`command-palette.js`:** Header is a single **`label.command-palette-search`** row: **left search SVG**, **`input`** (sleek placeholder), **right **`kbd`** pills** (⌘ · K · Esc). Scrollable **`command-palette-list`** under sticky header overlay (flex **`max-height: 70vh`**). Rows use **`.command-palette-icon-badge`**, **`.command-palette-label`**, **`.command-palette-sublabel`**, **`.command-palette-enter-hint`** (↵). **`.command-palette-group`** has **divider + **`font-dot`** eyebrow**. Reordered/static items: **Navigation** (Home → Projects → … → Admin), **Actions** (toggle theme, GitHub, Book a call `/#contact`, credits), **Links** (Resume); added **`subtitle`** strings + **`calendar`** icon. **Filtering** includes subtitle + group. **Empty state** with icon + two-line copy. **Overlay** **`requestAnimationFrame`** adds **`command-palette-overlay--shown`** for fade + modal scale‑up entrance.
+- **`styles.css`:** Full palette block rewrite: **760px‑ish width**, softer border/shadow, light **`#f3efe6`** / dark **`#071120`** shells, neutral hover/active (no pale blue selection), **`prefers-reduced-motion`** support.
+
+### Files touched
+- `command-palette.js`, `styles.css`, `SESSION_LOG.md`.
+
+### Verify
+- `node --check command-palette.js` passed.
