@@ -1035,3 +1035,16 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
 ### Handoff
 - User asked again to push **GitHub + Vercel**. First **`git push`** reported **Everything up-to-date** (**`HEAD`** **`85d5344`**). **`SESSION_LOG`** handoff line updated → commit **`c749493`** pushed to **`origin/main`** (triggers **Vercel** build).
+
+---
+
+## 2026-05-04 — Production lag vs localhost (`thegreaterengine.xyz`)
+
+### Diagnosis
+- **GitHub** **`Salutatorian/porty`** **`main`** was at **`d5412b6`**, but Vercel **Production** (`friendly-otter`) was still serving **`0cd789f`** (older **`main`**). **Git-triggered Production deploys were not keeping up** with **`git push`** (webhook/integration or ignored builds).
+
+### Fix
+- **`npx vercel deploy --prod --yes`** from repo root → deploy **`dpl_5tY93SfzWZkSyHgUNvYSPsgLcbxL`** **READY**, aliased **https://thegreaterengine.xyz**. **`/admin`** now serves **Studio** UI (matches localhost).
+
+### Next (maintainer)
+- **Vercel → friendly-otter → Settings → Git**: confirm **`Salutatorian/porty`**, Production branch **`main`**, no bad “Ignored Build Step”; reinstall Git integration if **`git push`** still produces no Production build.
