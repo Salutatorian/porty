@@ -452,15 +452,62 @@
     return (btn && btn.getAttribute("data-range")) || "all";
   }
 
+  function setTrainingApiNotice(visible, message) {
+    var el =
+      typeof document !== "undefined" &&
+      document.getElementById &&
+      document.getElementById("training-api-notice");
+    if (!el) return;
+    if (!visible) {
+      el.setAttribute("hidden", "");
+      el.textContent = "";
+      return;
+    }
+    var t = message || "";
+    if (t.length > 280) t = t.slice(0, 277) + "…";
+    el.removeAttribute("hidden");
+    el.textContent =
+      "demo data · " +
+      (t ? t : "/api/training unreachable — configure Strava env or redeploy.");
+  }
+
   function fetchAndRender(range) {
-    var url = window.location.origin + "/api/training" + (range ? "?range=" + encodeURIComponent(range) : "");
+    var url =
+      window.location.origin +
+      "/api/training" +
+      (range ? "?range=" + encodeURIComponent(range) : "");
     fetch(url)
-      .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error(r.status)); })
-      .then(function (data) {
-        setData(data);
-        renderAll();
+      .then(function (r) {
+        return r.text().then(function (text) {
+          if (!r.ok) {
+            var detail = "";
+            try {
+              var j = JSON.parse(text);
+              if (j && typeof j.error === "string") detail = j.error.trim();
+            } catch (e) {
+              detail = "";
+            }
+            setTrainingApiNotice(
+              true,
+              detail || "Could not load Strava (“" + r.status + "”)."
+            );
+            setData(buildPlaceholderData());
+            renderAll();
+            return;
+          }
+          try {
+            setData(JSON.parse(text));
+            setTrainingApiNotice(false);
+            renderAll();
+          } catch (e2) {
+            setTrainingApiNotice(true, "Invalid JSON from training API.");
+            setData(buildPlaceholderData());
+            renderAll();
+          }
+        });
       })
       .catch(function () {
+        setTrainingApiNotice(true, "Network error while loading /api/training.");
         setData(buildPlaceholderData());
         renderAll();
       });
@@ -490,7 +537,11 @@
     var s = document.createElement("script");
     s.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
     s.onload = boot;
-    s.onerror = function () { setData(buildPlaceholderData()); renderAll(); };
+    s.onerror = function () {
+      setTrainingApiNotice(true, "Chart library failed to load.");
+      setData(buildPlaceholderData());
+      renderAll();
+    };
     document.head.appendChild(s);
   }
 

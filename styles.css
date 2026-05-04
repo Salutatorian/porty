@@ -8139,6 +8139,26 @@ html.dark .stack-card.is-active {
   color: var(--text);
 }
 
+.training-api-notice {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  text-transform: none;
+  color: color-mix(in srgb, var(--text-muted) 92%, var(--text) 8%);
+  background: rgba(180, 120, 40, 0.09);
+  border: 1px solid rgba(160, 100, 30, 0.18);
+  border-radius: 8px;
+  max-width: min(52rem, 100%);
+}
+
+[data-theme="dark"] .training-api-notice {
+  background: rgba(255, 180, 80, 0.08);
+  border-color: rgba(255, 200, 120, 0.16);
+  color: color-mix(in srgb, var(--text-muted) 96%, white 4%);
+}
+
 .training-hero-stats {
   position: relative;
   display: grid;

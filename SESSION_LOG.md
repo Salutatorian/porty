@@ -996,3 +996,20 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
 ### Verify
 - `node --check command-palette.js` passed.
+
+---
+
+## 2026-05-04 — Env vars: Strava fallback, Resend missing on prod, UX hints
+
+### Handoff / diagnosis
+- **Strava “random numbers”:** **`training.js`** uses **`buildPlaceholderData()`** (explicit **`Math.random()`**) whenever **`/api/training`** is non‑OK or network fails — so expired **`STRAVA_REFRESH_TOKEN`** / bad secret / missing env manifests as plausible‑looking fake charts.
+- **`RESEND_API_KEY`:** Live probe **`curl -X POST`** to **`https://thegreaterengine.xyz/api/contact`** returned **503** with missing‑key semantics — **`process.env.RESEND_API_KEY`** is empty on Production despite dashboard; fixes: confirm **exact key name**, **friendly-otter** project, **Production** checkbox, then **Redeploy**; ensure no leading/trailing spaces.
+- **Vercel “Needs Attention”:** Re‑enter **`R2_*`**, **`BLOB_*`**, **`ADMIN_PASSWORD`**, **Strava** secrets and save — often indicates decrypt/legacy row; redeploy after.
+- **`RESEND`** also requires valid **`RESEND_FROM`** once off **`onboarding@resend.dev`** (verified domain).
+
+### Code / docs touched
+- **`training.html`:** **`#training-api-notice`** under hero title when demo fallback is used.
+- **`training.js`:** Parse **`/api/training`** error JSON; **`setTrainingApiNotice()`** banner; chart load failure sets notice + placeholder.
+- **`styles.css`:** **`.training-api-notice`** styling.
+- **`api/contact.js`:** Clearer **503** JSON mentioning Vercel **Production redeploy**.
+- **`env.example`:** Resend redeploy reminder.

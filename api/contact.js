@@ -84,7 +84,10 @@ module.exports = async (req, res) => {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     console.error("RESEND_API_KEY is not set");
-    res.status(503).json({ error: "Email is not configured on this server" });
+    res.status(503).json({
+      error:
+        "Missing RESEND_API_KEY for this deployment. In Vercel: Project → Settings → Environment Variables — set RESEND_API_KEY for Production (and Preview if needed), then Redeploy. Local: add to .env.local.",
+    });
     return;
   }
 
