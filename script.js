@@ -84,37 +84,37 @@
       '  <div class="credits-deck credits-deck--overlay" aria-label="Credits">' +
       '    <div class="friends-fab-stack credits-deck-stack" id="credits-deck-stack">' +
       '      <div class="friends-fab-stack-inner stack-inner-visible" role="list" aria-label="Credits">' +
-      '        <article class="friend-card" role="listitem" tabindex="0" style="--rest-x:-2px; --rest-y:-6px; --rest-rot:-3deg; --fan-x:20px; --fan-y:-380px; --fan-rot:-10deg; --z:1; --stagger:3;">' +
+      '<article class="friend-card" role="listitem" tabindex="0" style="--rest-x:-2px; --rest-y:-6px; --rest-rot:-3deg; --fan-x:20px; --fan-y:-380px; --fan-rot:-10deg; --z:1; --stagger:3;">' +
+      '          <div class="friend-card-avatar" aria-hidden="true">&lt;blank&gt;</div>' +
+      '          <p class="friend-card-eyebrow font-dot">blank</p>' +
+      '          <h3 class="friend-card-name">&lt;blank&gt;</h3>' +
+      '          <p class="friend-card-blurb">&lt;blank&gt;</p>' +
+      '</article>' +
+      '<article class="friend-card" role="listitem" tabindex="0" style="--rest-x:0px; --rest-y:-3px; --rest-rot:-1deg; --fan-x:200px; --fan-y:-410px; --fan-rot:-5deg; --z:2; --stagger:2;">' +
+      '          <div class="friend-card-avatar" aria-hidden="true">&lt;blank&gt;</div>' +
+      '          <p class="friend-card-eyebrow font-dot">blank</p>' +
+      '          <h3 class="friend-card-name">&lt;blank&gt;</h3>' +
+      '          <p class="friend-card-blurb">&lt;blank&gt;</p>' +
+      '</article>' +
+      '<article class="friend-card friend-card--spotlight" role="listitem" tabindex="0" style="--rest-x:0px; --rest-y:0px; --rest-rot:0deg; --fan-x:380px; --fan-y:-430px; --fan-rot:0deg; --z:5; --stagger:0;">' +
       '          <div class="friend-card-avatar friend-card-avatar--photo" aria-hidden="true"><img src="/images/friends/ty.png" alt="" /></div>' +
       '          <p class="friend-card-eyebrow font-dot">day one</p>' +
       '          <h3 class="friend-card-name">Ty Cepeda</h3>' +
       '          <p class="friend-card-blurb">Edit me — your shoutout for Ty.</p>' +
-      "        </article>" +
-      '        <article class="friend-card" role="listitem" tabindex="0" style="--rest-x:0px; --rest-y:-3px; --rest-rot:-1deg; --fan-x:200px; --fan-y:-410px; --fan-rot:-5deg; --z:2; --stagger:2;">' +
+      '</article>' +
+      '<article class="friend-card" role="listitem" tabindex="0" style="--rest-x:0px; --rest-y:-3px; --rest-rot:1deg; --fan-x:560px; --fan-y:-410px; --fan-rot:5deg; --z:2; --stagger:2;">' +
       '          <div class="friend-card-avatar" aria-hidden="true">&lt;blank&gt;</div>' +
       '          <p class="friend-card-eyebrow font-dot">blank</p>' +
       '          <h3 class="friend-card-name">&lt;blank&gt;</h3>' +
       '          <p class="friend-card-blurb">&lt;blank&gt;</p>' +
-      "        </article>" +
-      '        <article class="friend-card" role="listitem" tabindex="0" style="--rest-x:0px; --rest-y:0px; --rest-rot:0deg; --fan-x:380px; --fan-y:-430px; --fan-rot:0deg; --z:3; --stagger:0;">' +
+      '</article>' +
+      '<article class="friend-card" role="listitem" tabindex="0" style="--rest-x:2px; --rest-y:-6px; --rest-rot:3deg; --fan-x:740px; --fan-y:-380px; --fan-rot:10deg; --z:1; --stagger:3;">' +
       '          <div class="friend-card-avatar" aria-hidden="true">&lt;blank&gt;</div>' +
       '          <p class="friend-card-eyebrow font-dot">blank</p>' +
       '          <h3 class="friend-card-name">&lt;blank&gt;</h3>' +
       '          <p class="friend-card-blurb">&lt;blank&gt;</p>' +
-      "        </article>" +
-      '        <article class="friend-card" role="listitem" tabindex="0" style="--rest-x:0px; --rest-y:-3px; --rest-rot:1deg; --fan-x:560px; --fan-y:-410px; --fan-rot:5deg; --z:2; --stagger:2;">' +
-      '          <div class="friend-card-avatar" aria-hidden="true">&lt;blank&gt;</div>' +
-      '          <p class="friend-card-eyebrow font-dot">blank</p>' +
-      '          <h3 class="friend-card-name">&lt;blank&gt;</h3>' +
-      '          <p class="friend-card-blurb">&lt;blank&gt;</p>' +
-      "        </article>" +
-      '        <article class="friend-card" role="listitem" tabindex="0" style="--rest-x:2px; --rest-y:-6px; --rest-rot:3deg; --fan-x:740px; --fan-y:-380px; --fan-rot:10deg; --z:1; --stagger:3;">' +
-      '          <div class="friend-card-avatar" aria-hidden="true">&lt;blank&gt;</div>' +
-      '          <p class="friend-card-eyebrow font-dot">blank</p>' +
-      '          <h3 class="friend-card-name">&lt;blank&gt;</h3>' +
-      '          <p class="friend-card-blurb">&lt;blank&gt;</p>' +
-      "        </article>" +
-      "      </div></div></div></div>";
+      '</article>' +
+      '</div></div></div></div>';
 
     root.addEventListener("click", function (e) {
       if (e.target.closest("[data-credits-close]")) {
@@ -166,8 +166,9 @@
       requestAnimationFrame(function () {
         root.classList.add("is-open");
         ensureCreditsDeckInitialized();
-        var firstCard = root.querySelector(".friend-card");
-        if (firstCard) firstCard.focus({ preventScroll: true });
+        var focusCard =
+          root.querySelector(".friend-card--spotlight") || root.querySelector(".friend-card");
+        if (focusCard) focusCard.focus({ preventScroll: true });
       });
     });
   }

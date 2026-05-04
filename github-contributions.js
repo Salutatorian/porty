@@ -3,7 +3,7 @@
   window.__PORTY_GITHUB_CONTRIB_INIT__ = true;
 
   /** Set to false to silence temporary contribution-fetch debug logs */
-  var GH_CONTRIB_DEBUG = true;
+  var GH_CONTRIB_DEBUG = false;
 
   var requestGeneration = 0;
 
@@ -56,14 +56,19 @@
     tooltip.hidden = true;
   }
 
-  function renderMonths(monthRow, weeks) {
+  function renderMonths(monthRow, weeks, data) {
     if (!monthRow) return;
     monthRow.innerHTML = "";
     monthRow.style.setProperty("--weeks", String(weeks.length));
     var prevYm = "";
+    var calendarY =
+      data && data.range === "calendar" && data.year != null
+        ? String(data.year)
+        : "";
     for (var w = 0; w < weeks.length; w++) {
       var day = weeks[w] && weeks[w][0];
       if (!day || !day.date) continue;
+      if (calendarY && day.date.slice(0, 4) !== calendarY) continue;
       var ym = day.date.slice(0, 7);
       if (ym === prevYm) continue;
       prevYm = ym;
@@ -81,7 +86,7 @@
 
     var weeks = data.weeks || [];
     grid.style.setProperty("--weeks", String(weeks.length));
-    renderMonths(monthRow, weeks);
+    renderMonths(monthRow, weeks, data);
 
     for (var w = 0; w < weeks.length; w++) {
       var week = weeks[w];
@@ -151,15 +156,20 @@
     var user = (grid.getAttribute("data-user") || "Salutatorian").trim();
     if (!user) user = "Salutatorian";
 
+    var calendarYear =
+      Number(grid.getAttribute("data-calendar-year")) || new Date().getUTCFullYear();
+
     var myGen = ++requestGeneration;
 
     async function loadContributions() {
       var success = false;
       try {
+        /* Calendar-year grid so month strip reads Jan → Dec (GitHub’s weeks for Jan 1–Dec 31 UTC). */
         var url =
           "/api/github-contributions?username=" +
           encodeURIComponent(user) +
-          "&range=rolling";
+          "&range=calendar&year=" +
+          encodeURIComponent(String(calendarYear));
 
         if (GH_CONTRIB_DEBUG) {
           console.log("[github-contrib debug] GET", url);

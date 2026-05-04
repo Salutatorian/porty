@@ -2,6 +2,144 @@
 
 Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
+## 2026-05-04 — Vercel: link friendly-otter + production deploy (Hobby 12-fn cap)
+
+### Session Summary
+- **Linked CLI:** `.vercel/project.json` → **team `salutatorians-projects`** / **`friendly-otter`** (`prj_4VNb508mn1zLWs0LnegPZ88bisau`), schema **`projectId`** + **`orgId`** only.
+- **Hobby deploy fix:** Deploy failed (**>12 Serverless Functions**). **Removed** **`api/upload-direct.js`** (admin uses **`/api/upload`**). **Merged** **`/api/movies`** + **`/api/reading`** into **`api/syndication.js`** + **`vercel.json` rewrites** (`syndication?__route=movies|reading`); logic in **`lib/api-movies.js`**, **`lib/api-reading.js`**. **`server.js`** uses **`./lib/api-*`** for local dev.
+- **Production:** **`npx vercel deploy --prod`** succeeded — production alias **`https://thegreaterengine.xyz`** per deploy output.
+- **Git:** `.vercel/` is **gitignored**; reconnect with **`vercel link`** per machine. Confirm Dashboard **Git** points at this repo for push-to-deploy.
+
+### Files touched
+- `.vercel/project.json`, `vercel.json`, `server.js`, `api/syndication.js` (new), `lib/api-movies.js`, `lib/api-reading.js`, `lib/r2-direct-upload.js` (comment)
+- Deleted: `api/movies.js`, `api/reading.js`, `api/upload-direct.js`
+- `SESSION_LOG.md`
+
+### Note
+- **`ADMIN-SETUP.md`** may still cite **`upload-direct`**; update docs later.
+
+---
+
+## 2026-05-04 — Launch: reuse existing Vercel project + env tiers
+
+### Handoff (discussion)
+- User wants **same Vercel account/team/project** where **Production / Preview / Development** env are already configured.
+- **Mechanics:** (1) In repo root run **`vercel link`** → pick existing **Team** + **Project** (writes **`.vercel/project.json`**; **`.vercel/`** is gitignored so link metadata stays local). (2) **Git:** Vercel project must **point at this repo/branch** (Dashboard → Project → Settings → **Git**) — if the old site used a different repo, **Connect Repository** → **`Salutatorian/porty`** (or swap once). (3) **Env:** **`vercel env pull .env.local --environment=production`** / **`preview`** mirrors dashboard secrets locally; add any **new** keys this redesign needs (**`GITHUB_TOKEN`**, **`RESEND_*`**, **`ADMIN_PASSWORD`**, Strava/Blob/R2 as in **`env.example`**) once per environment in Dashboard or **`vercel env add`**. (4) **Deploy:** pushes to **`main`** deploy **Production** (default); other branches → **Preview** URLs with Preview env — no need for a separate Vercel “environment” unless using custom **`VERCEL_DEPLOYMENT_TARGET`** workflows.
+- **Domain / DNS:** stays on existing project — no migration of DNS if same project hostname.
+
+### Files touched
+- `.gitignore` — **`/.vercel/`** (ignore CLI link metadata)
+- `SESSION_LOG.md` (this entry)
+
+---
+
+## 2026-05-04 — Launch readiness: Greater Engine redesign vs existing site
+
+### Handoff (discussion)
+- **Stack:** Repo is **static HTML + vanilla JS** + **`/api/*`** (Vercel **Serverless**) per **`vercel.json`** (`github-contributions`, `contact`, `training` via functions, Blob/R2 for admin uploads). Local **`npm run dev`** = **`node server.js`**; production = **Vercel** (not `npm start` alone).
+- **Launch paths:** (1) **Migrate domain** — point apex/`www` DNS to **Vercel** for this project, add domain in dashboard, set **Production env** mirrors `env.example` (`GITHUB_TOKEN`, `RESEND_*`, `ADMIN_PASSWORD`, Strava if needed, `BLOB_*` / R2). (2) **Soft launch** — deploy to **`*.vercel.app`**, QA, then connect custom domain when ready. (3) **Parallel** — keep old host on subdomain (e.g. `legacy.` or **new** site on `staging.` or `beta.`) until cutover; use **301 redirects** on old host for important URLs if paths changed.
+- **Pre-flight:** Fix **single listener on :3000** locally; **rotate** any exposed GitHub PAT; confirm **Resend** domain/`RESEND_FROM` for contact; **Vercel env** for all secrets (never rely on `.env.local` in prod). Optional: **search console**, **og tags**, **Analytics**.
+
+### Files touched
+- `SESSION_LOG.md` (this entry)
+
+---
+
+## 2026-05-04 — Verified `GITHUB_TOKEN` + port 3000 conflict note
+
+### Session Summary
+- **`.env.local`:** `GITHUB_TOKEN` line is present and **`server.js` logs `GITHUB_TOKEN loaded: true`** when the process starts.
+- **Live check:** `GET /api/github-contributions?username=Salutatorian&range=calendar&year=2026` returned **HTTP 200** with contribution payload when **`node server.js` ran on PORT=3011** (avoided **`EADDRINUSE` on `:3000`** — another listener on **3000** had been answering with **503 Missing GITHUB_TOKEN**).
+- **Security:** PAT value still matches previously exposed token → **rotate on GitHub** and update `.env.local` with a new secret; never paste PATs into chat.
+
+### Operational
+- One dev server: **`pkill`** / stop stray **`node server.js`** on **3000** or run **`PORT=3011 npm run dev`** temporarily.
+
+### Files touched
+- `SESSION_LOG.md` (this entry)
+
+---
+
+## 2026-05-04 — GitHub heatmap: token env + calendar Jan–Dec; PAT rotation
+
+### Session Summary
+- **Missing `GITHUB_TOKEN`:** Homepage calls **`GET /api/github-contributions`** only when the Node server loads **`.env.local`** — use **`npm run dev`**, not **`npm start`** / plain static **`serve`** (those have no `/api`). On **Vercel**, set **`GITHUB_TOKEN`** in project env (not `.env.local`).
+- **Security:** A real **`ghp_…`** PAT was present in workspace **`.env.local`** during debugging — **must be revoked on GitHub** and replaced with a new token; `.env.local` rewritten with **`GITHUB_TOKEN=`** empty plus notes (never paste tokens into chat/commits).
+- **`github-contributions.js`:** Default fetch is **`range=calendar&year=<UTC current year>`** so the month strip matches **Jan → Dec** for that year; optional **`data-calendar-year`** on **`#github-contrib-grid`** overrides year. **`renderMonths`** skips week columns whose first cell is outside that calendar year (avoids leading **Dec** from prior-year week stubs). **`GH_CONTRIB_DEBUG`** default **`false`**.
+
+### Files touched
+- `.env.local`, `github-contributions.js`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-04 — `.env.local` stub for GitHub (GITHUB_TOKEN)
+
+### Session Summary
+- Added **`.env.local`** (gitignored) with **`GITHUB_TOKEN`** placeholder + short instructions (PAT URL, used by **`GET /api/github-contributions`**). User replaces placeholder; other keys remain in **`env.example`**.
+
+### Files touched
+- `.env.local` (new, not committed), `SESSION_LOG.md`
+
+---
+
+## 2026-05-04 — Credits overlay: wrong fan / “double pillar” illusion + Ty centered
+
+### Diagnosis
+- Overlay fan slots were targeted with **`article:nth-child(n)`**. The deck’s **`innerHTML` added whitespace `#text` nodes between **`</article>` and `<article>`**, so **`nth-child` often did not hit the **`article`** elements (rules skipped or mismatched).
+- Result: overlapping / uneven transforms so it looked like **two tall “pillars”** plus a crowded row (user screenshot); **Ty** landed off the true **`--x: 0` center slot**.
+
+### Fixes
+- **`styles.css`** — clarify comment; **`nth-of-type(1–5)`** for fan positions (already present in file; adjusted comment); **`friend-card--spotlight`** gets **`z-index: 8`** when open so the center card stays above wings until hover pulls another card forward.
+- **`script.js`** — **Ty** moved to **3rd **`article`** (center fan index)**; blanks on either side; **`<article>` tags contiguous** (`</article><article>`) inside the inner list to avoid stray `#text` siblings.
+- Spotlight card class **`friend-card--spotlight`**; focus on open prefers it over leftmost placeholder.
+
+### Files touched
+- `script.js`, `styles.css`, `SESSION_LOG.md`
+
+### Operational
+- **`#ge-credits-overlay`** is created once per page load — **hard refresh** after deploy clears any stale injected markup.
+
+---
+
+## 2026-05-04 — Dev server “only home” / SPA dead: missing `@vercel/blob`
+
+### Diagnosis (Mac clone)
+- **`npm run dev`** printed **`Server at http://localhost:3000`**, then **`MODULE_NOT_FOUND` `@vercel/blob`** (via **`lib/blob-utils.js` → `api/home-projects.js`** when **`GET /api/home-projects`** runs).
+- Homepage **`home-projects.js`** fetches **`/api/home-projects`** on load, so first paint triggers that route and **crashes Node** unless deps are installed.
+- Symptom: tab stuck on **home** (or flaky navigation) because **the server exits** immediately after startup.
+
+### Fix
+- Run **`npm install`** after clone/pull so **`@vercel/blob`** (already in **`package.json`**) lands in **`node_modules`**.
+
+### Verify
+- After install: **`GET /`**, **`GET /media`**, **`GET /api/home-projects`** all **200**.
+
+### Files touched
+- `SESSION_LOG.md` (this entry); **`node_modules`** / lockfile unchanged by agent beyond **`npm install`**.
+
+---
+
+## 2026-05-04 — Session log read-through (whole file)
+
+### Handoff
+- User asked agent to **read the entire `SESSION_LOG.md`** (823 lines end-to-end) so cross-machine memory is authoritative; confirmed read and skimmed consolidated themes (2026-05-02 → 2026-05-04: homepage/dock/connect/contact/GitHub API, booking PixelCard, media hub + training cockpit, routing/credits overlay, icons, Alpine hero fog, command palette/search).
+
+### Files touched
+- `SESSION_LOG.md` (this entry)
+
+---
+
+## 2026-05-04 — AGREEMENT: SESSION_LOG as shared memory (Mac + Windows 11)
+
+### Session Summary
+- **Agreement:** Cursor chat does not sync between machines; **`SESSION_LOG.md`** is treated as the **canonical handoff notebook** after `git pull` on **Windows 11** and **this MacBook**.
+- **Agent commitment:** Log **meaningful batches** here whenever the repo changes (additions, edits, **deletions**, refactors): what changed, **files touched**, and operational notes. On **question-only** turns with no edits, append a short handoff paragraph anyway.
+
+### Files touched
+- `SESSION_LOG.md` (this entry)
+
+---
+
 ## 2026-05-04 — Git push (Windows / porty-1 clone)
 
 ### Session Summary

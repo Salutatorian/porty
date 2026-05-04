@@ -22,6 +22,8 @@
     { "source": "/ge-icon-192x192.png", "destination": "/public/ge-icon-192x192.png" },
     { "source": "/ge-icon-512x512.png", "destination": "/public/ge-icon-512x512.png" },
     { "source": "/site.webmanifest", "destination": "/public/site.webmanifest" },
+    { "source": "/api/movies", "destination": "/api/syndication?__route=movies" },
+    { "source": "/api/reading", "destination": "/api/syndication?__route=reading" },
     { "source": "/", "destination": "/index.html" },
     { "source": "/about", "destination": "/about.html" },
     { "source": "/books", "destination": "/books.html" },
@@ -48,10 +50,6 @@
   ],
   "functions": {
     "api/upload.js": {
-      "maxDuration": 60,
-      "memory": 1024
-    },
-    "api/upload-direct.js": {
       "maxDuration": 60,
       "memory": 1024
     },

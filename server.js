@@ -385,11 +385,6 @@ const server = http.createServer(async (req, res) => {
     return uploadHandler(req, res);
   }
 
-  if (urlPath === "/api/upload-direct" && req.method === "POST") {
-    const uploadDirectHandler = require("./api/upload-direct");
-    return uploadDirectHandler(req, res);
-  }
-
   if (urlPath === "/api/auth") {
     const authHandler = require("./api/auth");
     return authHandler(req, res);
@@ -401,12 +396,12 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (urlPath === "/api/reading" && req.method === "GET") {
-    const readingHandler = require("./api/reading");
+    const readingHandler = require("./lib/api-reading");
     return readingHandler(req, res);
   }
 
   if (urlPath === "/api/movies" && req.method === "GET") {
-    const moviesHandler = require("./api/movies");
+    const moviesHandler = require("./lib/api-movies");
     return moviesHandler(req, res);
   }
 

@@ -5,3 +5,6 @@
 
 # Dependencies
 node_modules/
+
+# Vercel CLI (`vercel link`) — machine-specific link; recreate with `vercel link`
+.vercel/
