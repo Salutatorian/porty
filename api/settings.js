@@ -13,7 +13,7 @@ const {
 const INDEX_PATH = "site/settings.json";
 
 const DEFAULTS = {
-  siteTitle: "The Greater Engine",
+  siteTitle: "Greater Engine",
   tagline: "",
   github: "",
   linkedin: "",

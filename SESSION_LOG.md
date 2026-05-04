@@ -1160,5 +1160,17 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 ## 2026-05-04 — Push GitHub (Vercel)
 
 ### Handoff
-- User requested **push** to update **GitHub** / **Vercel**. **`git push origin main`** on **`Salutatorian/porty`** advanced **`origin/main`** from **`8d3b003`** to **`1085eeb`** (commit message: Admin Studio GE skin, **`/api/settings`**, auth/env, logout → **`/`**, **`writing/**`** updates).
+- User requested **push** to update **GitHub** / **Vercel**. **`git push origin main`** on **`Salutatorian/porty`**: **`8d3b003`**…**`1085eeb`** (main feature batch), then **`SESSION_LOG`** handoff push **`28328b5`** (tip of **`origin/main`** at commit time).
 
+---
+
+## 2026-05-04 — Document title: “Greater Engine” (drop “The”)
+
+### Summary
+- Replaced **`The Greater Engine`** with **`Greater Engine`** in **`<title>`** across site **`*.html`** (and **`writing/post.html`** dynamic **`document.title`** suffix) so the browser tab no longer leads with **“The …”** when truncated.
+- **`api/settings.js`** default **`siteTitle`** aligned to **`Greater Engine`**.
+
+### Files touched
+- **`index.html`**, **`about.html`**, **`books.html`**, **`media.html`**, **`movies.html`**, **`photos.html`**, **`portfolio.html`**, **`tools.html`**, **`training.html`**, **`videos.html`**, **`writing/*.html`**, **`writing/post.html`**
+- **`api/settings.js`**
+- **`SESSION_LOG.md`** (this entry)
