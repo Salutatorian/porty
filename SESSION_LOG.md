@@ -1183,5 +1183,5 @@ Shared progress log so MacBook + desktop stay aligned after `git pull`.
 ## 2026-05-04 — Git push (verify)
 
 ### Handoff
-- User asked **`git push`**. Initial check: **`main`** matched **`origin/main`** at **`2599895`**. **`SESSION_LOG`** commits: **`ecfbc72`**, **`e56f2ce`**, **`3f8ee01`** — **`git push origin main`** after each; tip **`origin/main`** **`3f8ee01`**.
+- User asked **`git push`**. **`main`** was even with **`origin/main`** at **`2599895`**; **SESSION_LOG** edits produced several small commits, each **`git push origin main`**’d. Use **`git log -1 origin/main`** for the current tip.
 
