@@ -253,8 +253,8 @@
     if (dateEl)
       dateEl.textContent =
         L && L.date
-          ? formatHeatmapDay(L.date + "T12:00:00.000Z")
-          : "no scored recovery";
+          ? "Wake · " + formatHeatmapDay(L.date)
+          : "No recovery yet";
 
     if (meter) {
       var w = L && L.recoveryScore != null ? Math.min(100, Math.max(0, L.recoveryScore)) : 0;

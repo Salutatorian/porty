@@ -190,45 +190,52 @@
             </article>
           </section>
 
-          <section class="training-whoop" aria-label="WHOOP recovery">
-            <header class="training-feature-head training-whoop-head">
-              <h2 class="training-feature-title">strain, sleep &amp; readiness</h2>
+          <section class="training-whoop" aria-label="WHOOP today">
+            <header class="training-whoop-bar">
+              <h2 class="training-whoop-title">Today</h2>
+              <span class="whoop-chip">WHOOP</span>
             </header>
-            <p id="whoop-api-notice" class="training-api-notice font-dot" role="status" hidden></p>
-            <div class="training-whoop-layout">
-              <article class="whoop-hero-card">
-                <p class="whoop-hero-score" id="whoop-score">—</p>
-                <p class="whoop-hero-date font-dot" id="whoop-recovery-date">—</p>
-                <div class="whoop-hero-meter" aria-hidden="true">
-                  <div class="whoop-hero-meter-fill" id="whoop-score-meter" style="width: 0%;"></div>
+            <p id="whoop-api-notice" class="training-api-notice" role="status" hidden></p>
+            <div class="training-whoop-surface">
+              <article class="whoop-spotlight">
+                <div class="whoop-spotlight-label">Recovery score</div>
+                <div class="whoop-spotlight-numbers">
+                  <span class="whoop-spotlight-value" id="whoop-score">—</span>
+                  <span class="whoop-spotlight-div">/</span>
+                  <span class="whoop-spotlight-cap">100</span>
+                </div>
+                <p class="whoop-spotlight-when" id="whoop-recovery-date">—</p>
+                <div class="whoop-meter" aria-hidden="true">
+                  <div class="whoop-meter-fill" id="whoop-score-meter" style="width: 0%;"></div>
                 </div>
               </article>
-              <div class="whoop-metric-cards">
-                <article class="whoop-metric">
-                  <p class="font-dot whoop-metric-label">hrv rmssd</p>
-                  <p class="whoop-metric-value" id="whoop-hrv">—</p>
-                  <p class="whoop-metric-unit font-dot">ms</p>
-                </article>
-                <article class="whoop-metric">
-                  <p class="font-dot whoop-metric-label">resting hr</p>
-                  <p class="whoop-metric-value" id="whoop-rhr">—</p>
-                  <p class="whoop-metric-unit font-dot">bpm</p>
-                </article>
-                <article class="whoop-metric">
-                  <p class="font-dot whoop-metric-label">sleep perf</p>
-                  <p class="whoop-metric-value" id="whoop-sleep">—</p>
-                  <p class="whoop-metric-unit font-dot" id="whoop-sleep-sub">%</p>
-                </article>
-                <article class="whoop-metric">
-                  <p class="font-dot whoop-metric-label">cycle strain</p>
-                  <p class="whoop-metric-value" id="whoop-strain">—</p>
-                  <p class="whoop-metric-unit font-dot">recent</p>
-                </article>
-              </div>
+              <ul class="whoop-stat-strip">
+                <li class="whoop-stat">
+                  <span class="whoop-stat-label">Strain</span>
+                  <span class="whoop-stat-num" id="whoop-strain">—</span>
+                  <span class="whoop-stat-meta">today</span>
+                </li>
+                <li class="whoop-stat">
+                  <span class="whoop-stat-label">Sleep</span>
+                  <span class="whoop-stat-num" id="whoop-sleep">—</span>
+                  <span class="whoop-stat-meta" id="whoop-sleep-sub">%</span>
+                </li>
+                <li class="whoop-stat">
+                  <span class="whoop-stat-label">Resting HR</span>
+                  <span class="whoop-stat-num" id="whoop-rhr">—</span>
+                  <span class="whoop-stat-meta">bpm</span>
+                </li>
+                <li class="whoop-stat">
+                  <span class="whoop-stat-label">HRV</span>
+                  <span class="whoop-stat-num" id="whoop-hrv">—</span>
+                  <span class="whoop-stat-meta">RMSSD · ms</span>
+                </li>
+              </ul>
             </div>
-            <div class="whoop-trend-wrap">
-              <div class="whoop-trend" id="whoop-trend-bars" role="group" aria-label="Recovery scores by day"></div>
-            </div>
+            <footer class="whoop-trend-band">
+              <p class="whoop-trend-label">Past two weeks</p>
+              <div class="whoop-trend" id="whoop-trend-bars" role="group" aria-label="Recovery by day"></div>
+            </footer>
           </section>
 
           <section class="training-consistency" aria-label="Consistency">

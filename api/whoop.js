@@ -5,6 +5,7 @@
  * instead of sorting by recovery `updated_at`. Sleep prioritizes main sleep over naps.
  *
  * Env: WHOOP_CLIENT_ID, WHOOP_CLIENT_SECRET, WHOOP_REFRESH_TOKEN
+ * Optional: WHOOP_REFRESH_REDIRECT_URI — use if tokens came from localhost auth but WHOOP_REDIRECT_URI on the server points elsewhere (e.g. Vercel).
  * Docs: https://developer.whoop.com/api/
  */
 module.exports = async function handler(req, res) {
@@ -91,6 +92,7 @@ module.exports = async function handler(req, res) {
 
 const WHOOP_TOKEN_URL = "https://api.prod.whoop.com/oauth/oauth2/token";
 const WHOOP_API_BASE = "https://api.prod.whoop.com/developer";
+const https = require("https");
 
 /** Space-separated — must match `scripts/whoop-exchange-code.js` authorize `scope` (refresh may need the same string). */
 const WHOOP_OAUTH_SCOPES = [
@@ -127,8 +129,8 @@ function summarizeWhoopTokenError(rawText) {
 }
 
 /**
- * WHOOP token endpoint: **client_secret_post** only (see WHOOP OAuth docs).
- * Do not use HTTP Basic — their IdP returns 401 if `client_secret_basic` is sent.
+ * WHOOP accepts **client_secret_post** only. Use raw `https.request` (not `fetch`) so no client
+ * stack or proxy forwards `Authorization: Basic`; Hydra reports 401 client_secret_basic if it sees Basic.
  */
 function postWhoopRefresh(fields) {
   var bodyPairs = {
@@ -140,12 +142,45 @@ function postWhoopRefresh(fields) {
   if (fields.scope) bodyPairs.scope = fields.scope;
   if (fields.redirect_uri) bodyPairs.redirect_uri = fields.redirect_uri;
 
-  var body = new URLSearchParams(bodyPairs);
-  return fetch(WHOOP_TOKEN_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body,
-    signal: AbortSignal.timeout(15000),
+  var encoded = new URLSearchParams(bodyPairs).toString();
+  var parsed = new URL(WHOOP_TOKEN_URL);
+  var port = parsed.port ? Number(parsed.port) : 443;
+
+  return new Promise(function (resolve, reject) {
+    var opts = {
+      hostname: parsed.hostname,
+      port: port,
+      path: parsed.pathname,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Length": Buffer.byteLength(encoded, "utf8"),
+      },
+    };
+
+    var req = https.request(opts, function (res) {
+      var chunks = [];
+      res.on("data", function (c) {
+        chunks.push(c);
+      });
+      res.on("end", function () {
+        var bodyStr = Buffer.concat(chunks).toString("utf8");
+        var code = res.statusCode || 0;
+        resolve({
+          ok: code >= 200 && code < 300,
+          status: code,
+          text: function () {
+            return Promise.resolve(bodyStr);
+          },
+        });
+      });
+    });
+    req.on("error", reject);
+    req.setTimeout(15000, function () {
+      req.destroy(new Error("WHOOP token POST timed out."));
+    });
+    req.write(encoded, "utf8");
+    req.end();
   });
 }
 
@@ -196,7 +231,9 @@ async function refreshWhoopToken(clientId, clientSecret) {
       throw new Error("WHOOP_REFRESH_TOKEN is empty after normalization.");
     }
 
-    const redirectFromEnv = normalizeWhoopToken(process.env.WHOOP_REDIRECT_URI);
+    const redirectFromEnv = normalizeWhoopToken(
+      process.env.WHOOP_REFRESH_REDIRECT_URI || process.env.WHOOP_REDIRECT_URI
+    );
     let lastText = "";
     let lastStatus = 0;
 
@@ -256,7 +293,7 @@ async function refreshWhoopToken(clientId, clientSecret) {
         lastStatus +
         "). " +
         summarizeWhoopTokenError(lastText) +
-        " If this persists: run `npm run whoop:auth`, put the new WHOOP_REFRESH_TOKEN + WHOOP_CLIENT_ID / SECRET in `.env.local` (and Vercel), and ensure WHOOP_REDIRECT_URI matches the WHOOP app Redirect URL exactly."
+        ' If you still see client_secret_basic after deploy, redeploy from latest main (WHOOP token POST uses raw HTTPS, not fetch) or clear Vercel build cache. Else run npm run whoop:auth, refresh WHOOP_REFRESH_TOKEN, and use WHOOP_REFRESH_REDIRECT_URI=http://127.0.0.1:8765/whoop/callback on production.'
     );
   })();
 

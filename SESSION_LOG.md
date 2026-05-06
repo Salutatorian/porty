@@ -2,6 +2,80 @@
 
 Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
+## 2026-05-06 — WHOOP training block redesign (sans layout, fewer words) + wake date bugfix
+
+### Summary
+- **UI:** Removed long explainer paragraph and per-tile hint spam; **`Inter`** via **`font-main`** inside **`.training-whoop`**; headline **Today** + **WHOOP** chip; **`63 / 100`** style recovery row with meter; strain / sleep / RHR / HRV as a **four-column strip** (stacks at narrow widths).
+- **Bugfix:** Recovery dateline **`Wake · —`** — **`formatHeatmapDay`** was called with **`YYYY-MM-DD` + `"T…Z"`** twice (invalid parse). Now **`formatHeatmapDay(L.date)`** only.
+- **CSS:** Replaced prior WHOOP ruleset (old hero / metric cards / trend-wrap).
+
+### Files touched
+- `training.html`, `styles.css`, `training.js`, `public/training.js`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-06 — Training WHOOP block: label recovery 0–100; reorder metrics; reader copy
+
+### Summary
+- **`63` = WHOOP Recovery (0–100)** — morning readiness from sleep + physiology. UI now names it **`recovery score · 0–100`**, hero kicker explains high vs low in plain English, **`after wake · …`** dateline under the number.
+- **Section title** → **`Recovery & strain`** with short explanatory summary; tiles reordered → **strain today**, **sleep**, **resting heart rate**, **hrv (rmssd)** with one-line hints; trend row titled **recovery trend**.
+- **`training.js` / `public/training.js`:** dateline **`no scored recovery yet`**.
+
+### Files touched
+- `training.html`, `styles.css`, `training.js`, `public/training.js`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-06 — WHOOP refresh 401 client_secret_basic: token POST via `https.request` (not `fetch`)
+
+### Summary
+- **Symptom:** UI still **`401`** “supports **client_secret_post** … **client_secret_basic** was requested”.
+- **`api/whoop.js`:** OAuth token **`POST`** now uses Node **`https.request`** with **only** `Content-Type` + body (no **`Authorization`** header): avoids **`fetch`/proxy quirks** seen on some hosts. Still **`client_secret_post`** form fields only.
+- User must **`git pull`**, **push**, **Vercel redeploy** (optionally cache clear) — old bundles may still behave differently.
+
+### Files touched
+- `api/whoop.js`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-06 — WHOOP: fresh auth `code` exchanged → `.env.local` refresh token updated
+
+### Handoff
+- Ran **`npm run whoop:auth -- '<code>'`** successfully; **`WHOOP_REFRESH_TOKEN`** updated in **`.env.local`** (omit value in commits). Restart **`npm run dev`**; copy same **`WHOOP_*`** (incl. **`WHOOP_REFRESH_REDIRECT_URI=http://127.0.0.1:8765/whoop/callback`**) into **Vercel** + redeploy.
+
+### Files touched
+- `.env.local` (not committed), `SESSION_LOG.md`
+
+---
+
+## 2026-05-06 — WHOOP: reused auth `code` → `invalid_grant` “already been used”
+
+### Handoff
+- User re-pasted prior **`/whoop/callback?code=…`**; **`npm run whoop:auth -- '<code>'`** → **400 `invalid_grant`**, **`error_hint`:** authorization code **already used** (OAuth codes are single-use). **Fix:** run **`npm run whoop:auth`** → open **new** authorize URL → approve → **`npm run whoop:auth -- NEW_CODE`**.
+
+### Files touched
+- `SESSION_LOG.md`
+
+---
+
+## 2026-05-06 — WHOOP Vercel: `WHOOP_REFRESH_REDIRECT_URI` + why prod still 400
+
+### Summary
+- **Cause:** Tokens from **`npm run whoop:auth`** are issued against **`redirect_uri=http://127.0.0.1:8765/whoop/callback`**. If **Vercel** sets **`WHOOP_REDIRECT_URI=https://…`** (prod callback), **`/api/whoop`** was sending that on refresh → Hydra **`400`** + redirect whitelist hint — adding the prod URL in WHOOP’s dashboard alone does **not** fix refresh for tokens obtained via localhost.
+- **`api/whoop.js`:** Refresh now prefers **`WHOOP_REFRESH_REDIRECT_URI`**, falling back to **`WHOOP_REDIRECT_URI`**.
+- **`env.example`:** Documents **`WHOOP_REFRESH_REDIRECT_URI`** for prod.
+- **Note:** Diagnostic refresh in agent session rotated an in-flight refresh token; **`.env.local`** **`WHOOP_REFRESH_TOKEN`** temporarily **`REPLACE_ME_RUN_WHOOP_AUTH`** until user runs **`npm run whoop:auth`** again (**codes in chat were already single-use / consumed — treat as revoked**).
+
+### Vercel env (recommended)
+- **`WHOOP_CLIENT_ID`**, **`WHOOP_CLIENT_SECRET`**, **`WHOOP_REFRESH_TOKEN`** (from successful **`whoop:auth`**).
+- **`WHOOP_REFRESH_REDIRECT_URI=http://127.0.0.1:8765/whoop/callback`** (or omit both redirects and set **`WHOOP_REDIRECT_URI`** to that localhost URL everywhere).
+- Redeploy after edits.
+
+### Files touched
+- `api/whoop.js`, `env.example`, `.env.local` (maintainer-only), `SESSION_LOG.md`
+
+---
+
 ## 2026-05-06 — WHOOP refresh 400 `redirect_uri` hint: retry with redirect + full scopes
 
 ### Summary
