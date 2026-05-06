@@ -102,10 +102,6 @@ function normalizeWhoopToken(value) {
   return s;
 }
 
-function normalizeWhoopRedirect(value) {
-  return normalizeWhoopToken(value); // same rules (quotes/newlines), no Bearer strip needed
-}
-
 function summarizeWhoopTokenError(rawText) {
   try {
     const j = JSON.parse(rawText);
@@ -121,31 +117,22 @@ function summarizeWhoopTokenError(rawText) {
 }
 
 /**
- * WHOOP OAuth: try client_secret in body (their docs), then RFC 6749 HTTP Basic fallback.
+ * WHOOP token endpoint: **client_secret_post** only (see WHOOP OAuth docs).
+ * Do not use HTTP Basic — their IdP returns 401 if `client_secret_basic` is sent.
  */
-function postWhoopRefresh(fields, useBasicAuth) {
+function postWhoopRefresh(fields) {
   var bodyPairs = {
     grant_type: "refresh_token",
     refresh_token: fields.refresh_token,
+    client_id: fields.client_id,
+    client_secret: fields.client_secret,
   };
   if (fields.scope) bodyPairs.scope = fields.scope;
-  if (fields.redirect_uri) bodyPairs.redirect_uri = fields.redirect_uri;
 
-  var headers = { "Content-Type": "application/x-www-form-urlencoded" };
-  var bodyObj = Object.assign({}, bodyPairs);
-
-  if (useBasicAuth) {
-    var auth = Buffer.from(fields.client_id + ":" + fields.client_secret, "utf8").toString("base64");
-    headers.Authorization = "Basic " + auth;
-  } else {
-    bodyObj.client_id = fields.client_id;
-    bodyObj.client_secret = fields.client_secret;
-  }
-
-  var body = new URLSearchParams(bodyObj);
+  var body = new URLSearchParams(bodyPairs);
   return fetch(WHOOP_TOKEN_URL, {
     method: "POST",
-    headers,
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body,
     signal: AbortSignal.timeout(15000),
   });
@@ -159,28 +146,6 @@ let whoopRefreshTokenCache = "";
 /** Avoid parallel refreshes (two successes would invalidate each other's refresh token). */
 let whoopRefreshInFlight = null;
 
-function refreshAttemptDescriptors(redirectUri) {
-  const ru = (redirectUri || "").trim();
-  const attempts = [];
-  const withScope = { withScope: true };
-  const noScope = { withScope: false };
-  if (ru) {
-    attempts.push({ ...withScope, redirect: true });
-    attempts.push({ ...withScope, redirect: false });
-    attempts.push({ ...noScope, redirect: true });
-    attempts.push({ ...noScope, redirect: false });
-  } else {
-    attempts.push({ ...withScope, redirect: false });
-    attempts.push({ ...noScope, redirect: false });
-  }
-  return attempts.map(({ withScope, redirect }) => {
-    const label =
-      (withScope ? "scope=offline" : "no scope") +
-      (redirect && ru ? " + redirect_uri" : "");
-    return { label, ru: redirect ? ru : "", withScope };
-  });
-}
-
 async function refreshWhoopToken(clientId, clientSecret) {
   if (whoopRefreshInFlight) return whoopRefreshInFlight;
 
@@ -191,67 +156,60 @@ async function refreshWhoopToken(clientId, clientSecret) {
       throw new Error("WHOOP_REFRESH_TOKEN is empty after normalization.");
     }
 
-    const redirectUri = normalizeWhoopRedirect(process.env.WHOOP_REDIRECT_URI);
     let lastText = "";
     let lastStatus = 0;
 
-    const tryModes = [{ basic: false, name: "body" }, { basic: true, name: "Basic" }];
-    outer: for (let mi = 0; mi < tryModes.length; mi++) {
-      const useBasic = tryModes[mi].basic;
+    /** Docs: https://developer.whoop.com/docs/developing/oauth — refresh uses body fields only; no redirect_uri. */
+    const bodyAttempts = [
+      { label: "scope=offline", scope: "offline" },
+      { label: "no scope", scope: "" },
+    ];
 
-      const tryList = refreshAttemptDescriptors(redirectUri);
-      for (let ti = 0; ti < tryList.length; ti++) {
-        const { label, ru, withScope } = tryList[ti];
-        const fields = {
-          grant_type: "refresh_token",
-          refresh_token: refreshToken,
-          client_id: clientId,
-          client_secret: clientSecret,
-          scope: withScope ? "offline" : "",
-          redirect_uri: ru || "",
-        };
+    for (let ti = 0; ti < bodyAttempts.length; ti++) {
+      const { label, scope } = bodyAttempts[ti];
+      const fields = {
+        grant_type: "refresh_token",
+        refresh_token: refreshToken,
+        client_id: clientId,
+        client_secret: clientSecret,
+        scope: scope || "",
+      };
 
-        const res = await postWhoopRefresh(fields, useBasic);
-        const attemptLabel =
-          tryModes[mi].name + " · " + label + (useBasic ? " (client via Authorization header)" : "");
-
-        const t = await res.text();
-        if (res.ok) {
-          let data;
-          try {
-            data = JSON.parse(t);
-          } catch (e1) {
-            throw new Error("WHOOP token response was not JSON.");
-          }
-          if (!data.access_token) {
-            throw new Error("WHOOP token response missing access_token.");
-          }
-          if (mi > 0 || ti > 0) {
-            console.warn('[whoop] Token refresh succeeded: "' + attemptLabel + '".');
-          }
-          if (data.refresh_token) {
-            whoopRefreshTokenCache = normalizeWhoopToken(data.refresh_token);
-            if (whoopRefreshTokenCache !== fromEnv) {
-              console.warn(
-                "[whoop] New refresh_token issued — update WHOOP_REFRESH_TOKEN in .env.local / Vercel (required for cold starts)."
-              );
-            }
-          }
-          return data.access_token;
+      const res = await postWhoopRefresh(fields);
+      const t = await res.text();
+      if (res.ok) {
+        let data;
+        try {
+          data = JSON.parse(t);
+        } catch (e1) {
+          throw new Error("WHOOP token response was not JSON.");
         }
-
-        lastStatus = res.status;
-        lastText = t;
-        if (res.status !== 400) break outer;
-        console.warn("[whoop] Refresh failed (" + attemptLabel + "): " + t.slice(0, 200));
+        if (!data.access_token) {
+          throw new Error("WHOOP token response missing access_token.");
+        }
+        if (ti > 0) {
+          console.warn('[whoop] Token refresh succeeded (fallback: "' + label + '").');
+        }
+        if (data.refresh_token) {
+          whoopRefreshTokenCache = normalizeWhoopToken(data.refresh_token);
+          if (whoopRefreshTokenCache !== fromEnv) {
+            console.warn(
+              "[whoop] New refresh_token issued — update WHOOP_REFRESH_TOKEN in .env.local / Vercel (required for cold starts)."
+            );
+          }
+        }
+        return data.access_token;
       }
+
+      lastStatus = res.status;
+      lastText = t;
+      console.warn("[whoop] Refresh failed (body · " + label + "): " + t.slice(0, 200));
     }
 
     console.error("[whoop] All refresh attempts failed.", {
       refreshTokenLength: refreshToken.length,
       clientIdLength: clientId.length,
       hasSecret: !!clientSecret,
-      hadRedirectEnv: !!redirectUri,
     });
 
     throw new Error(

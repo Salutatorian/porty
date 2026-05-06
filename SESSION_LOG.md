@@ -2,6 +2,21 @@
 
 Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
+## 2026-05-06 — WHOOP refresh: POST body only + no `redirect_uri` (fix misleading 401)
+
+### Summary
+- **Terminal:** Body refresh returned **400** `invalid_request`, then **`client_secret_basic`** attempt returned **401** (“supports **client_secret_post**”) — masking the underlying issue.
+- **`api/whoop.js`:** Token refresh uses **only** WHOOP-documented **`application/x-www-form-urlencoded`** body: **`grant_type`**, **`refresh_token`**, **`client_id`**, **`client_secret`**, optional **`scope=offline`** — **no** `redirect_uri` on refresh, **no** HTTP Basic. Removed unused **`normalizeWhoopRedirect`** in this file.
+
+### Files touched
+- `api/whoop.js`, `SESSION_LOG.md`
+
+### Ops
+- Restart **`npm run dev`** after pull. **Strava** `401 invalid` in the same terminal is unrelated (fix **`STRAVA_*`** in **`.env.local`** or ignore if not using Strava).
+- If refresh still fails: **`npm run whoop:auth`** and update **`WHOOP_REFRESH_TOKEN`** (rotation / stale token).
+
+---
+
 ## 2026-05-06 — Fix: WHOOP recovery / HRV / RHR never rendered (missing `latest`)
 
 ### Summary
