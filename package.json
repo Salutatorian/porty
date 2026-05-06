@@ -10,7 +10,8 @@
     "set-r2-cors": "node scripts/set-r2-cors.js",
     "migrate:blob-to-r2": "node scripts/migrate-blob-to-r2.js",
     "migrate:blob-to-r2:dry": "node scripts/migrate-blob-to-r2.js --dry-run",
-    "whoop:auth": "node scripts/whoop-exchange-code.js"
+    "whoop:auth": "node scripts/whoop-exchange-code.js",
+    "build": "node scripts/vercel-sync-public.js"
   },
   "keywords": [
     "personal-site",

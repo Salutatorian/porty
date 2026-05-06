@@ -2,6 +2,93 @@
 
 Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
+## 2026-05-06 — Q: Connect Cursor chat to Vercel?
+
+### Handoff
+- **No.** Cursor + this chat are **not** tied to Vercel. **GitHub → Vercel** is what triggers deploys. Optional: **`vercel link`** locally (`.vercel/` in repo, gitignored) for CLI **`vercel`** / **`vercel env pull`** only — per machine.
+
+### Files touched
+- `SESSION_LOG.md`
+
+---
+
+## 2026-05-06 — Fix prod 404 static assets (`/styles.css`): `public/` mirror + Vercel `build`
+
+### Summary
+- **Cause:** Production returned **404** for **`/styles.css`**, **`/script.js`**, **`/images/...`** (HTML still 200 via rewrites → unstyled gear page).
+- **Fix:** **`scripts/vercel-sync-public.js`** copies static dirs + root client assets into **`public/`** during **`npm run build`**. **`vercel.json`** sets **`buildCommand": "npm run build"`**. **`/public`** is **gitignored** (generated only on CI). Local **`npm run dev`** unchanged (serves repo root first, then **`public/`** fallback).
+
+### Files touched
+- `scripts/vercel-sync-public.js`, `package.json`, `vercel.json`, `.gitignore`, `SESSION_LOG.md`
+
+### Ops
+- **Push → redeploy**; confirm **`https://thegreaterengine.xyz/styles.css`** returns **200**. If dashboard overrides build command, align with **`npm run build`** or rely on **`vercel.json`**.
+
+---
+
+## 2026-05-06 — Clarify: Root Directory `./` was UI placeholder; prod static still 404
+
+### Handoff
+- User: **Root Directory** field does not contain literal **`./`** — that was **example** copy in the empty input. Empty = repo root ✓.
+- **Prod still returns 404** for **`/styles.css`** / **`/script.js`** (curl); **GitHub `main` has `styles.css`**; local **`vercel build`** puts assets in **`.vercel/output/static/`**. ⇒ Debug **deployment commit**, **Framework = Other**, **empty build/output**, correct **Git repo/branch**; optional **`vercel deploy --prebuilt`** after **`vercel build`**; check **Cloudflare** if used.
+
+---
+
+## 2026-05-06 — Vercel Root Directory: clear `./`
+
+### Handoff
+- User screenshot: **Root Directory** was set to **`./`**. Docs: leave **empty** for repo-root sites. **`./`** can break static uploads; → **clear field**, Save, Redeploy. Path: **Settings → Build & Deployment → Root Directory**.
+
+---
+
+## 2026-05-06 — Prod: giant gear / “broken” homepage — `styles.css` 404
+
+### Diagnosis
+- **`https://thegreaterengine.xyz/`** returns **`index.html`** (200) but **`/styles.css`**, **`/script.js`**, **`/images/...`** return **404** on this check ⇒ **static files are not in the deployment artifact** (CSS never loads → layout collapses; hero looks like a giant gear).
+- **Tracked in git:** `styles.css` / `script.js` exist in **`porty`** — not a missing-file-in-repo issue.
+
+### Fix (Vercel Dashboard — new project)
+1. **Settings → General → Root Directory** — must be **empty** (repo root), **not** a subfolder (`api`, `public` only, etc.).
+2. **Settings → Build & Deployment** — **Framework Preset: Other**; **Build Command** empty; **Output Directory** empty (defaults). Remove any custom **Output** that points at a folder that doesn’t contain `styles.css` + `images/`.
+3. **Save** → **Deployments → Redeploy** (or push an empty commit).
+4. **Confirm:** Deployment **Source** / file browser (if available) or curl: **`/styles.css`** should be **200**.
+
+### Files touched
+- `SESSION_LOG.md`
+
+---
+
+## 2026-05-06 — Vercel: new project wired (post-migration checklist)
+
+### Handoff
+- User **moved env to new project**, **disconnected old**, **connected new** to **`porty`**. **Next:** (1) **Domains** — `thegreaterengine.xyz` must be **on the new project** (remove from old if needed). (2) **Redeploy** after env paste. (3) Smoke **`/api/training`**, **`/api/whoop`** (optional), **`/`.** (4) **`vercel link`** locally if CLI used (new project `.vercel/`).
+
+### Files touched
+- `SESSION_LOG.md`
+
+---
+
+## 2026-05-06 — Ops: migrate to a fresh Vercel project (no double “mixing”)
+
+### Steps (mental model)
+- **Do not copy-paste `api/` into Vercel.** Connect **GitHub `Salutatorian/porty`** (or path you use)—the **`api/`** folder becomes **`/api/*`** serverless routes on deploy. **`vercel.json`** in the repo is applied automatically.
+
+1. **[Vercel](https://vercel.com) → Add New… → Project** → **Import `Salutatorian/porty`**, Production branch **`main`**, Deploy (defaults are usually fine for static + API; root = repo root).
+2. **Settings → Environment Variables** — copy names + values **from the old project** *or* from **`.env.local`** (omit anything you only want locally). Set for **Production** (and **Preview** if you use previews). Use **`env.example`** as the checklist (**`ADMIN_PASSWORD`**, **`STRAVA_*`**, **`WHOOP_*`**, **`RESEND_*`**, **`GITHUB_TOKEN`**, **`BLOB_*` / **`R2_*`**, **`BLOB_*_INDEX_URL`**, **`CONTACT_*`**, etc.).
+3. **Redeploy** the new project once env is saved (**Deployments → ⋯ → Redeploy**) so lambdas pick up vars.
+4. **Domains — move **`thegreaterengine.xyz`****  
+   **Old project** → Settings → Domains → **Remove** domain (avoid “already assigned”).  
+   **New project** → Settings → Domains → **Add** `thegreaterengine.xyz` (and `www` if you use it)—follow DNS if prompted.
+5. **Old project** — Disconnect Git / pause deployments / archive or delete when you’re satisfied the new prod works (optional).
+
+### API routes deployed from this repo (`api/`)
+auth, contact, convert, github-contributions, home-projects, photos, projects, settings, syndication, training, upload, videos, whoop, writings.
+
+### Files touched
+- `SESSION_LOG.md`
+
+---
+
 ## 2026-05-05 — End of day: pushed `main` to GitHub
 
 ### Summary
