@@ -2,11 +2,25 @@
 
 Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
+## 2026-05-06 — WHOOP refresh 400 `redirect_uri` hint: retry with redirect + full scopes
+
+### Summary
+- **Symptom:** UI still **demo data** + **`400` invalid_request** with Hydra-style hint to whitelist **`redirect_uri`**.
+- **`api/whoop.js`:** Refresh now tries **`WHOOP_REDIRECT_URI`** (when set) **before** doc-minimal shapes, and adds **`full_auth_scopes`** (same string as **`whoop-exchange-code.js`**) plus **`offline`** / **no scope** variants — still **client_secret_post** only.
+
+### Ops
+- **Vercel / prod:** Set **`WHOOP_REDIRECT_URI`** to the **exact** redirect used when you ran **`npm run whoop:auth`** (usually **`http://127.0.0.1:8765/whoop/callback`**), then redeploy. If refresh was invalidated (two servers refreshing), run **`whoop:auth`** again and update **`WHOOP_REFRESH_TOKEN`**.
+
+### Files touched
+- `api/whoop.js`, `SESSION_LOG.md`
+
+---
+
 ## 2026-05-06 — WHOOP refresh: POST body only + no `redirect_uri` (fix misleading 401)
 
 ### Summary
 - **Terminal:** Body refresh returned **400** `invalid_request`, then **`client_secret_basic`** attempt returned **401** (“supports **client_secret_post**”) — masking the underlying issue.
-- **`api/whoop.js`:** Token refresh uses **only** WHOOP-documented **`application/x-www-form-urlencoded`** body: **`grant_type`**, **`refresh_token`**, **`client_id`**, **`client_secret`**, optional **`scope=offline`** — **no** `redirect_uri` on refresh, **no** HTTP Basic. Removed unused **`normalizeWhoopRedirect`** in this file.
+- **`api/whoop.js`:** Removed HTTP Basic; **`client_secret_post` only**. Later: reintroduced optional **`redirect_uri`** + full authorize **scope** retries when Hydra returns **`redirect_uri`** hints (see newer log entry above).
 
 ### Files touched
 - `api/whoop.js`, `SESSION_LOG.md`

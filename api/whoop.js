@@ -92,6 +92,16 @@ module.exports = async function handler(req, res) {
 const WHOOP_TOKEN_URL = "https://api.prod.whoop.com/oauth/oauth2/token";
 const WHOOP_API_BASE = "https://api.prod.whoop.com/developer";
 
+/** Space-separated — must match `scripts/whoop-exchange-code.js` authorize `scope` (refresh may need the same string). */
+const WHOOP_OAUTH_SCOPES = [
+  "offline",
+  "read:recovery",
+  "read:cycles",
+  "read:sleep",
+  "read:workout",
+  "read:profile",
+].join(" ");
+
 /** Strip accidental quotes/newlines/Bearer prefix from OAuth tokens and redirect URIs. */
 function normalizeWhoopToken(value) {
   let s = String(value || "").trim();
@@ -128,6 +138,7 @@ function postWhoopRefresh(fields) {
     client_secret: fields.client_secret,
   };
   if (fields.scope) bodyPairs.scope = fields.scope;
+  if (fields.redirect_uri) bodyPairs.redirect_uri = fields.redirect_uri;
 
   var body = new URLSearchParams(bodyPairs);
   return fetch(WHOOP_TOKEN_URL, {
@@ -146,6 +157,35 @@ let whoopRefreshTokenCache = "";
 /** Avoid parallel refreshes (two successes would invalidate each other's refresh token). */
 let whoopRefreshInFlight = null;
 
+/**
+ * WHOOP’s token service (Hydra) often returns `error_hint` about `redirect_uri` on refresh.
+ * Try the same redirect used at authorize time + the full authorize scope string, then fall back to doc-minimal shapes.
+ */
+function whoopRefreshAttemptList(redirectUriRaw) {
+  const ru = normalizeWhoopToken(redirectUriRaw);
+  const attempts = [];
+
+  function push(label, scope, includeRedirect) {
+    var useRu = includeRedirect && ru ? ru : "";
+    attempts.push({
+      label: label + (useRu ? " + redirect_uri" : ""),
+      scope: scope || "",
+      redirect_uri: useRu,
+    });
+  }
+
+  if (ru) {
+    push("offline", "offline", true);
+    push("full_auth_scopes", WHOOP_OAUTH_SCOPES, true);
+    push("no_scope", "", true);
+  }
+  push("offline", "offline", false);
+  push("full_auth_scopes", WHOOP_OAUTH_SCOPES, false);
+  push("no_scope", "", false);
+
+  return attempts;
+}
+
 async function refreshWhoopToken(clientId, clientSecret) {
   if (whoopRefreshInFlight) return whoopRefreshInFlight;
 
@@ -156,23 +196,21 @@ async function refreshWhoopToken(clientId, clientSecret) {
       throw new Error("WHOOP_REFRESH_TOKEN is empty after normalization.");
     }
 
+    const redirectFromEnv = normalizeWhoopToken(process.env.WHOOP_REDIRECT_URI);
     let lastText = "";
     let lastStatus = 0;
 
-    /** Docs: https://developer.whoop.com/docs/developing/oauth — refresh uses body fields only; no redirect_uri. */
-    const bodyAttempts = [
-      { label: "scope=offline", scope: "offline" },
-      { label: "no scope", scope: "" },
-    ];
+    const bodyAttempts = whoopRefreshAttemptList(redirectFromEnv);
 
     for (let ti = 0; ti < bodyAttempts.length; ti++) {
-      const { label, scope } = bodyAttempts[ti];
+      const a = bodyAttempts[ti];
       const fields = {
         grant_type: "refresh_token",
         refresh_token: refreshToken,
         client_id: clientId,
         client_secret: clientSecret,
-        scope: scope || "",
+        scope: a.scope,
+        redirect_uri: a.redirect_uri,
       };
 
       const res = await postWhoopRefresh(fields);
@@ -188,7 +226,7 @@ async function refreshWhoopToken(clientId, clientSecret) {
           throw new Error("WHOOP token response missing access_token.");
         }
         if (ti > 0) {
-          console.warn('[whoop] Token refresh succeeded (fallback: "' + label + '").');
+          console.warn('[whoop] Token refresh succeeded (fallback: "' + a.label + '").');
         }
         if (data.refresh_token) {
           whoopRefreshTokenCache = normalizeWhoopToken(data.refresh_token);
@@ -203,13 +241,14 @@ async function refreshWhoopToken(clientId, clientSecret) {
 
       lastStatus = res.status;
       lastText = t;
-      console.warn("[whoop] Refresh failed (body · " + label + "): " + t.slice(0, 200));
+      console.warn("[whoop] Refresh failed (body · " + a.label + "): " + t.slice(0, 200));
     }
 
     console.error("[whoop] All refresh attempts failed.", {
       refreshTokenLength: refreshToken.length,
       clientIdLength: clientId.length,
       hasSecret: !!clientSecret,
+      hadRedirectEnv: !!redirectFromEnv,
     });
 
     throw new Error(
