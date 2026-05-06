@@ -2,6 +2,48 @@
 
 Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
+## 2026-05-06 — Fix: WHOOP recovery / HRV / RHR never rendered (missing `latest`)
+
+### Summary
+- **`setWhoopData`** in **`training.js`** / **`public/training.js`** never assigned **`whoopState.latest`** from **`/api/whoop`** — sleep + strain used **`sleep`** / **`cycle`** so they worked; recovery card read **`latest`** and stayed **null** (“no scored recovery”, em dashes).
+
+### Files touched
+- `training.js`, `public/training.js`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-06 — WHOOP callback URL: exchange `code` + refresh `.env.local`
+
+### Handoff
+- User pasted **`/whoop/callback?code=…`** (authorization code is **single-use** and was also **public in chat** — if odd behavior, revoke app access and re-auth).
+- Ran **`npm run whoop:auth -- '<code>'`** → success; updated **`WHOOP_REFRESH_TOKEN`** in **`.env.local`**. **Restart `npm run dev`**; mirror token to **Vercel Production** for prod.
+- Script **`scripts/whoop-exchange-code.js`** rejects a full **`http://…`** argv (that’s the authorize URL case); for **callback** URL, pass **only** the **`code`** query value (or extract from bar).
+
+---
+
+## 2026-05-06 — Q: WHOOP still shows `demo data · WHOOP token refresh failed (400) invalid_request`?
+
+### Handoff
+- **Meaning:** WHOOP rejects the **`/oauth/oauth2/token`** refresh POST as **RFC 6749 invalid_request** — usually **credential mismatch** (refresh token belongs to another app/outdated rotation), **`WHOOP_REFRESH_TOKEN`** mangled in env (quotes, truncation, pasted wrong line), **`WHOOP_CLIENT_SECRET`** wrong vs portal, or **`WHOOP_REDIRECT_URI`** not **exactly** the registered URI. **Production** often still has stale values vs `.env.local`.
+- **Sleep/strain “working”:** UI can still show **placeholder/demo** strips for some metrics while the banner reflects the refresh failure path.
+- **Next:** **`npm run whoop:auth`**, replace **`WHOOP_REFRESH_TOKEN`**; mirror **`WHOOP_*`** on **Vercel Production**, redeploy; read full **`error_hint`** in banner (training notice length now 560).
+
+---
+
+## 2026-05-06 — WHOOP 400 refresh: Basic auth fallback + clearer `error_hint`
+
+### Summary
+- **`api/whoop.js`:** After body-based client auth (WHOOP docs), retries token POST with **HTTP Basic** (`Authorization: Basic …`) and **no** `client_id` / `client_secret` in form (RFC 6749). **`normalizeWhoopRedirect`** trims quotes/newlines on **`WHOOP_REDIRECT_URI`**. Errors use **`summarizeWhoopTokenError()`** so **`error_hint`** surfaces in the JSON message to the client.
+- **`training.js`:** WHOOP notice max length **280 → 560** so hints aren’t cut off as aggressively.
+
+### Ops
+- **400 `invalid_request`** usually means **env doesn’t match a valid WHOOP token** (wrong secret, mangled refresh line, or token from another app). **Re-run `npm run whoop:auth`**, update **`WHOOP_REFRESH_TOKEN`** **and** matching **`WHOOP_CLIENT_ID` / `WHOOP_CLIENT_SECRET`**, set **`WHOOP_REDIRECT_URI`** exactly as in WHOOP dashboard — in **`.env.local` and Vercel Production**.
+
+### Files touched
+- `api/whoop.js`, `training.js`, `SESSION_LOG.md`
+
+---
+
 ## 2026-05-06 — Q: Connect Cursor chat to Vercel?
 
 ### Handoff

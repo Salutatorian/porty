@@ -215,7 +215,7 @@
       return;
     }
     var t = message || "";
-    if (t.length > 280) t = t.slice(0, 277) + "…";
+    if (t.length > 560) t = t.slice(0, 557) + "…";
     el.removeAttribute("hidden");
     el.textContent = t;
   }
@@ -226,6 +226,7 @@
     whoopState.range = data.range || getActiveRange();
     whoopState.fetchedAt = typeof data.fetchedAt === "string" ? data.fetchedAt : "";
     whoopState.series = Array.isArray(data.series) ? data.series : [];
+    whoopState.latest = data.latest != null ? data.latest : null;
     whoopState.sleep = data.sleep || null;
     whoopState.cycle = data.cycle || null;
   }
