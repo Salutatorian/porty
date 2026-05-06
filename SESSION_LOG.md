@@ -2,6 +2,21 @@
 
 Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
+## 2026-05-06 — WHOOP prod 400: localhost `redirect_uri` fallbacks when Vercel omits env
+
+### Summary
+- **Cause:** Vercel had **`WHOOP_CLIENT_*`** + **`WHOOP_REFRESH_TOKEN`** but often **no** **`WHOOP_REDIRECT_URI` / `WHOOP_REFRESH_REDIRECT_URI`**. Hydra refresh then failed **`400`** (redirect hint). Local dev loads **`.env.local`** with redirect; prod did not.
+- **`api/whoop.js`:** If redirect env empty, token refresh now **also** tries **`http://127.0.0.1:8765/whoop/callback`** and **`http://localhost:8765/whoop/callback`** (same as **`whoop:auth`** defaults) before body-only attempts.
+- **`env.example`:** Restored **Resend** block; WHOOP block ends cleanly.
+
+### Ops
+- **Push + redeploy** so production runs this file. Optional explicit Vercel: **`WHOOP_REFRESH_REDIRECT_URI=http://127.0.0.1:8765/whoop/callback`**.
+
+### Files touched
+- `api/whoop.js`, `env.example`, `SESSION_LOG.md`
+
+---
+
 ## 2026-05-06 — WHOOP training block redesign (sans layout, fewer words) + wake date bugfix
 
 ### Summary

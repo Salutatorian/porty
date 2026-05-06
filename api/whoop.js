@@ -193,31 +193,50 @@ let whoopRefreshTokenCache = "";
 let whoopRefreshInFlight = null;
 
 /**
- * WHOOP’s token service (Hydra) often returns `error_hint` about `redirect_uri` on refresh.
- * Try the same redirect used at authorize time + the full authorize scope string, then fall back to doc-minimal shapes.
+ * WHOOP’s token service (Hydra) may require `redirect_uri` on refresh. We try env first, then
+ * default localhost callback URLs (see `WHOOP_REFRESH_REDIRECT_FALLBACKS`) when Vercel omits them,
+ * then body-only doc-minimal attempts.
  */
+const WHOOP_REFRESH_REDIRECT_FALLBACKS = [
+  "http://127.0.0.1:8765/whoop/callback",
+  "http://localhost:8765/whoop/callback",
+];
+
 function whoopRefreshAttemptList(redirectUriRaw) {
   const ru = normalizeWhoopToken(redirectUriRaw);
   const attempts = [];
 
-  function push(label, scope, includeRedirect) {
-    var useRu = includeRedirect && ru ? ru : "";
+  function push(label, scope, redirectUri) {
     attempts.push({
-      label: label + (useRu ? " + redirect_uri" : ""),
+      label: label + (redirectUri ? " + redirect_uri" : ""),
       scope: scope || "",
-      redirect_uri: useRu,
+      redirect_uri: redirectUri || "",
     });
   }
 
-  if (ru) {
-    push("offline", "offline", true);
-    push("full_auth_scopes", WHOOP_OAUTH_SCOPES, true);
-    push("no_scope", "", true);
+  function tripleForRedirect(rUri, prefix) {
+    if (!rUri) return;
+    push(prefix + "offline", "offline", rUri);
+    push(prefix + "full_auth_scopes", WHOOP_OAUTH_SCOPES, rUri);
+    push(prefix + "no_scope", "", rUri);
   }
-  push("offline", "offline", false);
-  push("full_auth_scopes", WHOOP_OAUTH_SCOPES, false);
-  push("no_scope", "", false);
 
+  function tripleBodyOnly() {
+    push("offline", "offline", "");
+    push("full_auth_scopes", WHOOP_OAUTH_SCOPES, "");
+    push("no_scope", "", "");
+  }
+
+  if (ru) {
+    tripleForRedirect(ru, "");
+  } else {
+    /** Vercel often has CLIENT_* + REFRESH_TOKEN but omits redirect env — refresh must still send the redirect used at `whoop:auth` (localhost). */
+    for (var fi = 0; fi < WHOOP_REFRESH_REDIRECT_FALLBACKS.length; fi++) {
+      tripleForRedirect(WHOOP_REFRESH_REDIRECT_FALLBACKS[fi], "fb" + fi + "·");
+    }
+  }
+
+  tripleBodyOnly();
   return attempts;
 }
 
@@ -293,7 +312,7 @@ async function refreshWhoopToken(clientId, clientSecret) {
         lastStatus +
         "). " +
         summarizeWhoopTokenError(lastText) +
-        ' If you still see client_secret_basic after deploy, redeploy from latest main (WHOOP token POST uses raw HTTPS, not fetch) or clear Vercel build cache. Else run npm run whoop:auth, refresh WHOOP_REFRESH_TOKEN, and use WHOOP_REFRESH_REDIRECT_URI=http://127.0.0.1:8765/whoop/callback on production.'
+        ' Redeploy after updating env. If 400 redirect_uri: add WHOOP_REFRESH_REDIRECT_URI=http://127.0.0.1:8765/whoop/callback on Vercel (same as localhost whoop:auth), or rely on latest api/whoop.js localhost fallbacks. Refresh token must match CLIENT_ID/SECRET; run npm run whoop:auth if needed.'
     );
   })();
 
