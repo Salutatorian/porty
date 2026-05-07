@@ -145,6 +145,27 @@ function summarizeWhoopTokenError(rawText) {
   return (rawText || "").trim().slice(0, 500);
 }
 
+/** User-facing tail for 400/401 token responses (invalid_grant = must re-run whoop:auth). */
+function whoopRefreshFailureUserHint(lastText) {
+  try {
+    var j = JSON.parse(lastText);
+    if (j.error === "invalid_grant") {
+      return (
+        "WHOOP rejected this refresh token (wrong value, expired, or already rotated—often local `/api/whoop` refreshed and invalidated the token still saved on Vercel). Fix: run `npm run whoop:auth`, copy the new WHOOP_REFRESH_TOKEN into `.env.local` AND Vercel immediately, redeploy, then load production once."
+      );
+    }
+    if (j.error === "invalid_client") {
+      return "WHOOP_CLIENT_ID or WHOOP_CLIENT_SECRET does not match your app in the WHOOP dashboard.";
+    }
+    if (j.error === "invalid_request") {
+      return (
+        "WHOOP rejected the refresh request (`invalid_request`). Run `npm run whoop:auth`, put the new WHOOP_REFRESH_TOKEN (and matching CLIENT_ID / CLIENT_SECRET from the same WHOOP app) into `.env.local` and Vercel, redeploy, then load production once. Register redirect `http://127.0.0.1:8765/whoop/callback` in the WHOOP dashboard if missing."
+      );
+    }
+  } catch (e0) {}
+  return summarizeWhoopTokenError(lastText);
+}
+
 /**
  * WHOOP accepts **client_secret_post** only. Use raw `https.request` (not `fetch`) so no client
  * stack or proxy forwards `Authorization: Basic`; Hydra reports 401 client_secret_basic if it sees Basic.
@@ -345,8 +366,7 @@ async function refreshWhoopToken(clientId, clientSecret) {
       "WHOOP token refresh failed (" +
         lastStatus +
         "). " +
-        summarizeWhoopTokenError(lastText) +
-        " Env: WHOOP_CLIENT_ID/SECRET + WHOOP_REFRESH_TOKEN must match your WHOOP app. WHOOP_REFRESH_REDIRECT_URI must be the full URL http://127.0.0.1:8765/whoop/callback (not the variable name). Dashboard must list that redirect. Run npm run whoop:auth if token expired."
+        whoopRefreshFailureUserHint(lastText)
     );
   })();
 

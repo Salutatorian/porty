@@ -11,6 +11,7 @@
     "migrate:blob-to-r2": "node scripts/migrate-blob-to-r2.js",
     "migrate:blob-to-r2:dry": "node scripts/migrate-blob-to-r2.js --dry-run",
     "whoop:auth": "node scripts/whoop-exchange-code.js",
+    "whoop:test-refresh": "node scripts/whoop-test-refresh.js",
     "build": "node scripts/vercel-sync-public.js"
   },
   "keywords": [

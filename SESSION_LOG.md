@@ -2,6 +2,29 @@
 
 Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
+## 2026-05-07 — WHOOP: `invalid_request` hint; step 4 (re-auth) required when local refresh fails
+
+### Summary
+- **User:** Same prod **400** / demo data; **did not** run **step 4** (`npm run whoop:auth` + new token everywhere).
+- **Check:** `npm run whoop:test-refresh` on this machine → **HTTP 400** `invalid_request` (doc-shaped body: `scope=offline`, no redirect) — **not** Vercel-only; current **WHOOP_REFRESH_TOKEN + client** pairing is rejected until fresh OAuth.
+- **`api/whoop.js`:** `whoopRefreshFailureUserHint()` — **`invalid_request`** → short message: run **`whoop:auth`**, sync token + client vars to **`.env.local` + Vercel**, register **`http://127.0.0.1:8765/whoop/callback`** if needed.
+
+### Files touched
+- `api/whoop.js`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-07 — WHOOP: clearer `invalid_grant` message + `npm run whoop:test-refresh`
+
+### Summary
+- **`api/whoop.js`:** `whoopRefreshFailureUserHint()` — if WHOOP returns **`invalid_grant`**, error text tells user to **`npm run whoop:auth`** and sync **`.env.local` + Vercel** (local refresh can rotate token and break prod).
+- **`scripts/whoop-test-refresh.js` + `package.json`:** **`npm run whoop:test-refresh`** — one offline refresh POST, prints status + body snippet (no secrets echoed by name).
+
+### Files touched
+- `api/whoop.js`, `scripts/whoop-test-refresh.js`, `package.json`, `SESSION_LOG.md`
+
+---
+
 ## 2026-05-06 — WHOOP refresh: body-first order + ignore garbage redirect env
 
 ### Summary
