@@ -2,6 +2,31 @@
 
 Shared progress log so MacBook + desktop stay aligned after `git pull`.
 
+## 2026-05-06 — WHOOP refresh: body-first order + ignore garbage redirect env
+
+### Summary
+- **400 `invalid_request`:** WHOOP’s doc refresh sample is **form body + `scope=offline`**, **no** `redirect_uri`. We were running many **redirect** attempts before doc-shaped **body-only** posts; reordered: **`offline` / full scopes / no scope (no redirect) → minimal 4 fields → per-URI redirect triples**.
+- **`resolveWhoopRedirectForRefresh()`:** If **`WHOOP_REFRESH_REDIRECT_URI`** (or redirect) **doesn’t start with `http`**, it’s **ignored** (common Vercel mistake: pasting the **env key** as the value). Falls back to the other var or localhost list.
+
+### Files touched
+- `api/whoop.js`, `SESSION_LOG.md`
+
+---
+
+## 2026-05-06 — WHOOP 400 fix: try localhost redirect even when Vercel sets https `WHOOP_REDIRECT_URI`
+
+### Summary
+- **Bug:** If **`WHOOP_REDIRECT_URI`** on Vercel was **`https://…`** (production callback), refresh tried **only** that URI; tokens from **`npm run whoop:auth`** still expect **`http://127.0.0.1:8765/whoop/callback`** — **localhost fallbacks never ran**.
+- **`api/whoop.js`:** Build **ordered distinct URIs** (env redirect first if set, then **127.0.0.1** + **localhost** defaults); **triple each**. Added **`minimal`** POST (four OAuth fields only, no scope/redirect) as first attempt.
+
+### Ops
+- **Push + redeploy.** Either **delete** misleading **`WHOOP_REDIRECT_URI`** on Vercel or set **`WHOOP_REFRESH_REDIRECT_URI=http://127.0.0.1:8765/whoop/callback`** explicitly.
+
+### Files touched
+- `api/whoop.js`, `SESSION_LOG.md`
+
+---
+
 ## 2026-05-06 — WHOOP prod 400: localhost `redirect_uri` fallbacks when Vercel omits env
 
 ### Summary

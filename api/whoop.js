@@ -114,6 +114,23 @@ function normalizeWhoopToken(value) {
   return s;
 }
 
+/** Use refresh redirect override only if it looks like a real URL (Vercel sometimes gets the key pasted as the value). */
+function resolveWhoopRedirectForRefresh() {
+  var primary = normalizeWhoopToken(process.env.WHOOP_REFRESH_REDIRECT_URI);
+  if (primary && !/^https?:\/\//i.test(primary)) {
+    console.warn(
+      "[whoop] Ignoring WHOOP_REFRESH_REDIRECT_URI (not http/https — check Vercel env for typos)."
+    );
+    primary = "";
+  }
+  var fallback = normalizeWhoopToken(process.env.WHOOP_REDIRECT_URI);
+  if (fallback && !/^https?:\/\//i.test(fallback)) {
+    console.warn("[whoop] Ignoring WHOOP_REDIRECT_URI (not http/https).");
+    fallback = "";
+  }
+  return normalizeWhoopToken(primary || fallback);
+}
+
 function summarizeWhoopTokenError(rawText) {
   try {
     const j = JSON.parse(rawText);
@@ -139,8 +156,10 @@ function postWhoopRefresh(fields) {
     client_id: fields.client_id,
     client_secret: fields.client_secret,
   };
-  if (fields.scope) bodyPairs.scope = fields.scope;
-  if (fields.redirect_uri) bodyPairs.redirect_uri = fields.redirect_uri;
+  if (!fields.minimal) {
+    if (fields.scope) bodyPairs.scope = fields.scope;
+    if (fields.redirect_uri) bodyPairs.redirect_uri = fields.redirect_uri;
+  }
 
   var encoded = new URLSearchParams(bodyPairs).toString();
   var parsed = new URL(WHOOP_TOKEN_URL);
@@ -193,9 +212,11 @@ let whoopRefreshTokenCache = "";
 let whoopRefreshInFlight = null;
 
 /**
- * WHOOP’s token service (Hydra) may require `redirect_uri` on refresh. We try env first, then
- * default localhost callback URLs (see `WHOOP_REFRESH_REDIRECT_FALLBACKS`) when Vercel omits them,
- * then body-only doc-minimal attempts.
+ * WHOOP’s token service (Hydra) may require `redirect_uri` on refresh.
+ *
+ * **Critical:** If `WHOOP_REDIRECT_URI` on Vercel is `https://your-site/...` but the refresh token
+ * came from `npm run whoop:auth` on localhost, attempts that use only the prod URI will **all**
+ * fail — we must still try the localhost redirect(s) registered for the same OAuth client.
  */
 const WHOOP_REFRESH_REDIRECT_FALLBACKS = [
   "http://127.0.0.1:8765/whoop/callback",
@@ -206,37 +227,51 @@ function whoopRefreshAttemptList(redirectUriRaw) {
   const ru = normalizeWhoopToken(redirectUriRaw);
   const attempts = [];
 
-  function push(label, scope, redirectUri) {
+  function push(label, scope, redirectUri, minimal) {
     attempts.push({
       label: label + (redirectUri ? " + redirect_uri" : ""),
       scope: scope || "",
       redirect_uri: redirectUri || "",
+      minimal: !!minimal,
     });
   }
 
   function tripleForRedirect(rUri, prefix) {
     if (!rUri) return;
-    push(prefix + "offline", "offline", rUri);
-    push(prefix + "full_auth_scopes", WHOOP_OAUTH_SCOPES, rUri);
-    push(prefix + "no_scope", "", rUri);
+    push(prefix + "offline", "offline", rUri, false);
+    push(prefix + "full_auth_scopes", WHOOP_OAUTH_SCOPES, rUri, false);
+    push(prefix + "no_scope", "", rUri, false);
   }
 
+  /** WHOOP docs: refresh POST uses grant_type + refresh_token + client_id + client_secret + scope=offline (often no redirect_uri). Try body-only shapes FIRST. */
   function tripleBodyOnly() {
-    push("offline", "offline", "");
-    push("full_auth_scopes", WHOOP_OAUTH_SCOPES, "");
-    push("no_scope", "", "");
-  }
-
-  if (ru) {
-    tripleForRedirect(ru, "");
-  } else {
-    /** Vercel often has CLIENT_* + REFRESH_TOKEN but omits redirect env — refresh must still send the redirect used at `whoop:auth` (localhost). */
-    for (var fi = 0; fi < WHOOP_REFRESH_REDIRECT_FALLBACKS.length; fi++) {
-      tripleForRedirect(WHOOP_REFRESH_REDIRECT_FALLBACKS[fi], "fb" + fi + "·");
-    }
+    push("offline·body", "offline", "", false);
+    push("full_auth_scopes·body", WHOOP_OAUTH_SCOPES, "", false);
+    push("no_scope·body", "", "", false);
   }
 
   tripleBodyOnly();
+  push("minimal_four_fields_only", "", "", true);
+
+  /** Distinct redirect URIs: env first, then localhost defaults (tokens from `whoop:auth`). */
+  var seen = new Set();
+  var ordered = [];
+  if (ru) {
+    ordered.push(ru);
+    seen.add(ru);
+  }
+  for (var fi = 0; fi < WHOOP_REFRESH_REDIRECT_FALLBACKS.length; fi++) {
+    var u = WHOOP_REFRESH_REDIRECT_FALLBACKS[fi];
+    if (!seen.has(u)) {
+      ordered.push(u);
+      seen.add(u);
+    }
+  }
+
+  for (var oi = 0; oi < ordered.length; oi++) {
+    tripleForRedirect(ordered[oi], "u" + oi + "·");
+  }
+
   return attempts;
 }
 
@@ -250,9 +285,7 @@ async function refreshWhoopToken(clientId, clientSecret) {
       throw new Error("WHOOP_REFRESH_TOKEN is empty after normalization.");
     }
 
-    const redirectFromEnv = normalizeWhoopToken(
-      process.env.WHOOP_REFRESH_REDIRECT_URI || process.env.WHOOP_REDIRECT_URI
-    );
+    const redirectFromEnv = resolveWhoopRedirectForRefresh();
     let lastText = "";
     let lastStatus = 0;
 
@@ -267,6 +300,7 @@ async function refreshWhoopToken(clientId, clientSecret) {
         client_secret: clientSecret,
         scope: a.scope,
         redirect_uri: a.redirect_uri,
+        minimal: a.minimal,
       };
 
       const res = await postWhoopRefresh(fields);
@@ -312,7 +346,7 @@ async function refreshWhoopToken(clientId, clientSecret) {
         lastStatus +
         "). " +
         summarizeWhoopTokenError(lastText) +
-        ' Redeploy after updating env. If 400 redirect_uri: add WHOOP_REFRESH_REDIRECT_URI=http://127.0.0.1:8765/whoop/callback on Vercel (same as localhost whoop:auth), or rely on latest api/whoop.js localhost fallbacks. Refresh token must match CLIENT_ID/SECRET; run npm run whoop:auth if needed.'
+        " Env: WHOOP_CLIENT_ID/SECRET + WHOOP_REFRESH_TOKEN must match your WHOOP app. WHOOP_REFRESH_REDIRECT_URI must be the full URL http://127.0.0.1:8765/whoop/callback (not the variable name). Dashboard must list that redirect. Run npm run whoop:auth if token expired."
     );
   })();
 
