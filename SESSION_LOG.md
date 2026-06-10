@@ -1677,3 +1677,45 @@ auth, contact, convert, github-contributions, home-projects, photos, projects, s
 
 ### Files touched
 - **`api/whoop.js`**, **`training.js`**, **`SESSION_LOG.md`**
+
+---
+
+## 2026-06-10 — Repo orientation (Windows)
+
+### Summary
+- User asked for full folder walkthrough + dev server. Read **`README.md`**, **`PORTY_CONTEXT.md`**, **`SESSION_LOG.md`**, **`package.json`**, **`server.js`**, **`vercel.json`**, **`env.example`**, **`ADMIN-SETUP.md`**, key pages (`index.html`, `media.html`, `tools.html`, `admin/index.html`), data JSON, API route list, and core JS (`script.js`, `dock-nav.js`, `app-router.js`, `training.js`).
+- Ran **`npm install`** (first time on this machine; **143** packages) then **`npm run dev`** → **http://localhost:3000**. **`.env.local` not present** — Strava/WHOOP/admin APIs will 500 or use fallbacks until env is copied from Mac.
+- **76 tracked source files** in repo root layout: static HTML site + Vercel serverless **`api/*`** + **`lib/*`** helpers (R2/Blob storage, Goodreads/Letterboxd syndication).
+
+### Ops
+- Copy **`.env.local`** from other machine for full API behavior. Node on this box is **v24** (package wants **20.x** — warn only).
+
+### Next steps
+- Ready for feature/fix work with full project map in chat context.
+
+---
+
+## 2026-06-10 — Localhost for viewing
+
+### Summary
+- User asked to run localhost. **`npm run dev`** already up from prior turn — verified **HTTP 200** at **http://localhost:3000**. No **`.env.local`** on this machine (APIs limited; static site OK).
+- Background terminal task **61653** was stopped; port **3000** still in use — site still live at **http://localhost:3000** (restart attempt hit **EADDRINUSE**).
+
+---
+
+## 2026-06-10 — Git push → live site (Vercel auto-deploy)
+
+### Summary
+- User asked how pushes update **thegreaterengine.xyz**. Explained: **Vercel** watches **GitHub `main`** → on **`git push`** runs **`npm run build`** (`vercel-sync-public.js` + `vercel.json` rewrites/API) → promotes to production domain. **`.env.local` never deploys** — secrets live in Vercel env vars. Historical pitfall: Vercel must be connected to **`Salutatorian/porty`** (same repo as **`git remote`**) with production branch **`main`**; uncommitted local files are not built.
+
+---
+
+## 2026-06-10 — Mobile: credits overlay + logo/title overlap
+
+### Summary
+- **Credits (phone):** Horizontal fan deck clipped on narrow screens; backdrop taps blocked by full-height panel. Fix: panel **`pointer-events: none`** + deck **`auto`**; **≤900px** vertical scroll stack for cards; **×** close button; **`touchend`** dismiss; removed old **`scale(0.52)`** fan shrink.
+- **Logo overlap (phone):** User screenshots on **`thegreaterengine.xyz`** — wordmark stacked on **collection / media** titles. Fix: **hide `.site-logo` on phone** for pages without **`.alpine-hero`** (inner pages only); home hero keeps wordmark.
+- **Prod note:** Screenshots are live site — fixes are local until **`git push`** + Vercel deploy.
+
+### Files touched
+- `styles.css`, `script.js`, `SESSION_LOG.md`

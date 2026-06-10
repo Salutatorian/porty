@@ -81,6 +81,7 @@
     root.innerHTML =
       '<div class="ge-credits-overlay__backdrop" data-credits-backdrop="1" aria-hidden="true"></div>' +
       '<div class="ge-credits-overlay__panel" role="dialog" aria-modal="true" aria-label="Credits">' +
+      '  <button type="button" class="ge-credits-overlay__close" data-credits-close aria-label="Close credits"><span aria-hidden="true">×</span></button>' +
       '  <div class="credits-deck credits-deck--overlay" aria-label="Credits">' +
       '    <div class="friends-fab-stack credits-deck-stack" id="credits-deck-stack">' +
       '      <div class="friends-fab-stack-inner stack-inner-visible" role="list" aria-label="Credits">' +
@@ -116,7 +117,7 @@
       '</article>' +
       '</div></div></div></div>';
 
-    root.addEventListener("click", function (e) {
+    function handleCreditsDismiss(e) {
       if (e.target.closest("[data-credits-close]")) {
         e.preventDefault();
         closeCreditsOverlay();
@@ -129,7 +130,10 @@
       if (!e.target.closest(".credits-deck")) {
         closeCreditsOverlay();
       }
-    });
+    }
+
+    root.addEventListener("click", handleCreditsDismiss);
+    root.addEventListener("touchend", handleCreditsDismiss, { passive: true });
 
     document.body.appendChild(root);
     geCreditsOverlayEl = root;
