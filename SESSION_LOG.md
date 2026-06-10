@@ -1729,3 +1729,24 @@ auth, contact, convert, github-contributions, home-projects, photos, projects, s
 
 ### Files touched
 - `styles.css`, `script.js`, `SESSION_LOG.md`
+
+---
+
+## 2026-06-10 — Credits: remove ×; contact me scroll
+
+### Summary
+- Removed credits **×**; dismiss by tap outside fan only. **`app-router.js`**: **`#contact`** / **`#work`** same-page hash scroll (contact me → get-in-touch form at page bottom).
+
+### Files touched
+- `styles.css`, `script.js`, `app-router.js`, `SESSION_LOG.md`
+
+---
+
+## 2026-06-10 — Admin UI: Quill toolbar + button consistency
+
+### Summary
+- **Root cause:** `.studio-form-surface button:not(.studio-btn)…` legacy rule (high specificity) painted **Quill B/I/U** and **Now/Future/Done** filters as fat black pills.
+- **Fix:** Removed legacy catch-all; added **Quill toolbar** skin matching **studio-btn** ghost chips; **`studio-btn--sm`** / **`--danger`** for list actions; aligned video edit/save/delete buttons.
+
+### Files touched
+- `admin/index.html`, `SESSION_LOG.md`

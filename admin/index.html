@@ -260,6 +260,20 @@
       body.studio-body .studio-btn--ghost {
         background: transparent;
       }
+      body.studio-body .studio-btn--sm {
+        padding: 8px 14px;
+        min-height: 36px;
+        font-size: 12px;
+        border-radius: 12px;
+      }
+      body.studio-body .studio-btn--danger {
+        color: #ef4444;
+      }
+      body.studio-body .studio-btn--danger:hover:not(:disabled) {
+        border-color: rgba(239, 68, 68, 0.45);
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.06);
+      }
       .adminButton.primary,
       body.studio-body .studio-btn.studio-btn--primary,
       body.studio-body .studio-login-submit.primary {
@@ -484,44 +498,18 @@
       }
       .studio-form-surface textarea { min-height: 80px; resize: vertical; }
 
-      /* ---- Legacy form buttons (excludes toolbar + structured controls) ---- */
-      .studio-form-surface button:not(.studio-btn):not(.studio-linkish):not(.audio-trim-handle):not(.audio-trim-handle-start):not(.audio-trim-handle-end):not(.audio-trim-preview-btn):not(.admin-theme-toggle) {
-        padding: 10px 22px;
+      /* Bare inline save buttons in list edit panels */
+      body.studio-body .save-v-edit-btn {
+        padding: 8px 16px;
+        min-height: 36px;
+        border-radius: 12px;
+        border: 1px solid var(--ge-border);
         background: var(--ge-text);
         color: var(--ge-bg);
-        border: none;
-        border-radius: 14px;
+        font-size: 12px;
         font-weight: 700;
-        cursor: pointer;
         font-family: inherit;
-        font-size: 13px;
-        min-height: 44px;
-        -webkit-tap-highlight-color: transparent;
-        transition: opacity 0.15s ease, transform 0.15s ease;
-      }
-      .studio-form-surface button:not(.studio-btn):not(.studio-linkish):not(.audio-trim-handle):not(.audio-trim-handle-start):not(.audio-trim-handle-end):not(.audio-trim-preview-btn):not(.admin-theme-toggle):hover {
-        opacity: 0.92;
-        transform: translateY(-1px);
-      }
-      .studio-form-surface button:not(.studio-btn):not(.studio-linkish):not(.audio-trim-handle):not(.audio-trim-handle-start):not(.audio-trim-handle-end):not(.audio-trim-preview-btn):not(.admin-theme-toggle):disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        transform: none;
-      }
-      body.studio-body .studio-form-surface .ql-toolbar button {
-        padding: 4px;
-        margin: 0;
-        background: transparent;
-        color: inherit;
-        border: none;
-        border-radius: 4px;
-        min-height: 0;
-        font-weight: 500;
-        box-shadow: none;
-      }
-      body.studio-body .studio-form-surface .ql-toolbar button:hover {
-        opacity: 1;
-        transform: none;
+        cursor: pointer;
       }
 
       /* ---- logout ---- */
@@ -1551,42 +1539,16 @@
       .writing-item-edit label { font-size: 11px; }
       .writing-item-edit input, .writing-item-edit textarea, .writing-item-edit select { padding: 6px 8px; margin-bottom: 8px; font-size: 13px; }
 
-      /* ---- quill editor ---- */
-      .ql-editor { min-height: 140px; font-size: 14px; }
-      .ql-container { border-radius: 0 0 10px 10px; border-color: var(--border); background: var(--bg); }
-      .ql-toolbar {
-        border-radius: 10px 10px 0 0; background: var(--bg-alt);
-        border-color: var(--border); display: flex; align-items: center;
-        flex-wrap: wrap; padding: 10px 12px;
+      /* ---- quill editor (toolbar skinned at end of block) ---- */
+      body.studio-body .editor-wrap .ql-editor {
+        min-height: 140px;
+        font-size: 14px;
+        color: var(--ge-text);
       }
-      .ql-toolbar .ql-formats { display: inline-flex; align-items: center; gap: 6px; margin-right: 20px; margin-bottom: 0; }
-      .ql-toolbar .ql-formats:last-child { margin-right: 0; }
-      .ql-toolbar button, .ql-toolbar .ql-picker {
-        display: inline-flex; align-items: center; justify-content: center;
-        width: 28px; height: 28px; min-width: 28px; min-height: 28px;
-        padding: 0; margin: 0; border: none; border-radius: 6px; cursor: pointer;
+      body.studio-body .writing-item-edit .ql-editor,
+      body.studio-body .project-item-edit .ql-editor {
+        min-height: 120px;
       }
-      .ql-toolbar button:hover, .ql-toolbar .ql-picker:hover { background: var(--border); }
-      .ql-toolbar button svg { width: 18px; height: 18px; }
-      .ql-toolbar .ql-picker .ql-picker-label { padding: 0 4px; }
-      .ql-toolbar [data-tooltip] { position: relative; }
-      .ql-toolbar [data-tooltip]::after {
-        content: attr(data-tooltip);
-        position: absolute; left: 50%; bottom: 100%;
-        transform: translateX(-50%) translateY(-4px);
-        padding: 6px 10px; background: var(--text); color: var(--bg);
-        font-size: 12px; font-weight: 500; white-space: nowrap;
-        border-radius: 6px; opacity: 0; visibility: hidden;
-        transition: opacity 0.15s, visibility 0.15s;
-        pointer-events: none; z-index: 100;
-      }
-      .ql-toolbar [data-tooltip]:hover::after { opacity: 1; visibility: visible; }
-      .ql-toolbar .ql-stroke { stroke: var(--text-muted); }
-      .ql-toolbar .ql-fill { fill: var(--text-muted); }
-      .ql-toolbar .ql-picker { color: var(--text-muted); }
-      .ql-editor { color: var(--text); }
-      .editor-wrap { margin-bottom: 16px; }
-      .writing-item-edit .ql-editor { min-height: 120px; }
 
       /* ---- projects list ---- */
       .projects-list { margin-bottom: 16px; }
@@ -1621,6 +1583,104 @@
       .project-item-edit label { font-size: 11px; }
       .project-item-edit input, .project-item-edit textarea, .project-item-edit select { padding: 6px 8px; margin-bottom: 8px; font-size: 13px; }
       .project-item-edit .ql-editor { min-height: 120px; font-size: 14px; }
+
+      /* ---- Quill toolbar: match studio-btn ghost chips (not fat black pills) ---- */
+      body.studio-body .editor-wrap .ql-toolbar.ql-snow {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 12px;
+        border: none;
+        border-bottom: 1px solid var(--ge-border);
+        background: rgba(255, 255, 255, 0.28);
+      }
+      [data-theme="dark"] body.studio-body .editor-wrap .ql-toolbar.ql-snow {
+        background: rgba(255, 255, 255, 0.04);
+      }
+      body.studio-body .editor-wrap .ql-toolbar.ql-snow .ql-formats {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin: 0 10px 0 0;
+      }
+      body.studio-body .editor-wrap .ql-toolbar.ql-snow .ql-formats:last-child {
+        margin-right: 0;
+      }
+      body.studio-body .editor-wrap .ql-toolbar.ql-snow button,
+      body.studio-body .editor-wrap .ql-toolbar.ql-snow .ql-picker-label {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        min-height: 32px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: 1px solid transparent !important;
+        border-radius: 10px !important;
+        background: transparent !important;
+        color: var(--ge-muted) !important;
+        box-shadow: none !important;
+        font-weight: 500 !important;
+        cursor: pointer;
+        transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+      }
+      body.studio-body .editor-wrap .ql-toolbar.ql-snow button:hover,
+      body.studio-body .editor-wrap .ql-toolbar.ql-snow .ql-picker-label:hover {
+        background: rgba(255, 255, 255, 0.5) !important;
+        border-color: var(--ge-border) !important;
+        color: var(--ge-text) !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      body.studio-body .editor-wrap .ql-toolbar.ql-snow button.ql-active,
+      body.studio-body .editor-wrap .ql-toolbar.ql-snow .ql-picker-label.ql-active {
+        background: var(--ge-card-strong) !important;
+        border-color: var(--ge-border) !important;
+        color: var(--ge-text) !important;
+      }
+      body.studio-body .editor-wrap .ql-toolbar.ql-snow button svg {
+        width: 16px;
+        height: 16px;
+      }
+      body.studio-body .editor-wrap .ql-toolbar.ql-snow .ql-stroke {
+        stroke: currentColor !important;
+      }
+      body.studio-body .editor-wrap .ql-toolbar.ql-snow .ql-fill {
+        fill: currentColor !important;
+      }
+      body.studio-body .editor-wrap .ql-toolbar.ql-snow .ql-picker {
+        color: var(--ge-muted);
+        height: 32px;
+      }
+      body.studio-body .editor-wrap .ql-toolbar.ql-snow [data-tooltip] {
+        position: relative;
+      }
+      body.studio-body .editor-wrap .ql-toolbar.ql-snow [data-tooltip]::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: 50%;
+        bottom: calc(100% + 6px);
+        transform: translateX(-50%);
+        padding: 5px 9px;
+        background: var(--ge-text);
+        color: var(--ge-bg);
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+        border-radius: 8px;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        z-index: 20;
+        transition: opacity 0.12s ease, visibility 0.12s ease;
+      }
+      body.studio-body .editor-wrap .ql-toolbar.ql-snow [data-tooltip]:hover::after {
+        opacity: 1;
+        visibility: visible;
+      }
 
       /* ---- mobile ---- */
       @media (max-width: 480px) {
@@ -1865,7 +1925,9 @@
           <input type="text" autocomplete="off" id="video-title" placeholder="e.g. Japan montage" required />
           <label for="video-desc-editor">Description</label>
           <div class="editor-wrap"><div id="video-desc-editor"></div></div>
-          <button type="submit" id="video-submit" class="studio-btn studio-btn--primary">Add video</button>
+          <div class="studio-form-actions">
+            <button type="submit" id="video-submit" class="studio-btn studio-btn--primary">Add video</button>
+          </div>
           <p class="msg" id="video-msg"></p>
         </form>
         </div>
@@ -3567,7 +3629,7 @@
 
             var editBtn = document.createElement("button");
             editBtn.type = "button";
-            editBtn.className = "edit-btn studio-btn studio-btn--ghost";
+            editBtn.className = "edit-btn studio-btn studio-btn--ghost studio-btn--sm";
             editBtn.textContent = "Edit";
             editBtn.addEventListener("click", function () {
               fillPhotoComposer(p);
@@ -3575,7 +3637,7 @@
 
             var featBtn = document.createElement("button");
             featBtn.type = "button";
-            featBtn.className = "studio-btn studio-btn--ghost";
+            featBtn.className = "studio-btn studio-btn--ghost studio-btn--sm";
             featBtn.style.fontSize = "12px";
             featBtn.textContent = p.featured ? "★ unfeature" : "☆ feature";
             featBtn.addEventListener("click", function () {
@@ -3607,7 +3669,7 @@
 
             var btn = document.createElement("button");
             btn.type = "button";
-            btn.className = "delete-btn studio-btn studio-btn--ghost";
+            btn.className = "delete-btn studio-btn studio-btn--ghost studio-btn--sm studio-btn--danger";
             btn.textContent = "Delete";
             btn.addEventListener("click", function () {
               if (!confirm("Delete this photo entry? Files stay in Blob until you prune storage."))
@@ -3708,7 +3770,7 @@
                 btnWrap.style.gap = "6px";
                 var editBtn = document.createElement("button");
                 editBtn.type = "button";
-                editBtn.className = "edit-btn";
+                editBtn.className = "edit-btn studio-btn studio-btn--ghost studio-btn--sm";
                 editBtn.textContent = "Edit";
                 var editPane = document.createElement("div");
                 editPane.className = "photo-item-edit";
@@ -3721,7 +3783,7 @@
                   "<label>Description</label><div class=\"editor-wrap\"><div id=\"" + vDescHostId + "\" class=\"video-edit-desc-quill-host\"></div></div>" +
                   "<label>Replace video file</label><input type=\"file\" class=\"edit-v-replace-file\" accept=\"video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov\" style=\"margin-bottom:4px\">" +
                   "<p style=\"font-size:11px;color:var(--text-muted);margin:-4px 0 10px;line-height:1.35\">Leave empty to keep the current file. Large uploads can take several minutes.</p>" +
-                  "<button type=\"button\" class=\"save-v-edit-btn\">Save</button>";
+                  "<button type=\"button\" class=\"save-v-edit-btn studio-btn studio-btn--primary studio-btn--sm\">Save</button>";
                 editBtn.addEventListener("click", function () {
                   editPane.classList.toggle("active");
                   if (!editPane.classList.contains("active") || editPane._vDescQuill || typeof Quill === "undefined") return;
@@ -3788,7 +3850,7 @@
                 btnWrap.appendChild(editBtn);
                 var del = document.createElement("button");
                 del.type = "button";
-                del.className = "delete-btn";
+                del.className = "delete-btn studio-btn studio-btn--ghost studio-btn--sm studio-btn--danger";
                 del.textContent = "Delete";
                 del.addEventListener("click", function () {
                   if (!confirm("Delete this video from the site?")) return;
@@ -4013,11 +4075,11 @@
             act.className = "studio-card-actions";
             var editBtn = document.createElement("button");
             editBtn.type = "button";
-            editBtn.className = "edit-btn studio-btn studio-btn--ghost";
+            editBtn.className = "edit-btn studio-btn studio-btn--ghost studio-btn--sm";
             editBtn.textContent = "Edit";
             var delBtn = document.createElement("button");
             delBtn.type = "button";
-            delBtn.className = "delete-btn studio-btn studio-btn--ghost";
+            delBtn.className = "delete-btn studio-btn studio-btn--ghost studio-btn--sm studio-btn--danger";
             delBtn.textContent = "Delete";
             editBtn.addEventListener("click", function() {
               loadWritingIntoComposer(w);
@@ -4300,7 +4362,7 @@
             if (ps === "now" || ps === "future") {
               var checkoffBtn = document.createElement("button");
               checkoffBtn.type = "button";
-              checkoffBtn.className = "checkoff-btn studio-btn studio-btn--ghost";
+              checkoffBtn.className = "checkoff-btn studio-btn studio-btn--ghost studio-btn--sm";
               checkoffBtn.textContent = "Mark done";
               checkoffBtn.addEventListener("click", function() {
                 if (!confirm("Mark this project as done? The list will switch to Done.")) return;
@@ -4334,7 +4396,7 @@
 
             var editBtn = document.createElement("button");
             editBtn.type = "button";
-            editBtn.className = "edit-btn studio-btn studio-btn--ghost";
+            editBtn.className = "edit-btn studio-btn studio-btn--ghost studio-btn--sm";
             editBtn.textContent = "Edit";
             editBtn.addEventListener("click", function() {
               portfolioComposerLoad(p);
@@ -4342,7 +4404,7 @@
 
             var delBtn = document.createElement("button");
             delBtn.type = "button";
-            delBtn.className = "delete-btn studio-btn studio-btn--ghost";
+            delBtn.className = "delete-btn studio-btn studio-btn--ghost studio-btn--sm studio-btn--danger";
             delBtn.textContent = "Delete";
             delBtn.addEventListener("click", function() {
               if (!confirm("Delete this project?")) return;
