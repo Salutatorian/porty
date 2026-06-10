@@ -1100,19 +1100,24 @@
         border-radius: 18px;
         border: 1px solid var(--ge-border);
         background: rgba(255, 255, 255, 0.4);
-        overflow: hidden;
+        overflow: visible;
         margin-bottom: 16px;
+        isolation: isolate;
       }
       [data-theme="dark"] body.studio-body .editor-wrap {
         background: rgba(255, 255, 255, 0.04);
       }
-      body.studio-body .ql-toolbar.ql-snow {
+      body.studio-body .editor-wrap .ql-toolbar.ql-snow {
         border: none;
         border-bottom: 1px solid var(--ge-border);
         background: transparent;
+        border-radius: 17px 17px 0 0;
+        overflow: visible;
       }
-      body.studio-body .ql-container.ql-snow {
+      body.studio-body .editor-wrap .ql-container.ql-snow {
         border: none;
+        border-radius: 0 0 17px 17px;
+        overflow: hidden;
       }
 
       .adminNarrowStack {
@@ -1629,16 +1634,20 @@
       }
       body.studio-body .editor-wrap .ql-toolbar.ql-snow button:hover,
       body.studio-body .editor-wrap .ql-toolbar.ql-snow .ql-picker-label:hover {
-        background: rgba(255, 255, 255, 0.5) !important;
+        background: var(--ge-card-strong) !important;
         border-color: var(--ge-border) !important;
         color: var(--ge-text) !important;
         opacity: 1 !important;
         transform: none !important;
       }
+      [data-theme="dark"] body.studio-body .editor-wrap .ql-toolbar.ql-snow button:hover,
+      [data-theme="dark"] body.studio-body .editor-wrap .ql-toolbar.ql-snow .ql-picker-label:hover {
+        background: rgba(255, 255, 255, 0.12) !important;
+      }
       body.studio-body .editor-wrap .ql-toolbar.ql-snow button.ql-active,
       body.studio-body .editor-wrap .ql-toolbar.ql-snow .ql-picker-label.ql-active {
-        background: var(--ge-card-strong) !important;
-        border-color: var(--ge-border) !important;
+        background: rgba(120, 150, 190, 0.22) !important;
+        border-color: rgba(120, 150, 190, 0.45) !important;
         color: var(--ge-text) !important;
       }
       body.studio-body .editor-wrap .ql-toolbar.ql-snow button svg {
@@ -1655,14 +1664,17 @@
         color: var(--ge-muted);
         height: 32px;
       }
+      /* Tooltips sit below icons so they are not clipped by the card edge */
       body.studio-body .editor-wrap .ql-toolbar.ql-snow [data-tooltip] {
         position: relative;
+        overflow: visible;
       }
       body.studio-body .editor-wrap .ql-toolbar.ql-snow [data-tooltip]::after {
         content: attr(data-tooltip);
         position: absolute;
         left: 50%;
-        bottom: calc(100% + 6px);
+        top: calc(100% + 6px);
+        bottom: auto;
         transform: translateX(-50%);
         padding: 5px 9px;
         background: var(--ge-text);
@@ -1674,12 +1686,19 @@
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
-        z-index: 20;
+        z-index: 30;
         transition: opacity 0.12s ease, visibility 0.12s ease;
       }
       body.studio-body .editor-wrap .ql-toolbar.ql-snow [data-tooltip]:hover::after {
         opacity: 1;
         visibility: visible;
+      }
+      body.studio-body .editor-wrap .ql-toolbar.ql-snow .ql-formats {
+        overflow: visible;
+      }
+      /* Quill ships its own tooltip — hide it; we use data-tooltip below icons */
+      body.studio-body .ql-tooltip {
+        display: none !important;
       }
 
       /* ---- mobile ---- */

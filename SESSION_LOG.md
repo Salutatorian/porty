@@ -1750,3 +1750,10 @@ auth, contact, convert, github-contributions, home-projects, photos, projects, s
 
 ### Files touched
 - `admin/index.html`, `SESSION_LOG.md`
+
+---
+
+## 2026-06-10 — Admin Quill: hover clip + tooltip fix
+
+### Summary
+- **Bug:** White sliver top-left on toolbar hover — **`overflow: hidden`** on **`.editor-wrap`** clipped button hover backgrounds and tooltips. **Fix:** **`overflow: visible`** on wrap/toolbar; clip only **`.ql-container`**; tooltips moved **below** icons; hide Quill default **`.ql-tooltip`**.
