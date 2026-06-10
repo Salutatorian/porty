@@ -1555,6 +1555,28 @@
         min-height: 120px;
       }
 
+      /* ---- home project links editor ---- */
+      .home-proj-links-editor { margin-bottom: 8px; }
+      .home-proj-link-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 8px;
+        margin-bottom: 8px;
+        align-items: center;
+      }
+      .home-proj-visible-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 12px 0 4px;
+      }
+      .home-proj-visible-row label {
+        margin: 0;
+        text-transform: none;
+        letter-spacing: 0;
+        font-size: 13px;
+      }
+
       /* ---- projects list ---- */
       .projects-list { margin-bottom: 16px; }
       .projects-section { margin-bottom: 24px; }
@@ -1735,7 +1757,6 @@
         <span class="adminSidebarLogo" aria-hidden="true"></span>
         <nav class="studio-nav font-dot" role="tablist">
           <button type="button" class="studio-nav-item active" role="tab" data-studio-pane="projects" aria-selected="true">Projects</button>
-          <button type="button" class="studio-nav-item" role="tab" data-studio-pane="writing" aria-selected="false">Writing</button>
           <button type="button" class="studio-nav-item" role="tab" data-studio-pane="photos" aria-selected="false">Photos</button>
           <button type="button" class="studio-nav-item" role="tab" data-studio-pane="media" aria-selected="false">Media</button>
           <button type="button" class="studio-nav-item" role="tab" data-studio-pane="tools" aria-selected="false">Tools</button>
@@ -1762,82 +1783,75 @@
         <div class="adminSectionHero studio-intro-card">
           <div class="adminHeroRow">
             <div class="adminHeroRow-main">
-              <p class="adminEyebrow">portfolio · code builds</p>
+              <p class="adminEyebrow">homepage</p>
               <h2 class="adminSectionTitle studio-intro-title">Projects</h2>
-              <p class="studio-intro-copy adminSectionText">Portfolio entries on <strong>/portfolio</strong>. Homepage “Current / Future” is edited separately.</p>
+              <p class="studio-intro-copy adminSectionText">Edit the <strong>Current</strong> and <strong>Future</strong> cards on your home page — same data the public site loads from <code>/api/home-projects</code>.</p>
             </div>
-            <a href="/admin/home-projects" class="studio-btn studio-btn--primary" style="text-decoration:none;display:inline-flex;align-items:center;">Homepage projects →</a>
           </div>
-          <div class="studio-stats-row" id="portfolio-stats-row">
-            <div class="studio-stat-chip"><span class="lbl">Now</span><span class="num" id="stat-port-now">0</span></div>
-            <div class="studio-stat-chip"><span class="lbl">Future</span><span class="num" id="stat-port-future">0</span></div>
-            <div class="studio-stat-chip"><span class="lbl">Done</span><span class="num" id="stat-port-done">0</span></div>
+          <div class="studio-stats-row" id="home-proj-stats-row">
+            <div class="studio-stat-chip"><span class="lbl">Current</span><span class="num" id="stat-home-current">0</span></div>
+            <div class="studio-stat-chip"><span class="lbl">Future</span><span class="num" id="stat-home-future">0</span></div>
           </div>
         </div>
         <div class="studio-cms-split adminGrid">
           <div class="adminCard studio-panel-card">
-            <input type="hidden" id="port-proj-edit-id" value="" />
-            <input type="hidden" id="port-proj-prev-image-url" value="" />
-            <input type="hidden" id="port-proj-prev-video-url" value="" />
-            <h2 id="port-proj-form-heading">Add portfolio project</h2>
-            <p class="studio-panel-help">Screenshots and demo videos are optional. Tags: comma-separated (e.g. <code>next, vercel</code>).</p>
-            <form id="portfolio-project-form" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore>
-              <label for="port-proj-title">Title</label>
-              <input type="text" autocomplete="off" id="port-proj-title" required />
-              <label for="port-proj-tags-input">Tags</label>
-              <input type="text" autocomplete="off" id="port-proj-tags-input" placeholder="e.g. typescript, infra" />
-              <label for="port-proj-desc-editor">Description</label>
-              <div class="editor-wrap"><div id="port-proj-desc-editor"></div></div>
-              <label for="port-proj-status">Status</label>
-              <select id="port-proj-status">
-                <option value="now">now</option>
-                <option value="future">future</option>
-                <option value="done">done</option>
+            <input type="hidden" id="home-proj-edit-id" value="" />
+            <h2 id="home-proj-form-heading">Add project</h2>
+            <p class="studio-panel-help">Tags are comma-separated. Links show as buttons on each card.</p>
+            <form id="home-project-form" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore>
+              <label for="home-proj-title">Title</label>
+              <input type="text" autocomplete="off" id="home-proj-title" required />
+              <label for="home-proj-type">Type</label>
+              <select id="home-proj-type">
+                <option value="current">Current</option>
+                <option value="future">Future</option>
               </select>
-              <span class="studio-upload-label">Screenshot (optional)</span>
-              <div class="studio-upload-zone" data-upload-for="port-proj-image">
-                <input type="file" id="port-proj-image" accept="image/*" />
-                <div class="studio-upload-hit">
-                  <p class="studio-upload-hint">Drop image or click to choose</p>
-                  <p class="studio-upload-file" id="port-proj-image-name">No file chosen</p>
-                  <div class="studio-drop-preview" id="port-proj-image-prev" hidden></div>
-                </div>
+              <div id="home-proj-wrap-status">
+                <label for="home-proj-status">Status</label>
+                <input type="text" autocomplete="off" id="home-proj-status" placeholder="e.g. building" />
               </div>
-              <span class="studio-upload-label">Video / GIF demo (optional)</span>
-              <div class="studio-upload-zone" data-upload-for="port-proj-video">
-                <input type="file" id="port-proj-video" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov" />
-                <div class="studio-upload-hit">
-                  <p class="studio-upload-hint">Drop video or click to choose</p>
-                  <p class="studio-upload-file" id="port-proj-video-name">No file chosen</p>
-                  <div class="studio-drop-preview" id="port-proj-video-prev" hidden></div>
-                </div>
+              <div id="home-proj-wrap-priority" hidden>
+                <label for="home-proj-priority">Priority</label>
+                <select id="home-proj-priority">
+                  <option value="">—</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
               </div>
-              <label for="port-proj-start-date">Start date (month year)</label>
-              <input type="month" autocomplete="off" id="port-proj-start-date" class="studio-month-input" />
-              <label for="port-proj-end-date">End date (month year, for done)</label>
-              <input type="month" autocomplete="off" id="port-proj-end-date" class="studio-month-input" />
+              <label for="home-proj-description">Description</label>
+              <textarea id="home-proj-description" required rows="4"></textarea>
+              <label for="home-proj-tags">Tags (comma-separated)</label>
+              <input type="text" autocomplete="off" id="home-proj-tags" placeholder="React, UI/UX, Vercel" />
+              <span class="studio-upload-label">Links</span>
+              <div class="home-proj-links-editor" id="home-proj-links-editor"></div>
+              <button type="button" class="studio-btn studio-btn--ghost studio-btn--sm" id="home-proj-add-link" style="margin-bottom:14px">+ Add link</button>
+              <label for="home-proj-notes">Notes (future ideas)</label>
+              <textarea id="home-proj-notes" rows="2" placeholder="Optional notes"></textarea>
+              <div class="home-proj-visible-row">
+                <input type="checkbox" id="home-proj-visible" checked />
+                <label for="home-proj-visible">Visible on public site</label>
+              </div>
               <div class="studio-form-actions">
-                <button type="submit" id="port-proj-submit" class="studio-btn studio-btn--primary">Add portfolio project</button>
-                <button type="button" id="port-proj-new-btn" class="studio-btn studio-btn--ghost">New project</button>
-                <button type="button" id="port-proj-cancel-edit" class="studio-btn studio-btn--ghost" style="display:none">Cancel</button>
-                <span id="port-proj-unsaved" class="studio-unsaved" style="display:none">Unsaved edits</span>
+                <button type="submit" id="home-proj-submit" class="studio-btn studio-btn--primary">Save project</button>
+                <button type="button" id="home-proj-new-btn" class="studio-btn studio-btn--ghost">New project</button>
+                <button type="button" id="home-proj-cancel-edit" class="studio-btn studio-btn--ghost" style="display:none">Cancel</button>
               </div>
-              <p class="msg" id="port-proj-msg"></p>
+              <p class="msg" id="home-proj-msg"></p>
             </form>
           </div>
           <div class="studio-panel-card studio-side-sticky">
             <h2 class="studio-side-title">Library</h2>
-            <p class="studio-panel-help">Filter by status, search, then edit in the composer.</p>
+            <p class="studio-panel-help">Current and Future tabs match the home page. Use Up/Down to reorder within a tab.</p>
             <div class="studio-list-toolbar">
-              <input type="search" id="portfolio-project-search" placeholder="Search title or tags…" aria-label="Search portfolio projects" />
+              <input type="search" id="home-project-search" placeholder="Search title or tags…" aria-label="Search home projects" />
             </div>
-            <div class="admin-project-subtabs admin-project-subtabs--segmented" role="tablist" aria-label="Filter portfolio projects by status" data-project-pane="portfolio">
-              <button type="button" class="admin-project-subtab active" role="tab" aria-selected="true" data-project-pane="portfolio" data-filter="now">Now</button>
-              <button type="button" class="admin-project-subtab" role="tab" aria-selected="false" data-project-pane="portfolio" data-filter="future">Future</button>
-              <button type="button" class="admin-project-subtab" role="tab" aria-selected="false" data-project-pane="portfolio" data-filter="done">Done</button>
+            <div class="admin-project-subtabs admin-project-subtabs--segmented" role="tablist" aria-label="Filter home projects by type" data-project-pane="home">
+              <button type="button" class="admin-project-subtab active" role="tab" aria-selected="true" data-project-pane="home" data-filter="current">Current</button>
+              <button type="button" class="admin-project-subtab" role="tab" aria-selected="false" data-project-pane="home" data-filter="future">Future</button>
             </div>
-            <div id="portfolio-projects-list" class="projects-list studio-project-cards"></div>
-            <p class="msg studio-side-msg" id="portfolio-projects-msg"></p>
+            <div id="home-projects-list" class="projects-list studio-project-cards"></div>
+            <p class="msg studio-side-msg" id="home-projects-msg"></p>
           </div>
         </div>
         </div>
@@ -1960,118 +1974,6 @@
         </div>
         </div>
 
-        <div id="pane-writing" class="admin-pane studio-pane studio-cms-pane">
-        <div class="adminSectionHero studio-intro-card">
-          <p class="adminEyebrow">journal</p>
-          <h2 class="adminSectionTitle studio-intro-title">Writing</h2>
-          <p class="studio-intro-copy adminSectionText">Compose posts with rich text and optional trimmed audio.</p>
-        </div>
-        <div class="studio-cms-split adminGrid">
-        <div class="adminCard studio-panel-card">
-        <input type="hidden" id="writing-edit-id" value="" />
-        <input type="hidden" id="writing-current-audio-url" value="" />
-        <h2 id="writing-form-heading">New writing</h2>
-        <p class="studio-panel-help">Drafts stay off the public index until published.</p>
-        <form id="writing-form" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore>
-          <label for="writing-title">Title</label>
-          <input type="text" autocomplete="off" id="writing-title" placeholder="e.g. Booting up the greater engine" required />
-          <label for="writing-date">Date</label>
-          <input type="text" autocomplete="off" id="writing-date" placeholder="e.g. MAR 15, 2026" />
-          <label for="writing-time">Time</label>
-          <input type="text" autocomplete="off" id="writing-time" placeholder="e.g. 2041 (24h)" />
-          <label for="writing-category">Category</label>
-          <select id="writing-category">
-            <option value="learning">Learning</option>
-            <option value="getting started">Getting started</option>
-            <option value="reflections">Reflections</option>
-            <option value="updates">Updates</option>
-            <option value="other">Other</option>
-          </select>
-          <label for="writing-published">Status</label>
-          <select id="writing-published">
-            <option value="true">Published</option>
-            <option value="false">Draft</option>
-          </select>
-          <span class="studio-upload-label">Companion audio (optional)</span>
-          <div class="studio-upload-zone" data-upload-for="writing-audio">
-          <input type="file" id="writing-audio" accept="audio/mpeg,audio/mp3,audio/wav,audio/x-wav,.mp3,.wav" />
-          <div class="studio-upload-hit">
-            <p class="studio-upload-hint">Drop audio or click to choose · MP3 / WAV</p>
-            <p class="studio-upload-file" id="writing-audio-name">No file chosen</p>
-          </div>
-          </div>
-          <p id="writing-audio-current-wrap" style="display:none;color:var(--text-muted);font-size:12px;margin:-6px 0 8px;line-height:1.45;">
-            Current: <a id="writing-audio-current-link" href="#" target="_blank" rel="noopener noreferrer"></a>
-            · <button type="button" class="studio-linkish" id="writing-remove-current-audio" style="display:none">Remove</button>
-          </p>
-          <p style="color: var(--text-muted); font-size: 12px; margin: -8px 0 12px; line-height: 1.45;">Drag the green handles to trim playback, or use typed times below.</p>
-          <div id="writing-audio-trimmer" class="audio-trim-panel" hidden>
-            <div class="audio-trim-heading">
-              <svg class="audio-trim-heading-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M4 7V4h3M4 17v3h3M20 7V4h-3M20 17v3h-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                <path d="M9 9h6v6H9V9z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-              </svg>
-              Select the part to trim
-            </div>
-            <p class="audio-trim-hint">Click the green range to set where preview starts (white line). Drag handles to trim.</p>
-            <div class="audio-trim-track" id="writing-audio-trim-track">
-              <canvas class="audio-trim-waveform" id="writing-audio-waveform" width="1" height="96"></canvas>
-              <div class="audio-trim-shade audio-trim-shade-left" id="writing-audio-shade-left"></div>
-              <div class="audio-trim-shade audio-trim-shade-right" id="writing-audio-shade-right"></div>
-              <div class="audio-trim-keep" id="writing-audio-keep" title="Click to set preview start"></div>
-              <div class="audio-trim-scrub-head" id="writing-audio-scrub-head" aria-hidden="true"></div>
-              <button type="button" class="audio-trim-handle audio-trim-handle-start" id="writing-audio-handle-start" aria-label="Trim start"></button>
-              <button type="button" class="audio-trim-handle audio-trim-handle-end" id="writing-audio-handle-end" aria-label="Trim end"></button>
-              <span class="audio-trim-duration-total" id="writing-audio-duration-total"></span>
-            </div>
-            <p class="audio-trim-readout" id="writing-audio-trim-readout"></p>
-            <div class="audio-trim-preview">
-              <button type="button" class="audio-trim-preview-btn" id="writing-audio-preview-btn" aria-pressed="false">Play preview</button>
-              <div class="audio-trim-preview-vol-wrap">
-                <label class="audio-trim-preview-vol-label" for="writing-audio-preview-vol">Preview volume</label>
-                <input type="range" id="writing-audio-preview-vol" class="audio-trim-preview-vol" min="0" max="1" step="0.05" value="0.65" aria-label="Preview volume" />
-              </div>
-              <span class="audio-trim-preview-note">White line follows playback. Click green to set start.</span>
-            </div>
-          </div>
-          <details class="audio-trim-fallback">
-            <summary>Fine-tune with typed times</summary>
-            <label for="writing-audio-start" style="margin-top:8px">From</label>
-            <input type="text" autocomplete="off" id="writing-audio-start" placeholder="sec, m:ss, or MMSS" />
-            <label for="writing-audio-end">Until</label>
-            <input type="text" autocomplete="off" id="writing-audio-end" placeholder="blank = end of file" />
-            <p style="color: var(--text-muted); font-size: 12px; margin: -8px 0 0; line-height: 1.45;">Overrides the waveform if filled.</p>
-          </details>
-          <label>Your post</label>
-          <div class="editor-wrap"><div id="writing-editor"></div></div>
-          <div class="studio-form-actions">
-            <button type="submit" id="writing-submit" class="studio-btn studio-btn--primary">Publish</button>
-            <button type="button" id="writing-cancel-edit" class="studio-btn studio-btn--ghost" style="display:none">Cancel</button>
-            <button type="button" id="writing-refresh-preview" class="studio-btn studio-btn--ghost">Refresh preview</button>
-            <span id="writing-unsaved" class="studio-unsaved" style="display:none">Unsaved edits</span>
-          </div>
-          <p class="msg" id="writing-msg"></p>
-        </form>
-        </div>
-        <div class="studio-panel-card studio-side-sticky">
-          <h2 class="studio-side-title">Preview &amp; library</h2>
-          <p class="studio-panel-help">Rough layout of how a post surfaces on site (not pixel-perfect).</p>
-          <div class="studio-preview-card" style="margin-bottom:16px">
-            <div class="eyebrow">Public preview</div>
-            <p class="ttl" id="writing-preview-title">Post title</p>
-            <p class="meta" id="writing-preview-meta">DATE · CATEGORY</p>
-            <div id="writing-preview-badge" style="margin-bottom:8px"></div>
-            <div class="studio-preview-body ql-snow ql-editor" id="writing-preview-body">Body…</div>
-          </div>
-          <div class="studio-list-toolbar">
-            <input type="search" id="writing-library-search" placeholder="Search writings…" aria-label="Search writings" />
-          </div>
-          <div id="writings-list" class="writings-list"></div>
-          <p class="msg studio-side-msg" id="writings-msg"></p>
-        </div>
-        </div>
-        </div>
-
         <div id="pane-tools" class="admin-pane studio-pane studio-cms-pane">
         <div class="adminSectionHero studio-intro-card">
           <p class="adminEyebrow">utilities</p>
@@ -2099,7 +2001,8 @@
           <h2 class="adminSectionTitle studio-intro-title">Site settings</h2>
           <p class="studio-intro-copy adminSectionText">Stored as JSON in blob storage (<code>site/settings.json</code>) when uploads are configured. Resume and secrets still use env/repo where noted.</p>
         </div>
-          <div class="adminCard studio-panel-card adminNarrowStack"> autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore>
+          <div class="adminCard studio-panel-card adminNarrowStack">
+            <form id="studio-settings-form" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore>
               <label for="set-site-title">Site title</label>
               <input type="text" id="set-site-title" autocomplete="off" placeholder="Portfolio name" />
               <label for="set-tagline">Tagline</label>
@@ -2147,8 +2050,7 @@
         var inactivityTimer = null;
         var INACTIVITY_MS = 4 * 60 * 1000;
         var VIDEO_MAX_BYTES = 1024 * 1024 * 1024;
-        var cachedPortfolioProjects = [];
-        var cachedWritingsAdmin = [];
+        var cachedHomeProjects = [];
         var cachedPhotosAdmin = [];
         var portfolioProjectSearchDebouncedTimer = null;
         var studioUploadZonesReady = false;
@@ -2244,11 +2146,8 @@
 
         function initStudioUploadZones() {
           var prevFor = [
-            { id: "port-proj-image", ref: {} },
-            { id: "port-proj-video", ref: {} },
             { id: "photo-file", ref: {} },
-            { id: "video-file", ref: {} },
-            { id: "writing-audio", ref: {} }
+            { id: "video-file", ref: {} }
           ];
           prevFor.forEach(function (x) {
             var inp = document.getElementById(x.id);
@@ -2303,10 +2202,8 @@
           loadStudioSettingsQuiet();
           loadPhotosForDelete();
           loadVideosForManage();
-          loadWritingsForManage();
-          loadPortfolioProjectsForManage();
-          syncProjectSubtabUI("portfolio");
-          initPortfolioDescQuill();
+          loadHomeProjectsForManage();
+          syncProjectSubtabUI("home");
           resetInactivityTimer();
         }
 
@@ -2387,34 +2284,18 @@
             var el = document.getElementById("pane-" + pane);
             if (el) el.classList.add("active");
             if (pane === "projects") {
-              loadPortfolioProjectsForManage();
-              syncProjectSubtabUI("portfolio");
-              initPortfolioDescQuill();
+              loadHomeProjectsForManage();
+              syncProjectSubtabUI("home");
             }
             if (pane === "photos") loadPhotosForDelete();
             if (pane === "media") {
               loadVideosForManage();
               initVideoDescQuill();
             }
-            if (pane === "writing") {
-              initWritingQuill();
-              loadWritingsForManage();
-              var d = document.getElementById("writing-date");
-              var t = document.getElementById("writing-time");
-              if (d && !d.value) {
-                var now = new Date();
-                var months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
-                d.value = months[now.getMonth()] + " " + now.getDate() + ", " + now.getFullYear();
-              }
-              if (t && !t.value) {
-                var n = new Date();
-                t.value = String(n.getHours()).padStart(2, "0") + String(n.getMinutes()).padStart(2, "0");
-              }
-            }
           });
         });
 
-        var projectStatusFilter = { portfolio: "now" };
+        var projectStatusFilter = { home: "current" };
         function syncProjectSubtabUI(pane) {
           var wrap = document.querySelector('.admin-project-subtabs[data-project-pane="' + pane + '"]');
           if (!wrap) return;
@@ -2429,15 +2310,13 @@
           btn.addEventListener("click", function () {
             var pane = btn.getAttribute("data-project-pane");
             var f = btn.getAttribute("data-filter");
-            if (!pane || !f || !["now", "future", "done"].includes(f)) return;
+            if (!pane || !f || !["current", "future"].includes(f)) return;
             projectStatusFilter[pane] = f;
             syncProjectSubtabUI(pane);
-            if (pane === "portfolio") loadPortfolioProjectsForManage();
+            if (pane === "home") renderHomeProjectCardsFromCache();
           });
         });
 
-        var writingQuill = null;
-        var portfolioDescQuill = null;
         var videoDescQuill = null;
         var quillTooltipLabels = { bold: "Bold", italic: "Italic", underline: "Underline", ordered: "Numbered list", bullet: "Bullet list", link: "Insert link", image: "Insert image", clean: "Clear formatting" };
         function addQuillTooltips(quill) {
@@ -2465,58 +2344,6 @@
             }
           });
         }
-        function initWritingQuill() {
-          if (writingQuill) return;
-          var el = document.getElementById("writing-editor");
-          if (!el || typeof Quill === "undefined") return;
-          writingQuill = new Quill("#writing-editor", {
-            theme: "snow",
-            placeholder: "Just type your thoughts. Use the toolbar for bold, italic, links, and photos.",
-            modules: {
-              clipboard: {
-                matchers: [
-                  ["IMG", function(node, delta) {
-                    if (node.src && String(node.src).indexOf("data:") === 0) {
-                      var D = Quill.import("delta");
-                      return new D();
-                    }
-                  }]
-                ]
-              },
-              toolbar: {
-                container: [
-                  ["bold", "italic", "underline"],
-                  [{ "list": "ordered" }, { "list": "bullet" }],
-                  ["link"],
-                  ["image"],
-                  ["clean"]
-                ],
-                handlers: {
-                  image: function() {
-                    var input = document.createElement("input");
-                    input.type = "file";
-                    input.accept = "image/*";
-                    input.onchange = function() {
-                      var file = input.files[0];
-                      if (!file) return;
-                      uploadFileViaPresigned(file).then(function(url) {
-                        var range = writingQuill.getSelection(true);
-                        writingQuill.insertEmbed(range.index, "image", url);
-                        writingQuill.setSelection(range.index + 1);
-                      }).catch(function(err) {
-                        alert("Upload failed: " + (err.message || "Try again"));
-                      });
-                    };
-                    input.click();
-                  }
-                }
-              }
-            }
-          });
-          addQuillTooltips(writingQuill);
-          writingQuill.on("text-change", refreshWritingLivePreview);
-        }
-
         function makeProjectQuillImageHandler(getQuill) {
           return function () {
             var input = document.createElement("input");
@@ -2576,57 +2403,12 @@
           };
         }
 
-        function initPortfolioDescQuill() {
-          if (portfolioDescQuill) return;
-          var el = document.getElementById("port-proj-desc-editor");
-          if (!el || typeof Quill === "undefined") return;
-          portfolioDescQuill = new Quill("#port-proj-desc-editor", projectDescQuillOptions(function () { return portfolioDescQuill; }));
-          addQuillTooltips(portfolioDescQuill);
-        }
-
         function initVideoDescQuill() {
           if (videoDescQuill) return;
           var el = document.getElementById("video-desc-editor");
           if (!el || typeof Quill === "undefined") return;
           videoDescQuill = new Quill("#video-desc-editor", projectDescQuillOptions(function () { return videoDescQuill; }));
           addQuillTooltips(videoDescQuill);
-        }
-
-        function parseWritingAudioTime(str) {
-          str = String(str || "").trim();
-          if (!str) return null;
-          var hms = str.match(/^(\d+):(\d{1,2}):(\d{1,2}(?:\.\d+)?)$/);
-          if (hms) {
-            var sec = parseInt(hms[1], 10) * 3600 + parseInt(hms[2], 10) * 60 + parseFloat(hms[3]);
-            return Number.isFinite(sec) && sec >= 0 ? sec : NaN;
-          }
-          var hm = str.match(/^(\d+):(\d{1,2}(?:\.\d+)?)$/);
-          if (hm) {
-            var sec2 = parseInt(hm[1], 10) * 60 + parseFloat(hm[2]);
-            return Number.isFinite(sec2) && sec2 >= 0 ? sec2 : NaN;
-          }
-          if (/^\d+$/.test(str)) {
-            if (str.length === 6) {
-              var H = parseInt(str.slice(0, 2), 10);
-              var M = parseInt(str.slice(2, 4), 10);
-              var S = parseInt(str.slice(4, 6), 10);
-              if (M < 60 && S < 60) return H * 3600 + M * 60 + S;
-              return NaN;
-            }
-            if (str.length === 4) {
-              var MM = parseInt(str.slice(0, 2), 10);
-              var SS = parseInt(str.slice(2, 4), 10);
-              if (SS < 60) return MM * 60 + SS;
-              return NaN;
-            }
-            var n = parseFloat(str);
-            return Number.isFinite(n) && n >= 0 ? n : NaN;
-          }
-          if (/^\d+\.\d+$/.test(str)) {
-            var nf = parseFloat(str);
-            return Number.isFinite(nf) && nf >= 0 ? nf : NaN;
-          }
-          return NaN;
         }
 
         var adminAudioCtx = null;
@@ -3059,267 +2841,6 @@
               if (panel) panel.setAttribute("hidden", "");
             });
         }
-
-        var writingFormAudioTrim = null;
-        var writingComposerAudioSourceUrl = "";
-
-        function hideWritingNewAudioTrimmer() {
-          writingComposerAudioSourceUrl = "";
-          var panel = document.getElementById("writing-audio-trimmer");
-          if (writingFormAudioTrim) {
-            writingFormAudioTrim.destroy();
-            writingFormAudioTrim = null;
-          }
-          if (panel) panel.setAttribute("hidden", "");
-        }
-
-        function hydrateWritingComposerTrimFromRemote(url, ss, ee) {
-          hideWritingNewAudioTrimmer();
-          var panel = document.getElementById("writing-audio-trimmer");
-          if (!url || !panel) {
-            if (panel) panel.setAttribute("hidden", "");
-            return;
-          }
-          fetch(url)
-            .then(function (r) {
-              if (!r.ok) throw new Error("audio fetch failed");
-              return r.arrayBuffer();
-            })
-            .then(function (buf) {
-              return getAdminAudioContext().decodeAudioData(buf.slice(0));
-            })
-            .then(function (buffer) {
-              var ssn = ss != null && ss !== "" ? Number(ss) : null;
-              var een = ee != null && ee !== "" ? Number(ee) : null;
-              writingFormAudioTrim = mountAudioTrimmer(panel, buffer, {
-                startSec: Number.isFinite(ssn) ? ssn : null,
-                endSec: Number.isFinite(een) ? een : null
-              });
-              writingComposerAudioSourceUrl = url || "";
-              panel.removeAttribute("hidden");
-              requestAnimationFrame(function () {
-                if (writingFormAudioTrim && writingFormAudioTrim.relayout) writingFormAudioTrim.relayout();
-              });
-            })
-            .catch(function () {
-              if (panel) panel.setAttribute("hidden", "");
-            });
-        }
-
-        function showWritingNewAudioTrimmer(audioBuffer) {
-          hideWritingNewAudioTrimmer();
-          var panel = document.getElementById("writing-audio-trimmer");
-          if (!panel) return;
-          writingFormAudioTrim = mountAudioTrimmer(panel, audioBuffer, {});
-          panel.removeAttribute("hidden");
-          requestAnimationFrame(function() {
-            if (writingFormAudioTrim && writingFormAudioTrim.relayout) writingFormAudioTrim.relayout();
-          });
-        }
-
-        var writingAudioFileInput = document.getElementById("writing-audio");
-        if (writingAudioFileInput) {
-          writingAudioFileInput.addEventListener("change", function() {
-            var f = this.files[0];
-            if (!f) {
-              hideWritingNewAudioTrimmer();
-              return;
-            }
-            f.arrayBuffer()
-              .then(function(buf) {
-                return getAdminAudioContext().decodeAudioData(buf.slice(0));
-              })
-              .then(function(buffer) {
-                showWritingNewAudioTrimmer(buffer);
-              })
-              .catch(function() {
-                hideWritingNewAudioTrimmer();
-              });
-          });
-        }
-
-
-        var writingAudioUserRemoved = false;
-
-        var wf = document.getElementById("writing-form");
-        if (wf) wf.addEventListener("submit", function(e) {
-          e.preventDefault();
-          var btn = document.getElementById("writing-submit");
-          var msg = document.getElementById("writing-msg");
-          var editingId = document.getElementById("writing-edit-id").value.trim();
-          var pubEl = document.getElementById("writing-published");
-          var published = pubEl ? pubEl.value !== "false" : true;
-          var title = document.getElementById("writing-title").value.trim();
-          var dateEl = document.getElementById("writing-date");
-          var catEl = document.getElementById("writing-category");
-          var date = dateEl ? dateEl.value.trim() : "";
-          var time = document.getElementById("writing-time").value.trim() || "1021";
-          if (typeof normalizeClockTimeToHHMM === "function") {
-            var nt = normalizeClockTimeToHHMM(time);
-            if (nt) time = nt;
-          }
-          var category = catEl ? catEl.value : "learning";
-          if (!date) {
-            var now = new Date();
-            var months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
-            date = months[now.getMonth()] + " " + now.getDate() + ", " + now.getFullYear();
-          }
-          var body = writingQuill ? writingQuill.root.innerHTML : "";
-          if (!title) { showMsg(msg, "Title is required.", false); return; }
-          var audioInput = document.getElementById("writing-audio");
-          var audioFile = audioInput && audioInput.files[0];
-          var curAuEl = document.getElementById("writing-current-audio-url");
-          var curAudioHidden = curAuEl && curAuEl.value ? curAuEl.value.trim() : "";
-          var startEl = document.getElementById("writing-audio-start");
-          var endEl = document.getElementById("writing-audio-end");
-          var startRaw = startEl ? startEl.value : "";
-          var endRaw = endEl ? endEl.value : "";
-          var trimStart = null;
-          var trimEnd = null;
-          if (startRaw.trim() || endRaw.trim()) {
-            trimStart = startRaw.trim() ? parseWritingAudioTime(startRaw) : null;
-            trimEnd = endRaw.trim() ? parseWritingAudioTime(endRaw) : null;
-            if (startRaw.trim() && !Number.isFinite(trimStart)) {
-              showMsg(msg, "Invalid “play from” time. Use seconds (90), m:ss (1:30), or MMSS (0130).", false);
-              return;
-            }
-            if (endRaw.trim() && !Number.isFinite(trimEnd)) {
-              showMsg(msg, "Invalid “until” time. Use seconds, m:ss, or MMSS.", false);
-              return;
-            }
-            if (trimStart != null && trimEnd != null && trimEnd <= trimStart) {
-              showMsg(msg, "“Until” must be after “from”.", false);
-              return;
-            }
-          } else if ((audioFile || curAudioHidden) && writingFormAudioTrim) {
-            var tw2 = writingFormAudioTrim.getTrimSeconds();
-            trimStart = tw2.start;
-            trimEnd = tw2.end;
-          }
-          btn.disabled = true;
-
-          function finalizeOk(text) {
-            btn.disabled = false;
-            showMsg(msg, text, true);
-            loadWritingsForManage();
-            resetWritingComposer();
-            writingAudioUserRemoved = false;
-          }
-
-          function attachTrim(payload) {
-            if (writingAudioUserRemoved && !audioFile) return;
-            var shouldApply =
-              (startRaw.trim() || endRaw.trim()) ||
-              !!(writingFormAudioTrim && (audioFile || curAudioHidden));
-            if (!shouldApply) return;
-            if (trimStart != null) payload.audioStartSec = trimStart;
-            if (trimEnd != null) payload.audioEndSec = trimEnd;
-          }
-
-          function postWriting(audioUploadedUrl) {
-            var payload = {
-              password: pw,
-              title: title,
-              date: date,
-              time: time,
-              category: category,
-              body: body,
-              excerpt: body,
-              published: published
-            };
-            if (audioUploadedUrl) payload.audioUrl = audioUploadedUrl;
-            attachTrim(payload);
-            return fetch("/api/writings", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(payload)
-            }).then(function (r) {
-              return r.json();
-            });
-          }
-
-          function patchWriting(uploadedReplaceUrl) {
-            var payload = {
-              id: editingId,
-              password: pw,
-              title: title,
-              date: date,
-              time: time,
-              category: category,
-              body: body,
-              excerpt: body,
-              published: published
-            };
-            if (writingAudioUserRemoved && !audioFile) {
-              payload.audioUrl = "";
-            } else if (uploadedReplaceUrl) {
-              payload.audioUrl = uploadedReplaceUrl;
-              attachTrim(payload);
-            } else if (curAudioHidden) {
-              attachTrim(payload);
-            }
-            return fetch("/api/writings", {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(payload)
-            }).then(function (r) {
-              return r.json();
-            });
-          }
-
-          var savePromise;
-          if (audioFile) {
-            savePromise = uploadFileToBlob(audioFile).then(function (url) {
-              return editingId ? patchWriting(url) : postWriting(url);
-            });
-          } else if (editingId) {
-            savePromise = patchWriting(null);
-          } else {
-            savePromise = postWriting();
-          }
-          savePromise
-            .then(function(data) {
-              btn.disabled = false;
-              if (data.ok) {
-                finalizeOk(editingId ? "Saved changes." : published ? "Published." : "Draft saved.");
-              } else {
-                showMsg(msg, data.error || "Failed", false);
-              }
-            })
-            .catch(function(err) {
-              btn.disabled = false;
-              var m = err && err.message ? err.message : "";
-              if (m) showMsg(msg, m, false);
-              else showMsg(msg, "Could not reach server. Run locally (npm run dev) or deploy to Vercel.", false);
-            });
-        });
-
-        var wfCancel = document.getElementById("writing-cancel-edit");
-        if (wfCancel) wfCancel.addEventListener("click", function() {
-          writingAudioUserRemoved = false;
-          resetWritingComposer();
-        });
-        var wfPrevRefresh = document.getElementById("writing-refresh-preview");
-        if (wfPrevRefresh) wfPrevRefresh.addEventListener("click", refreshWritingLivePreview);
-        var wfRmAu = document.getElementById("writing-remove-current-audio");
-        if (wfRmAu) wfRmAu.addEventListener("click", function() {
-          writingAudioUserRemoved = true;
-          var curAu = document.getElementById("writing-current-audio-url");
-          if (curAu) curAu.value = "";
-          hideWritingNewAudioTrimmer();
-          var cw = document.getElementById("writing-audio-current-wrap");
-          if (cw) cw.style.display = "none";
-          wfRmAu.style.display = "none";
-        });
-
-        ["writing-title", "writing-date", "writing-time", "writing-category", "writing-published"].forEach(
-          function (fid) {
-            var node = document.getElementById(fid);
-            if (!node) return;
-            node.addEventListener("input", refreshWritingLivePreview);
-            node.addEventListener("change", refreshWritingLivePreview);
-          }
-        );
 
         function fillStudioSettingsForm(cfg) {
           if (!cfg || typeof cfg !== "object") cfg = {};
@@ -3914,597 +3435,362 @@
             .replace(/"/g, "&quot;");
         }
 
-        function refreshWritingLivePreview() {
-          var t = document.getElementById("writing-title");
-          var d = document.getElementById("writing-date");
-          var cat = document.getElementById("writing-category");
-          var pub = document.getElementById("writing-published");
-          var pt = document.getElementById("writing-preview-title");
-          var pm = document.getElementById("writing-preview-meta");
-          var bd = document.getElementById("writing-preview-badge");
-          var pb = document.getElementById("writing-preview-body");
-          if (!pt || !pm || !bd || !pb) return;
-          pt.textContent = (t && t.value.trim()) ? t.value.trim() : "Post title";
-          var dm = "";
-          if (d && d.value.trim()) dm += d.value.trim() + " · ";
-          if (cat) dm += cat.value || "";
-          pm.textContent = dm || "DATE · CATEGORY";
-          if (pub && pub.value === "false") {
-            bd.innerHTML = "<span class=\"studio-status-pill studio-status-pill--draft\">draft</span>";
-          } else {
-            bd.innerHTML = "<span class=\"studio-status-pill\">live</span>";
-          }
-          pb.innerHTML = writingQuill && writingQuill.root.innerHTML ? writingQuill.root.innerHTML : "<p>Body…</p>";
+        function homeProjectsAuthHeaders(withJson) {
+          var h = { Authorization: "Bearer " + pw };
+          if (withJson) h["Content-Type"] = "application/json";
+          return h;
         }
 
-        function setWritingEditMode(on) {
-          var hForm = document.getElementById("writing-form-heading");
-          var btn = document.getElementById("writing-submit");
-          var cancel = document.getElementById("writing-cancel-edit");
-          var uns = document.getElementById("writing-unsaved");
-          if (!hForm || !btn || !cancel || !uns) return;
-          if (on) {
-            hForm.textContent = "Edit writing";
-            btn.textContent = "Save changes";
-            cancel.style.display = "inline-flex";
-            uns.style.display = "inline-flex";
-          } else {
-            hForm.textContent = "New writing";
-            btn.textContent = "Publish";
-            cancel.style.display = "none";
-            uns.style.display = "none";
-          }
+        function homeProjEscapeAttr(s) {
+          return String(s || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
         }
 
-        function resetWritingComposer() {
-          var eid = document.getElementById("writing-edit-id");
-          var curAu = document.getElementById("writing-current-audio-url");
+        function applyHomeProjTypeUi() {
+          var typeEl = document.getElementById("home-proj-type");
+          var wrapStatus = document.getElementById("home-proj-wrap-status");
+          var wrapPriority = document.getElementById("home-proj-wrap-priority");
+          if (!typeEl || !wrapStatus || !wrapPriority) return;
+          var fut = typeEl.value === "future";
+          wrapPriority.hidden = !fut;
+          wrapStatus.hidden = fut;
+        }
+
+        function getHomeProjLinksFromDom() {
+          var editor = document.getElementById("home-proj-links-editor");
+          if (!editor) return [];
+          var out = [];
+          editor.querySelectorAll(".home-proj-link-row").forEach(function(row) {
+            var lab = row.querySelector(".home-proj-link-label");
+            var href = row.querySelector(".home-proj-link-href");
+            var label = lab ? lab.value.trim() : "";
+            var h = href ? href.value.trim() : "";
+            if (label || h) out.push({ label: label || "Link", href: h || "#" });
+          });
+          return out;
+        }
+
+        function renderHomeProjLinkRows(links) {
+          var editor = document.getElementById("home-proj-links-editor");
+          if (!editor) return;
+          links = links && links.length ? links : [{ label: "", href: "" }];
+          editor.innerHTML = "";
+          links.forEach(function(L) {
+            var row = document.createElement("div");
+            row.className = "home-proj-link-row";
+            row.innerHTML =
+              '<input type="text" class="home-proj-link-label" placeholder="Label" value="' + homeProjEscapeAttr(L.label) + '" />' +
+              '<input type="text" class="home-proj-link-href" placeholder="URL" value="' + homeProjEscapeAttr(L.href) + '" />' +
+              '<button type="button" class="studio-btn studio-btn--ghost studio-btn--sm home-proj-remove-link" aria-label="Remove link">×</button>';
+            row.querySelector(".home-proj-remove-link").addEventListener("click", function() {
+              row.remove();
+              if (!editor.querySelector(".home-proj-link-row")) renderHomeProjLinkRows([]);
+            });
+            editor.appendChild(row);
+          });
+        }
+
+        function homeProjSortByOrder(a, b) {
+          var ao = typeof a.sortOrder === "number" ? a.sortOrder : 0;
+          var bo = typeof b.sortOrder === "number" ? b.sortOrder : 0;
+          if (ao !== bo) return ao - bo;
+          return String(a.title || "").localeCompare(String(b.title || ""));
+        }
+
+        function splitHomeProjects(items) {
+          var cur = items.filter(function(p) { return p && p.type !== "future"; });
+          var fut = items.filter(function(p) { return p && p.type === "future"; });
+          cur.sort(homeProjSortByOrder);
+          fut.sort(homeProjSortByOrder);
+          return { cur: cur, fut: fut };
+        }
+
+        function updateHomeProjectStatChips(items) {
+          var sp = splitHomeProjects(items || []);
+          var curEl = document.getElementById("stat-home-current");
+          var futEl = document.getElementById("stat-home-future");
+          if (curEl) curEl.textContent = String(sp.cur.length);
+          if (futEl) futEl.textContent = String(sp.fut.length);
+        }
+
+        function homeProjectComposerReset() {
+          var eid = document.getElementById("home-proj-edit-id");
           if (eid) eid.value = "";
-          if (curAu) curAu.value = "";
-          var ttl = document.getElementById("writing-title");
-          if (ttl) ttl.value = "";
-          var dd = document.getElementById("writing-date");
-          if (dd) dd.value = "";
-          var tm = document.getElementById("writing-time");
-          if (tm) tm.value = "";
-          var ct = document.getElementById("writing-category");
-          if (ct) ct.value = "learning";
-          var pub = document.getElementById("writing-published");
-          if (pub) pub.value = "true";
-          var ain = document.getElementById("writing-audio");
-          var an = document.getElementById("writing-audio-name");
-          if (ain) ain.value = "";
-          if (an) an.textContent = "No file chosen";
-          hideWritingNewAudioTrimmer();
-          var startEl = document.getElementById("writing-audio-start");
-          var endEl = document.getElementById("writing-audio-end");
-          if (startEl) startEl.value = "";
-          if (endEl) endEl.value = "";
-          var cw = document.getElementById("writing-audio-current-wrap");
-          var lk = document.getElementById("writing-audio-current-link");
-          var rm = document.getElementById("writing-remove-current-audio");
-          if (cw) cw.style.display = "none";
-          if (rm) rm.style.display = "none";
-          if (lk) lk.removeAttribute("href");
-          if (writingQuill) writingQuill.root.innerHTML = "";
-          refreshWritingLivePreview();
-          setWritingEditMode(false);
+          var title = document.getElementById("home-proj-title");
+          if (title) title.value = "";
+          var type = document.getElementById("home-proj-type");
+          if (type) type.value = "current";
+          var status = document.getElementById("home-proj-status");
+          if (status) status.value = "";
+          var priority = document.getElementById("home-proj-priority");
+          if (priority) priority.value = "";
+          var desc = document.getElementById("home-proj-description");
+          if (desc) desc.value = "";
+          var tags = document.getElementById("home-proj-tags");
+          if (tags) tags.value = "";
+          var notes = document.getElementById("home-proj-notes");
+          if (notes) notes.value = "";
+          var vis = document.getElementById("home-proj-visible");
+          if (vis) vis.checked = true;
+          renderHomeProjLinkRows([]);
+          applyHomeProjTypeUi();
+          var hForm = document.getElementById("home-proj-form-heading");
+          var submit = document.getElementById("home-proj-submit");
+          var cancel = document.getElementById("home-proj-cancel-edit");
+          if (hForm) hForm.textContent = "Add project";
+          if (submit) submit.textContent = "Save project";
+          if (cancel) cancel.style.display = "none";
         }
 
-        function loadWritingIntoComposer(w) {
-          if (!w) return;
-          writingAudioUserRemoved = false;
-          initWritingQuill();
-          document.getElementById("writing-edit-id").value = w.id || "";
-          document.getElementById("writing-current-audio-url").value = w.audioUrl ? String(w.audioUrl).trim() : "";
-          document.getElementById("writing-title").value = w.title || "";
-          document.getElementById("writing-date").value = (w.date || "").trim();
-          var rawT = w.time || "";
-          var dispT = typeof normalizeClockTimeToHHMM === "function" ? (normalizeClockTimeToHHMM(rawT) || rawT) : rawT;
-          document.getElementById("writing-time").value = dispT;
-          var cat = (w.category || "learning").toLowerCase().trim();
-          document.getElementById("writing-category").value =
-            ["learning", "getting started", "reflections", "updates", "other"].indexOf(cat) !== -1 ? cat : "reflections";
-          document.getElementById("writing-published").value = w.published === false ? "false" : "true";
-          if (writingQuill) writingQuill.root.innerHTML = w.body || w.excerpt || "";
-          var ain = document.getElementById("writing-audio");
-          if (ain) ain.value = "";
-          var an = document.getElementById("writing-audio-name");
-          if (an) an.textContent = "No file chosen";
-          var aus = document.getElementById("writing-audio-start");
-          var aue = document.getElementById("writing-audio-end");
-          if (aus) aus.value = w.audioStartSec != null && w.audioStartSec !== "" ? String(w.audioStartSec) : "";
-          if (aue) aue.value = w.audioEndSec != null && w.audioEndSec !== "" ? String(w.audioEndSec) : "";
-          var cw = document.getElementById("writing-audio-current-wrap");
-          var lk = document.getElementById("writing-audio-current-link");
-          var rm = document.getElementById("writing-remove-current-audio");
-          if (w.audioUrl && lk && cw) {
-            lk.href = w.audioUrl;
-            lk.textContent = "Open audio";
-            cw.style.display = "block";
-            if (rm) rm.style.display = "inline";
-            hydrateWritingComposerTrimFromRemote(
-              String(w.audioUrl).trim(),
-              w.audioStartSec,
-              w.audioEndSec
-            );
-          } else {
-            hideWritingNewAudioTrimmer();
-            if (cw) cw.style.display = "none";
-            if (rm) rm.style.display = "none";
-          }
-          setWritingEditMode(true);
-          refreshWritingLivePreview();
+        function homeProjectComposerLoad(p) {
+          homeProjectComposerReset();
+          document.getElementById("home-proj-edit-id").value = p.id || "";
+          document.getElementById("home-proj-title").value = p.title || "";
+          document.getElementById("home-proj-type").value = p.type === "future" ? "future" : "current";
+          document.getElementById("home-proj-status").value = p.status || "";
+          var pr = String(p.priority || "").toLowerCase();
+          document.getElementById("home-proj-priority").value = ["high", "medium", "low"].indexOf(pr) >= 0 ? pr : "";
+          document.getElementById("home-proj-description").value = p.description || "";
+          document.getElementById("home-proj-tags").value = (p.tags || []).join(", ");
+          document.getElementById("home-proj-notes").value = p.notes || "";
+          document.getElementById("home-proj-visible").checked = p.visible !== false;
+          renderHomeProjLinkRows(p.links && p.links.length ? p.links : []);
+          applyHomeProjTypeUi();
+          document.getElementById("home-proj-form-heading").textContent = "Edit project";
+          document.getElementById("home-proj-submit").textContent = "Save changes";
+          document.getElementById("home-proj-cancel-edit").style.display = "inline-flex";
           window.scrollTo({ top: 0, behavior: "smooth" });
         }
 
-        var writingsSearchToolbarBound = false;
-        function bindWritingLibraryToolbarOnce() {
-          if (writingsSearchToolbarBound) return;
-          var inp = document.getElementById("writing-library-search");
-          writingsSearchToolbarBound = true;
+        var homeProjectSearchBound = false;
+        function bindHomeProjectSearchOnce() {
+          if (homeProjectSearchBound) return;
+          var inp = document.getElementById("home-project-search");
           if (!inp) return;
-          var t = null;
-          inp.addEventListener("input", function () {
-            clearTimeout(t);
-            t = setTimeout(renderWritingsListFiltered, 140);
-          });
-        }
-
-        function renderWritingsListFiltered() {
-          var list = document.getElementById("writings-list");
-          var msgEl = document.getElementById("writings-msg");
-          var srch = document.getElementById("writing-library-search");
-          if (!list) return;
-          bindWritingLibraryToolbarOnce();
-          list.innerHTML = "";
-          if (msgEl) msgEl.textContent = "";
-          if (!cachedWritingsAdmin.length) {
-            list.innerHTML = "<p class=\"studio-empty-msg\">No writings yet.</p>";
-            return;
-          }
-          var q = (srch && srch.value ? srch.value : "").trim().toLowerCase();
-          var filtered = cachedWritingsAdmin.filter(function(w) {
-            if (!q) return true;
-            return String(w.title || "").toLowerCase().indexOf(q) !== -1;
-          });
-          if (!filtered.length) {
-            list.innerHTML = "<p class=\"studio-empty-msg\">No matches.</p>";
-            return;
-          }
-          filtered.forEach(function(w) {
-            var div = document.createElement("div");
-            div.className = "studio-writing-item";
-            var head = document.createElement("div");
-            head.innerHTML =
-              "<strong>" +
-              escapeHtmlBare(w.title || "Untitled") +
-              "</strong>" +
-              (w.published === false ? " <span class=\"studio-status-pill studio-status-pill--draft\">draft</span>" : " <span class=\"studio-status-pill\">live</span>");
-            var meta = document.createElement("div");
-            meta.className = "studio-writing-meta";
-            meta.textContent =
-              (w.date || "") +
-              " · " +
-              (w.time || "") +
-              " · " +
-              (w.category || "") +
-              (w.audioUrl ? " · audio" : "");
-            var act = document.createElement("div");
-            act.className = "studio-card-actions";
-            var editBtn = document.createElement("button");
-            editBtn.type = "button";
-            editBtn.className = "edit-btn studio-btn studio-btn--ghost studio-btn--sm";
-            editBtn.textContent = "Edit";
-            var delBtn = document.createElement("button");
-            delBtn.type = "button";
-            delBtn.className = "delete-btn studio-btn studio-btn--ghost studio-btn--sm studio-btn--danger";
-            delBtn.textContent = "Delete";
-            editBtn.addEventListener("click", function() {
-              loadWritingIntoComposer(w);
-            });
-            delBtn.addEventListener("click", function() {
-              if (!confirm("Delete this writing? This cannot be undone.")) return;
-              delBtn.disabled = true;
-              fetch("/api/writings", {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id: w.id, password: pw })
-              })
-                .then(function(r) {
-                  return r.json();
-                })
-                .then(function(data) {
-                  if (data.ok) {
-                    if (msgEl) showMsg(msgEl, "Deleted.", true);
-                    if (document.getElementById("writing-edit-id") && String(document.getElementById("writing-edit-id").value) === String(w.id)) {
-                      resetWritingComposer();
-                    }
-                    loadWritingsForManage();
-                  } else {
-                    if (msgEl) showMsg(msgEl, data.error || "Failed", false);
-                    delBtn.disabled = false;
-                  }
-                })
-                .catch(function() {
-                  if (msgEl) showMsg(msgEl, "Request failed.", false);
-                  delBtn.disabled = false;
-                });
-            });
-            act.appendChild(editBtn);
-            act.appendChild(delBtn);
-            div.appendChild(head);
-            div.appendChild(meta);
-            div.appendChild(act);
-            list.appendChild(div);
-          });
-        }
-
-        function loadWritingsForManage() {
-          var list = document.getElementById("writings-list");
-          var msgEl = document.getElementById("writings-msg");
-          if (!list) return;
-          cachedWritingsAdmin = [];
-          list.innerHTML = "";
-          if (msgEl) msgEl.textContent = "";
-          fetch("/api/writings?_t=" + Date.now())
-            .then(function(r) {
-              return r.json();
-            })
-            .then(function(writings) {
-              if (!Array.isArray(writings)) writings = [];
-              cachedWritingsAdmin = writings;
-              renderWritingsListFiltered();
-            })
-            .catch(function() {
-              list.innerHTML = "<p class=\"studio-empty-msg\">Could not load writings.</p>";
-            });
-        }
-
-        function formatProjectDateRange(p) {
-          var s = p.startDate, e = p.endDate;
-          if (p.status === "future") return "pending – pending";
-          if (p.status === "now") {
-            if (!s) return "— – present";
-            var parts = s.split("-");
-            var mon = parts[1] ? ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][parseInt(parts[1],10)-1] : "";
-            return (mon ? mon + " " + (parts[0]||"") : s) + " – present";
-          }
-          if (p.status === "done") {
-            if (!s && !e) return "— – —";
-            function fmt(ym) {
-              if (!ym) return "—";
-              var parts = String(ym).split("-");
-              var mon = parts[1] ? ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][parseInt(parts[1],10)-1] : "";
-              return mon ? mon + " " + (parts[0]||"") : ym;
-            }
-            return fmt(s) + " – " + fmt(e);
-          }
-          return "—";
-        }
-
-        function updatePortfolioStatChips(codeProjects) {
-          var counts = { now: 0, future: 0, done: 0 };
-          codeProjects.forEach(function(p) {
-            var s = String(p.status || "now").toLowerCase();
-            if (counts[s] !== undefined) counts[s]++;
-          });
-          ["now", "future", "done"].forEach(function(key) {
-            var el = document.getElementById("stat-port-" + (key === "now" ? "now" : key === "future" ? "future" : "done"));
-            if (el) el.textContent = counts[key];
-          });
-        }
-
-        var portfolioCardsSearchBound = false;
-        function bindPortfolioSearchOnce() {
-          if (portfolioCardsSearchBound) return;
-          var inp = document.getElementById("portfolio-project-search");
-          if (!inp) return;
-          portfolioCardsSearchBound = true;
+          homeProjectSearchBound = true;
           inp.addEventListener("input", function() {
             clearTimeout(portfolioProjectSearchDebouncedTimer);
-            portfolioProjectSearchDebouncedTimer = setTimeout(renderPortfolioCardsFromCache, 120);
+            portfolioProjectSearchDebouncedTimer = setTimeout(renderHomeProjectCardsFromCache, 120);
           });
         }
 
-        function portfolioComposerReset() {
-          document.getElementById("port-proj-edit-id").value = "";
-          document.getElementById("port-proj-prev-image-url").value = "";
-          document.getElementById("port-proj-prev-video-url").value = "";
-          document.getElementById("port-proj-tags-input").value = "";
-          document.getElementById("port-proj-title").value = "";
-          if (portfolioDescQuill) portfolioDescQuill.root.innerHTML = "";
-          document.getElementById("port-proj-status").value = "now";
-          document.getElementById("port-proj-start-date").value = "";
-          document.getElementById("port-proj-end-date").value = "";
-          ["port-proj-image", "port-proj-video"].forEach(function(id) {
-            var inp = document.getElementById(id);
-            if (inp) inp.value = "";
-          });
-          ["port-proj-image-name", "port-proj-video-name"].forEach(function(id, idx) {
-            var el = document.getElementById(id);
-            if (el) el.textContent = "No file chosen";
-            var pv = idx === 0 ? "port-proj-image-prev" : "port-proj-video-prev";
-            var wrap = document.getElementById(pv);
-            if (wrap) {
-              wrap.setAttribute("hidden", "");
-              wrap.innerHTML = "";
-            }
-          });
-          var hForm = document.getElementById("port-proj-form-heading");
-          var submit = document.getElementById("port-proj-submit");
-          var cancel = document.getElementById("port-proj-cancel-edit");
-          var uns = document.getElementById("port-proj-unsaved");
-          if (hForm) hForm.textContent = "Add portfolio project";
-          if (submit) submit.textContent = "Add portfolio project";
-          if (cancel) cancel.style.display = "none";
-          if (uns) uns.style.display = "none";
+        function getHomeProjectSearchQuery() {
+          var el = document.getElementById("home-project-search");
+          return el ? el.value.trim().toLowerCase() : "";
         }
 
-        function portfolioComposerLoad(p) {
-          initPortfolioDescQuill();
-          portfolioComposerReset();
-          document.getElementById("port-proj-edit-id").value = p.id || "";
-          document.getElementById("port-proj-prev-image-url").value = p.imageUrl || "";
-          document.getElementById("port-proj-prev-video-url").value = p.videoUrl || "";
-          document.getElementById("port-proj-title").value = p.title || "";
-          if (portfolioDescQuill) portfolioDescQuill.root.innerHTML = p.description || "";
-          document.getElementById("port-proj-status").value =
-            ["now", "future", "done"].indexOf(String(p.status || "now").toLowerCase()) !== -1
-              ? String(p.status || "now").toLowerCase()
-              : "now";
-          document.getElementById("port-proj-start-date").value = p.startDate || "";
-          document.getElementById("port-proj-end-date").value = p.endDate || "";
-          var tags =
-            Array.isArray(p.tags) ? p.tags.join(", ") : (typeof p.tags === "string" ? p.tags : "");
-          document.getElementById("port-proj-tags-input").value = tags;
-          ["port-proj-image", "port-proj-video"].forEach(function(id) {
-            var inp = document.getElementById(id);
-            if (inp) inp.value = "";
-          });
-          ["port-proj-image-name", "port-proj-video-name"].forEach(function(id, idx) {
-            var el = document.getElementById(id);
-            var prevId = idx === 0 ? "port-proj-image-prev" : "port-proj-video-prev";
-            var wrap = document.getElementById(prevId);
-            if (!el || !wrap) return;
-            if (idx === 0 && p.imageUrl) {
-              el.textContent = "Current screenshot (choose file to replace)";
-              wrap.innerHTML = "<img alt=\"Screenshot\" />";
-              wrap.querySelector("img").src = p.imageUrl;
-              wrap.removeAttribute("hidden");
-            } else if (idx === 1 && p.videoUrl) {
-              el.textContent = "Current demo (choose file to replace)";
-              wrap.innerHTML = "<video muted controls playsinline></video>";
-              var v = wrap.querySelector("video");
-              v.src = p.videoUrl;
-              wrap.removeAttribute("hidden");
-            } else {
-              el.textContent = "No file chosen";
-              wrap.setAttribute("hidden", "");
-              wrap.innerHTML = "";
-            }
-          });
-          document.getElementById("port-proj-form-heading").textContent = "Edit portfolio project";
-          document.getElementById("port-proj-submit").textContent = "Save changes";
-          document.getElementById("port-proj-cancel-edit").style.display = "inline-flex";
-          document.getElementById("port-proj-unsaved").style.display = "none";
-          window.scrollTo({ top: 0, behavior: "smooth" });
+        function homeProjectMatchesSearch(p, q) {
+          if (!q) return true;
+          var slug = Array.isArray(p.tags) ? p.tags.join(" ") : "";
+          var hay = (p.title || "") + " " + slug + " " + (p.description || "");
+          return hay.toLowerCase().indexOf(q) !== -1;
         }
 
-        function renderPortfolioCardsFromCache() {
-          var opts = {
-            listId: "portfolio-projects-list",
-            msgId: "portfolio-projects-msg",
-            emptyLabel: "No portfolio projects yet.",
-            filterKey: "portfolio"
-          };
-          var list = document.getElementById(opts.listId);
-          var msgEl = document.getElementById(opts.msgId);
+        function patchHomeProjectOrder(ids) {
+          var msgEl = document.getElementById("home-projects-msg");
+          fetch("/api/home-projects", {
+            method: "PATCH",
+            headers: homeProjectsAuthHeaders(true),
+            body: JSON.stringify({ ids: ids })
+          })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(res) {
+              if (!res.ok) {
+                if (msgEl) showMsg(msgEl, res.data.error || "Could not reorder.", false);
+                return;
+              }
+              loadHomeProjectsForManage();
+            })
+            .catch(function() {
+              if (msgEl) showMsg(msgEl, "Network error.", false);
+            });
+        }
+
+        function moveHomeProjectWithinGroup(id, group, dir) {
+          var sp = splitHomeProjects(cachedHomeProjects);
+          var arr = group === "future" ? sp.fut : sp.cur;
+          var i = arr.findIndex(function(p) { return String(p.id) === String(id); });
+          var j = i + dir;
+          if (i < 0 || j < 0 || j >= arr.length) return;
+          var t = arr[i];
+          arr[i] = arr[j];
+          arr[j] = t;
+          var ids = sp.cur.map(function(p) { return p.id; }).concat(sp.fut.map(function(p) { return p.id; }));
+          patchHomeProjectOrder(ids);
+        }
+
+        function renderHomeProjectCardsFromCache() {
+          var list = document.getElementById("home-projects-list");
+          var msgEl = document.getElementById("home-projects-msg");
           if (!list) return;
-          bindPortfolioSearchOnce();
-          updatePortfolioStatChips(cachedPortfolioProjects);
+          bindHomeProjectSearchOnce();
+          updateHomeProjectStatChips(cachedHomeProjects);
           list.innerHTML = "";
           if (msgEl) msgEl.textContent = "";
-          if (!cachedPortfolioProjects.length) {
-            list.innerHTML = "<p class=\"studio-empty-msg\">" + opts.emptyLabel + "</p>";
+          if (!cachedHomeProjects.length) {
+            list.innerHTML = "<p class=\"studio-empty-msg\">No projects yet — add one in the composer.</p>";
             return;
           }
-          var fixed = cachedPortfolioProjects;
-          var byStatus = { now: [], future: [], done: [] };
-          fixed.forEach(function(p) {
-            var s = String(p.status || "now").toLowerCase();
-            if (s !== "now" && s !== "future" && s !== "done") s = "now";
-            byStatus[s].push(p);
-          });
-          var statusFilter = projectStatusFilter[opts.filterKey] || "now";
-          var emptyByStatus = {
-            now: "No projects in Now. Switch to Done to see completed items.",
-            future: "No upcoming projects in Future.",
-            done: "No completed projects yet. Mark done from Now/Future."
-          };
-          var q = getPortfolioProjectSearchQuery();
-          var items = byStatus[statusFilter].filter(function(p) {
-            return portfolioProjectMatchesSearch(p, q);
+          var sp = splitHomeProjects(cachedHomeProjects);
+          var typeFilter = projectStatusFilter.home || "current";
+          var items = (typeFilter === "future" ? sp.fut : sp.cur).filter(function(p) {
+            return homeProjectMatchesSearch(p, getHomeProjectSearchQuery());
           });
           if (!items.length) {
-            list.innerHTML =
-              "<p class=\"studio-empty-msg\">" + (q ? "No matches in this tab." : emptyByStatus[statusFilter]) + "</p>";
+            list.innerHTML = "<p class=\"studio-empty-msg\">" + (getHomeProjectSearchQuery() ? "No matches in this tab." : "No projects in this tab.") + "</p>";
             return;
           }
-
           items.forEach(function(p) {
-            var ps = String(p.status || "now").toLowerCase();
-            if (ps !== "now" && ps !== "future" && ps !== "done") ps = "now";
-
-            function reload() {
-              loadPortfolioProjectsForManage();
-            }
-
+            var group = p.type === "future" ? "future" : "current";
             var card = document.createElement("div");
             card.className = "studio-proj-grid-card";
-            var thumb = document.createElement("div");
-            thumb.className = "thumb";
-            if (p.imageUrl) {
-              var im = document.createElement("img");
-              im.src = p.imageUrl;
-              im.alt = "";
-              im.loading = "lazy";
-              thumb.appendChild(im);
-            } else thumb.textContent = "—";
-
             var body = document.createElement("div");
-
             var t = document.createElement("div");
             t.style.fontWeight = "700";
             t.style.marginBottom = "4px";
             t.textContent = p.title || "Untitled";
             body.appendChild(t);
-
             var d = document.createElement("div");
             d.style.fontSize = "12px";
             d.style.color = "var(--text-muted)";
-            d.textContent = ps + " · " + formatProjectDateRange(p);
+            var meta = (p.visible === false ? "Hidden · " : "") +
+              (group === "current" ? (p.status ? "Status: " + p.status : "Current") : (p.priority ? "Priority: " + p.priority : "Future"));
+            d.textContent = meta;
             body.appendChild(d);
-
-            var tagRow = document.createElement("div");
-            tagRow.className = "studio-proj-tags";
-            (Array.isArray(p.tags) ? p.tags : []).forEach(function(tg) {
-              var sSpan = document.createElement("span");
-              sSpan.textContent = tg;
-              tagRow.appendChild(sSpan);
-            });
-            if (tagRow.childNodes.length) body.appendChild(tagRow);
-
             var act = document.createElement("div");
             act.className = "studio-proj-actions";
-
-            if (ps === "now" || ps === "future") {
-              var checkoffBtn = document.createElement("button");
-              checkoffBtn.type = "button";
-              checkoffBtn.className = "checkoff-btn studio-btn studio-btn--ghost studio-btn--sm";
-              checkoffBtn.textContent = "Mark done";
-              checkoffBtn.addEventListener("click", function() {
-                if (!confirm("Mark this project as done? The list will switch to Done.")) return;
-                checkoffBtn.disabled = true;
-                fetch("/api/projects", {
-                  method: "PATCH",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ id: p.id, password: pw, status: "done" })
-                })
-                  .then(function(r) {
-                    return r.json();
-                  })
-                  .then(function(data) {
-                    if (data.ok) {
-                      projectStatusFilter[opts.filterKey] = "done";
-                      syncProjectSubtabUI(opts.filterKey);
-                      if (msgEl) showMsg(msgEl, "Moved to done.", true);
-                      reload();
-                    } else {
-                      if (msgEl) showMsg(msgEl, data.error || "Failed", false);
-                      checkoffBtn.disabled = false;
-                    }
-                  })
-                  .catch(function() {
-                    if (msgEl) showMsg(msgEl, "Request failed.", false);
-                    checkoffBtn.disabled = false;
-                  });
-              });
-              act.appendChild(checkoffBtn);
+            function mkBtn(label, fn, extra) {
+              var b = document.createElement("button");
+              b.type = "button";
+              b.className = "studio-btn studio-btn--ghost studio-btn--sm" + (extra || "");
+              b.textContent = label;
+              b.addEventListener("click", fn);
+              return b;
             }
-
-            var editBtn = document.createElement("button");
-            editBtn.type = "button";
-            editBtn.className = "edit-btn studio-btn studio-btn--ghost studio-btn--sm";
-            editBtn.textContent = "Edit";
-            editBtn.addEventListener("click", function() {
-              portfolioComposerLoad(p);
-            });
-
-            var delBtn = document.createElement("button");
-            delBtn.type = "button";
-            delBtn.className = "delete-btn studio-btn studio-btn--ghost studio-btn--sm studio-btn--danger";
-            delBtn.textContent = "Delete";
-            delBtn.addEventListener("click", function() {
-              if (!confirm("Delete this project?")) return;
-              delBtn.disabled = true;
-              fetch("/api/projects", {
+            act.appendChild(mkBtn("Edit", function() { homeProjectComposerLoad(p); }));
+            act.appendChild(mkBtn("Up", function() { moveHomeProjectWithinGroup(p.id, group, -1); }));
+            act.appendChild(mkBtn("Down", function() { moveHomeProjectWithinGroup(p.id, group, 1); }));
+            act.appendChild(mkBtn("Delete", function() {
+              if (!confirm("Delete \"" + (p.title || "project") + "\"?")) return;
+              fetch("/api/home-projects?id=" + encodeURIComponent(p.id), {
                 method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id: p.id, password: pw })
+                headers: homeProjectsAuthHeaders(false)
               })
-                .then(function(r) {
-                  return r.json();
-                })
-                .then(function(data) {
-                  if (data.ok) {
-                    if (msgEl) showMsg(msgEl, "Deleted.", true);
-                    if (document.getElementById("port-proj-edit-id") && String(document.getElementById("port-proj-edit-id").value) === String(p.id)) {
-                      portfolioComposerReset();
-                    }
-                    reload();
-                  } else {
-                    if (msgEl) showMsg(msgEl, data.error || "Failed", false);
-                    delBtn.disabled = false;
+                .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+                .then(function(res) {
+                  if (!res.ok) {
+                    if (msgEl) showMsg(msgEl, res.data.error || "Delete failed.", false);
+                    return;
                   }
+                  if (msgEl) showMsg(msgEl, "Deleted.", true);
+                  if (String(document.getElementById("home-proj-edit-id").value) === String(p.id)) homeProjectComposerReset();
+                  loadHomeProjectsForManage();
                 })
                 .catch(function() {
                   if (msgEl) showMsg(msgEl, "Request failed.", false);
-                  delBtn.disabled = false;
                 });
-            });
-
-            act.appendChild(editBtn);
-            act.appendChild(delBtn);
+            }, " studio-btn--danger"));
             body.appendChild(act);
-
-            card.appendChild(thumb);
             card.appendChild(body);
             list.appendChild(card);
           });
         }
 
-        function getPortfolioProjectSearchQuery() {
-          var el = document.getElementById("portfolio-project-search");
-          return el ? el.value.trim().toLowerCase() : "";
-        }
-
-        function portfolioProjectMatchesSearch(p, q) {
-          if (!q) return true;
-          var slug = Array.isArray(p.tags) ? p.tags.join(" ") : "";
-          var hay = (p.title || "") + " " + slug;
-          return hay.toLowerCase().indexOf(q) !== -1;
-        }
-
-        function loadProjectsList(opts) {
-          cachedPortfolioProjects = [];
-          fetch("/api/projects?_t=" + Date.now())
-            .then(function(r) {
-              return r.json();
-            })
-            .then(function(projects) {
-              if (!Array.isArray(projects)) projects = [];
-              cachedPortfolioProjects = projects.filter(function(p) {
-                return p.type === "code";
-              });
-              renderPortfolioCardsFromCache();
+        function loadHomeProjectsForManage() {
+          cachedHomeProjects = [];
+          fetch("/api/home-projects?_t=" + Date.now(), { headers: homeProjectsAuthHeaders(false) })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(res) {
+              if (!res.ok) {
+                var list = document.getElementById("home-projects-list");
+                if (list) list.innerHTML = "<p class=\"studio-empty-msg\">Could not load projects.</p>";
+                return;
+              }
+              cachedHomeProjects = res.data.items || [];
+              renderHomeProjectCardsFromCache();
             })
             .catch(function() {
-              var list = document.getElementById("portfolio-projects-list");
-              if (list)
-                list.innerHTML = "<p class=\"studio-empty-msg\">Could not load projects.</p>";
+              var list = document.getElementById("home-projects-list");
+              if (list) list.innerHTML = "<p class=\"studio-empty-msg\">Could not load projects.</p>";
             });
         }
 
-        function loadPortfolioProjectsForManage() {
-          loadProjectsList({
-            listId: "portfolio-projects-list",
-            msgId: "portfolio-projects-msg",
-            fixedType: "code",
-            filterKey: "portfolio",
-            emptyLabel: "No portfolio projects yet."
+        var homeProjTypeEl = document.getElementById("home-proj-type");
+        if (homeProjTypeEl) {
+          homeProjTypeEl.addEventListener("change", function() {
+            applyHomeProjTypeUi();
+            if (homeProjTypeEl.value === "future") {
+              var st = document.getElementById("home-proj-status");
+              if (st) st.value = "";
+            } else {
+              var pr = document.getElementById("home-proj-priority");
+              if (pr) pr.value = "";
+            }
           });
         }
+        var homeProjAddLink = document.getElementById("home-proj-add-link");
+        if (homeProjAddLink) {
+          homeProjAddLink.addEventListener("click", function() {
+            var editor = document.getElementById("home-proj-links-editor");
+            if (!editor) return;
+            var row = document.createElement("div");
+            row.className = "home-proj-link-row";
+            row.innerHTML =
+              '<input type="text" class="home-proj-link-label" placeholder="Label" />' +
+              '<input type="text" class="home-proj-link-href" placeholder="URL" />' +
+              '<button type="button" class="studio-btn studio-btn--ghost studio-btn--sm home-proj-remove-link" aria-label="Remove link">×</button>';
+            row.querySelector(".home-proj-remove-link").addEventListener("click", function() { row.remove(); });
+            editor.appendChild(row);
+          });
+        }
+        var homeProjForm = document.getElementById("home-project-form");
+        if (homeProjForm) {
+          homeProjForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            var msg = document.getElementById("home-proj-msg");
+            var submitBtn = document.getElementById("home-proj-submit");
+            var editId = document.getElementById("home-proj-edit-id").value.trim();
+            var typeVal = document.getElementById("home-proj-type").value;
+            var tags = document.getElementById("home-proj-tags").value.split(",").map(function(t) { return t.trim(); }).filter(Boolean);
+            var body = {
+              title: document.getElementById("home-proj-title").value.trim(),
+              type: typeVal,
+              description: document.getElementById("home-proj-description").value,
+              tags: tags,
+              links: getHomeProjLinksFromDom(),
+              notes: document.getElementById("home-proj-notes").value,
+              visible: document.getElementById("home-proj-visible").checked
+            };
+            if (typeVal === "current") body.status = document.getElementById("home-proj-status").value.trim();
+            else body.priority = document.getElementById("home-proj-priority").value || undefined;
+            submitBtn.disabled = true;
+            showMsg(msg, "Saving…", true);
+            var req = editId
+              ? fetch("/api/home-projects?id=" + encodeURIComponent(editId), { method: "PUT", headers: homeProjectsAuthHeaders(true), body: JSON.stringify(body) })
+              : fetch("/api/home-projects", { method: "POST", headers: homeProjectsAuthHeaders(true), body: JSON.stringify(body) });
+            req
+              .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+              .then(function(res) {
+                submitBtn.disabled = false;
+                if (!res.ok) {
+                  showMsg(msg, res.data.error || "Save failed.", false);
+                  return;
+                }
+                showMsg(msg, editId ? "Saved." : "Created.", true);
+                if (!editId && res.data.id) document.getElementById("home-proj-edit-id").value = res.data.id;
+                loadHomeProjectsForManage();
+                if (!editId) homeProjectComposerReset();
+              })
+              .catch(function() {
+                submitBtn.disabled = false;
+                showMsg(msg, "Request failed.", false);
+              });
+          });
+        }
+        var homeProjNewBtn = document.getElementById("home-proj-new-btn");
+        if (homeProjNewBtn) homeProjNewBtn.addEventListener("click", homeProjectComposerReset);
+        var homeProjCancelBtn = document.getElementById("home-proj-cancel-edit");
+        if (homeProjCancelBtn) homeProjCancelBtn.addEventListener("click", homeProjectComposerReset);
+        applyHomeProjTypeUi();
 
         var RAW_EXTS = ["arw","sr2","srf","dng","cr2","cr3","nef","orf","raf","rw2","pef","raw"];
 
@@ -4753,77 +4039,7 @@
           });
         }
 
-        document.getElementById("portfolio-project-form").addEventListener("submit", function(e){
-          e.preventDefault();
-          initPortfolioDescQuill();
-          var msg = document.getElementById("port-proj-msg");
-          var submitBtn = document.getElementById("port-proj-submit");
-          var editId = document.getElementById("port-proj-edit-id").value.trim();
-          var prevImg = document.getElementById("port-proj-prev-image-url").value.trim();
-          var prevVid = document.getElementById("port-proj-prev-video-url").value.trim();
-          var status = document.getElementById("port-proj-status").value;
-          var startVal = document.getElementById("port-proj-start-date").value;
-          var endVal = document.getElementById("port-proj-end-date").value;
-          var imageFile = document.getElementById("port-proj-image").files[0] || null;
-          var videoFile = document.getElementById("port-proj-video").files[0] || null;
-          var tagsRaw = document.getElementById("port-proj-tags-input").value.trim();
-
-          submitBtn.disabled = true;
-          showMsg(msg, "Saving…", true);
-
-          var uploads = [];
-          var imageUrlResolved = imageFile ? null : prevImg ? prevImg : null;
-          var videoUrlResolved = videoFile ? null : prevVid ? prevVid : null;
-          if (imageFile) uploads.push(uploadFileToBlob(imageFile).then(function (u) { imageUrlResolved = u; }));
-          if (videoFile) uploads.push(uploadFileToBlob(videoFile).then(function (u) { videoUrlResolved = u; }));
-
-          Promise.all(uploads)
-            .then(function () {
-              var payload = {
-                title: document.getElementById("port-proj-title").value.trim(),
-                description: portfolioDescQuill ? portfolioDescQuill.root.innerHTML : "",
-                status: status,
-                type: "code",
-                password: pw
-              };
-              if (tagsRaw) payload.tags = tagsRaw;
-              if (imageUrlResolved) payload.imageUrl = imageUrlResolved;
-              if (videoUrlResolved) payload.videoUrl = videoUrlResolved;
-              if (status !== "future") payload.startDate = startVal || null;
-              if (status === "done") payload.endDate = endVal || null;
-
-              var method = "POST";
-              if (editId) {
-                method = "PATCH";
-                payload.id = editId;
-              }
-              return fetch("/api/projects", {
-                method: method,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-              });
-            })
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-              submitBtn.disabled = false;
-              if (data.ok) {
-                showMsg(msg, editId ? "Project updated." : "Portfolio project added.", true);
-                loadPortfolioProjectsForManage();
-                portfolioComposerReset();
-              } else {
-                showMsg(msg, data.error || "Failed", false);
-              }
-            })
-            .catch(function () {
-              submitBtn.disabled = false;
-              showMsg(msg, "Request failed.", false);
-            });
-        });
-
-        var portNewBtn = document.getElementById("port-proj-new-btn");
-        if (portNewBtn) portNewBtn.addEventListener("click", portfolioComposerReset);
-        var portCancelBtnEl = document.getElementById("port-proj-cancel-edit");
-        if (portCancelBtnEl) portCancelBtnEl.addEventListener("click", portfolioComposerReset);        function capitalizeWords(str) {
+        function capitalizeWords(str) {
           return String(str).replace(/\b\w/g, function(c) { return c.toUpperCase(); });
         }
         ["photo-location"].forEach(function(id) {

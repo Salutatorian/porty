@@ -1757,3 +1757,39 @@ auth, contact, convert, github-contributions, home-projects, photos, projects, s
 
 ### Summary
 - **Bug:** White sliver top-left on toolbar hover — **`overflow: hidden`** on **`.editor-wrap`** clipped button hover backgrounds and tooltips. **Fix:** **`overflow: visible`** on wrap/toolbar; clip only **`.ql-container`**; tooltips moved **below** icons; hide Quill default **`.ql-tooltip`**.
+
+---
+
+## 2026-06-10 — Remove writing; connect admin Projects to home page
+
+### Summary
+- **Writing removed:** Deleted **`writing/*.html`**; stripped mobile nav + home stack card; **`vercel.json`** redirects **`/writing/*` → /**; command palette no longer indexes **`/api/writings`**; admin **Writing** tab removed.
+- **Projects fix:** Admin **Projects** tab now edits **`/api/home-projects`** (same as public home **Current / Future**), not the old **`/api/projects`** portfolio API. **`/admin/home-projects`** redirects to **`/admin`**.
+
+### Files touched
+- `admin/index.html`, `index.html`, `about.html`, `books.html`, `media.html`, `movies.html`, `photos.html`, `portfolio.html`, `tools.html`, `training.html`, `videos.html`, `vercel.json`, `command-palette.js`, `script.js`, `app-router.js`, `data/home-projects.json`, deleted `writing/*.html`, `SESSION_LOG.md`
+
+### Next steps
+- Commit + push when ready; hard-refresh **`/admin`** → **Projects** should list the same cards as the home page (loads with admin auth, includes hidden items).
+
+---
+
+## 2026-06-10 — Home experience section (afterquery)
+
+### Summary
+- Added **`#experience`** section on homepage (after **projects**): timeline layout with **afterquery** · **Software Engineering** · **April 2026 — Present**; expandable role card with Project S / swe author bench copy.
+
+### Files touched
+- `index.html`, `styles.css`, `SESSION_LOG.md`
+
+---
+
+## 2026-06-10 — Browser verification + bug fixes
+
+### Summary
+- **Bug fixed:** Admin **Settings** pane had a broken `<div>` instead of `<form id="studio-settings-form">` — save button did nothing.
+- **Local dev:** **`server.js`** now mirrors Vercel redirects — **`/writing` → /**, **`/admin/home-projects` → /admin**.
+- **Verified:** `npm run verify` (smoke HTTP + Playwright headless) — home **experience** accordion, **home-projects** cards, admin **Projects** form, no writing tab; 14/14 smoke + all browser checks pass. GitHub contributions console error ignored (missing **`GITHUB_TOKEN`** locally).
+
+### Files touched
+- `admin/index.html`, `server.js`, `scripts/smoke-verify.mjs`, `scripts/browser-verify.mjs`, `package.json`, `SESSION_LOG.md`

@@ -45,7 +45,6 @@
       }
     }
     var links = document.querySelectorAll(".nav-link, .mobile-nav-link");
-    var isWriting = path.indexOf("/writing") >= 0;
     var onTools = path === "/tools" || path === "/tools.html";
     var onAdmin = path.indexOf("/admin") === 0;
     var onProjects = (path === "/" || path === "" || path === "/index.html") && hash === "#work";
@@ -63,7 +62,6 @@
           (path === "/" || path === "" || path === "/index.html") &&
           !onProjects) ||
         (label === "media" && onMediaSection) ||
-        (label === "writing" && isWriting) ||
         (label === "projects" && onProjects) ||
         (label === "training" && path.indexOf("training") >= 0) ||
         (label === "tools" && onTools) ||

@@ -444,12 +444,10 @@
     var mobileNav = document.querySelector(".mobile-nav");
     if (mobileNav) {
       var path = (window.location.pathname || "").toLowerCase();
-      var isWriting = path.indexOf("/writing") >= 0;
       mobileNav.querySelectorAll(".mobile-nav-link").forEach(function (link) {
         var label = (link.textContent || "").trim().toLowerCase();
         var active = (label === "home" && (path === "/" || path === "" || path === "/index.html")) ||
                     (label === "about" && path.endsWith("about")) ||
-                    (label === "writing" && isWriting) ||
                     (label === "books" && path.endsWith("books")) ||
                     (label === "photos" && path.endsWith("photos")) ||
                     (label === "training" && path.endsWith("training"));

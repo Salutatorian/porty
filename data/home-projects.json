@@ -5,7 +5,7 @@
       "type": "current",
       "title": "Portfolio Website",
       "status": "building",
-      "description": "A personal portfolio with writing, tools, training, and media sections.",
+      "description": "A personal portfolio with tools, training, and media sections.",
       "tags": ["React", "UI/UX", "Vercel"],
       "links": [{ "label": "Live", "href": "/" }],
       "notes": "",

@@ -103,32 +103,13 @@
     var root = (document.querySelector("base") && document.querySelector("base").href) ? new URL(document.querySelector("base").href).origin : "";
     if (!root && typeof window !== "undefined" && window.location) root = window.location.origin;
     var done = 0;
-    var max = 3;
+    var max = 2;
     function finish() {
       done++;
       if (done >= max) {
         itemsCache = null;
       }
     }
-    fetch((root || "") + "/api/writings").then(function (r) {
-      if (!r.ok) throw new Error();
-      return r.json();
-    }).then(function (posts) {
-      if (!Array.isArray(posts)) return;
-      posts.forEach(function (p) {
-        var slug = p.slug || String(p.title || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "post";
-        var href = "/writing/post?slug=" + encodeURIComponent(slug);
-        var searchText = [p.title, p.excerpt, p.body].join(" ");
-        searchText = stripHtml(searchText).toLowerCase();
-        dynamicItems.push({
-          label: (p.title || "Untitled") + " — article",
-          href: href,
-          icon: "pen",
-          group: "Articles",
-          keywords: searchText
-        });
-      });
-    }).catch(function () {}).then(finish);
 
     fetch((root || "") + "/api/photos").then(function (r) {
       if (!r.ok) throw new Error();

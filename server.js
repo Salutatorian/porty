@@ -371,6 +371,17 @@ function attachApiResponseHelpers(res) {
 const server = http.createServer(async (req, res) => {
   const urlPath = req.url.split("?")[0];
 
+  if (urlPath === "/writing" || urlPath.startsWith("/writing/")) {
+    res.writeHead(301, { Location: "/" });
+    res.end();
+    return;
+  }
+  if (urlPath === "/admin/home-projects" || urlPath === "/admin/home-projects.html") {
+    res.writeHead(301, { Location: "/admin" });
+    res.end();
+    return;
+  }
+
   if (urlPath.startsWith("/api/")) {
     attachApiResponseHelpers(res);
   }
