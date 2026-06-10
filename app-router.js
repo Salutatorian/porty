@@ -127,19 +127,23 @@
         setActiveNav(path, url.hash);
         runPageScripts(doc, url.href);
         window.dispatchEvent(new CustomEvent("pagechange", { detail: { path: path, url: href } }));
-        if (url.hash === "#work") {
-          var workEl = document.getElementById("work");
-          if (workEl) {
-            requestAnimationFrame(function () {
-              workEl.scrollIntoView({ behavior: "smooth" });
-            });
-          }
-        }
+        if (url.hash) scrollToHash(url.hash);
       })
       .catch(function (err) {
         console.error("Router error:", err);
         window.location.href = href;
       });
+  }
+
+  function scrollToHash(hash) {
+    if (!hash || hash === "#") return;
+    var id = hash.charAt(0) === "#" ? hash.slice(1) : hash;
+    var el = document.getElementById(id);
+    if (el) {
+      requestAnimationFrame(function () {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
   }
 
   function playNavSound() {
@@ -153,7 +157,20 @@
 
   document.addEventListener("click", function (e) {
     var a = e.target.closest("a");
-    if (a && a.getAttribute("href") === "/#work") {
+    if (!a) return;
+    var href = a.getAttribute("href") || "";
+
+    if (href.charAt(0) === "#" && href.length > 1) {
+      e.preventDefault();
+      try {
+        window.history.pushState({}, "", href);
+      } catch (err) {}
+      scrollToHash(href);
+      setActiveNav(getPath(new URL(window.location.href)), href);
+      return;
+    }
+
+    if (href === "/#work") {
       var shell = document.getElementById("portfolio-home");
       if (shell) {
         e.preventDefault();
@@ -179,4 +196,5 @@
   });
 
   setActiveNav(getPath(new URL(window.location.href)), window.location.hash);
+  if (window.location.hash) scrollToHash(window.location.hash);
 })();

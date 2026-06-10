@@ -785,10 +785,6 @@ body.ge-credits-overlay-open {
   overflow: hidden;
 }
 
-.ge-credits-overlay__close {
-  display: none;
-}
-
 /* ---- fixed top-left wordmark (visible above hero) ---- */
 .site-logo {
   position: absolute;
@@ -8950,27 +8946,3 @@ html.dark .stack-card.is-active {
   }
 }
 
-/* Credits on phone: same fan deck as desktop; optional × if backdrop is hard to reach */
-@media (max-width: 900px) {
-  .ge-credits-overlay__close {
-    display: flex;
-    position: fixed;
-    top: max(12px, env(safe-area-inset-top));
-    right: max(12px, env(safe-area-inset-right));
-    z-index: 3;
-    pointer-events: auto;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    border-radius: 999px;
-    background: rgba(0, 0, 0, 0.45);
-    color: #fff;
-    font-size: 28px;
-    line-height: 1;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-  }
-}
