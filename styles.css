@@ -745,7 +745,42 @@ a:hover {
 #ge-credits-overlay.is-open .credits-deck article.friend-card--spotlight {
   z-index: 8;
 }
-/* Narrow screens: credits use vertical stack (see Mobile tightening block at EOF). */
+@media (max-width: 900px) {
+  .ge-credits-overlay .credits-deck--overlay .credits-deck-stack.friends-fab-stack {
+    transform: scale(0.72);
+  }
+}
+@media (max-width: 640px) {
+  .ge-credits-overlay .credits-deck--overlay .credits-deck-stack.friends-fab-stack {
+    transform: scale(0.52);
+  }
+  /* Tighter fan spread so the desktop cover-flow look fits narrow viewports */
+  #ge-credits-overlay.is-open .credits-deck article.friend-card:nth-of-type(1) {
+    --x: -200px;
+    --y: 12px;
+    --rot: -10deg;
+  }
+  #ge-credits-overlay.is-open .credits-deck article.friend-card:nth-of-type(2) {
+    --x: -100px;
+    --y: 0px;
+    --rot: -5deg;
+  }
+  #ge-credits-overlay.is-open .credits-deck article.friend-card:nth-of-type(3) {
+    --x: 0px;
+    --y: -12px;
+    --rot: 0deg;
+  }
+  #ge-credits-overlay.is-open .credits-deck article.friend-card:nth-of-type(4) {
+    --x: 100px;
+    --y: 0px;
+    --rot: 5deg;
+  }
+  #ge-credits-overlay.is-open .credits-deck article.friend-card:nth-of-type(5) {
+    --x: 200px;
+    --y: 12px;
+    --rot: 10deg;
+  }
+}
 body.ge-credits-overlay-open {
   overflow: hidden;
 }
@@ -8915,7 +8950,7 @@ html.dark .stack-card.is-active {
   }
 }
 
-/* Credits + tablet/narrow phones: vertical stack, tappable backdrop, close button */
+/* Credits on phone: same fan deck as desktop; optional × if backdrop is hard to reach */
 @media (max-width: 900px) {
   .ge-credits-overlay__close {
     display: flex;
@@ -8937,62 +8972,5 @@ html.dark .stack-card.is-active {
     line-height: 1;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-  }
-
-  .ge-credits-overlay__panel {
-    min-height: 0;
-    max-height: 100dvh;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    justify-content: flex-start;
-    padding: max(56px, calc(env(safe-area-inset-top) + 44px)) 16px max(24px, env(safe-area-inset-bottom));
-  }
-
-  .ge-credits-overlay .credits-deck--overlay {
-    width: 100%;
-    height: auto;
-    min-height: 0;
-    max-height: none;
-    overflow: visible;
-  }
-
-  .ge-credits-overlay .credits-deck--overlay .credits-deck-stack.friends-fab-stack {
-    transform: none !important;
-    width: 100%;
-    height: auto;
-    perspective: none;
-  }
-
-  .ge-credits-overlay .credits-deck--overlay .friends-fab-stack-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
-    width: 100%;
-    padding: 0 0 8px;
-    box-sizing: border-box;
-  }
-
-  #ge-credits-overlay .credits-deck article.friend-card,
-  #ge-credits-overlay.is-open .credits-deck article.friend-card,
-  #ge-credits-overlay.is-open .credits-deck article.friend-card:nth-of-type(1),
-  #ge-credits-overlay.is-open .credits-deck article.friend-card:nth-of-type(2),
-  #ge-credits-overlay.is-open .credits-deck article.friend-card:nth-of-type(3),
-  #ge-credits-overlay.is-open .credits-deck article.friend-card:nth-of-type(4),
-  #ge-credits-overlay.is-open .credits-deck article.friend-card:nth-of-type(5) {
-    position: relative;
-    left: auto;
-    bottom: auto;
-    margin: 0;
-    --x: 0px;
-    --y: 0px;
-    --rot: 0deg;
-    --scale: 1;
-    width: min(300px, calc(100vw - 40px));
-    height: auto;
-    min-height: 300px;
-    opacity: 1;
-    pointer-events: auto;
-    transform: none !important;
   }
 }

@@ -1719,3 +1719,13 @@ auth, contact, convert, github-contributions, home-projects, photos, projects, s
 
 ### Files touched
 - `styles.css`, `script.js`, `SESSION_LOG.md`
+
+---
+
+## 2026-06-10 — Credits mobile: restore desktop fan (not vertical stack)
+
+### Summary
+- User wanted **same desktop fan card design** on phone, only fix **tap outside to dismiss**. Reverted vertical stack; restored **scale(0.72/0.52)** fan + tighter **--x** offsets on **≤640px**. Kept panel **`pointer-events: none`** + backdrop **`touchend`** dismiss; skip parallax tilt on **`pointer: coarse`**.
+
+### Files touched
+- `styles.css`, `script.js`, `SESSION_LOG.md`

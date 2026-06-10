@@ -123,17 +123,21 @@
         closeCreditsOverlay();
         return;
       }
-      if (e.target.closest("[data-credits-backdrop]")) {
-        closeCreditsOverlay();
-        return;
-      }
-      if (!e.target.closest(".credits-deck")) {
+      if (e.target.closest(".credits-deck")) return;
+      if (e.target.closest("[data-credits-backdrop]") || e.target === root) {
         closeCreditsOverlay();
       }
     }
 
     root.addEventListener("click", handleCreditsDismiss);
-    root.addEventListener("touchend", handleCreditsDismiss, { passive: true });
+    root.querySelector("[data-credits-backdrop]").addEventListener(
+      "touchend",
+      function (e) {
+        e.preventDefault();
+        closeCreditsOverlay();
+      },
+      { passive: false }
+    );
 
     document.body.appendChild(root);
     geCreditsOverlayEl = root;
@@ -302,7 +306,13 @@
       card.insertBefore(motif, card.firstChild);
     });
 
+    var skipTilt = false;
+    try {
+      skipTilt = window.matchMedia("(pointer: coarse)").matches;
+    } catch (e) {}
+
     Array.prototype.forEach.call(mount.querySelectorAll(".friend-card"), function (card) {
+      if (skipTilt) return;
       var raf = 0;
       var lastEv = null;
       function frame() {
