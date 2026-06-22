@@ -5,80 +5,70 @@
       label: "Home",
       href: "/",
       icon: "home",
-      group: "Navigation",
-      subtitle: "Main landing page",
+      group: "pages",
       keywords: "home portfolio main landing page"
     },
     {
       label: "Projects",
       href: "/#work",
       icon: "code",
-      group: "Navigation",
-      subtitle: "Current and future builds",
+      group: "pages",
       keywords: "projects current future work"
     },
     {
       label: "Media",
       href: "/media",
       icon: "image",
-      group: "Navigation",
-      subtitle: "Books, movies, photos & videos",
+      group: "pages",
       keywords: "books movies photos videos media"
     },
     {
       label: "Training",
       href: "/training",
       icon: "chart",
-      group: "Navigation",
-      subtitle: "Stats, triathlon & running",
+      group: "pages",
       keywords: "training stats triathlon running"
     },
     {
       label: "Admin",
       href: "/admin",
       icon: "gear",
-      group: "Navigation",
-      subtitle: "Edit home & dashboards",
+      group: "pages",
       keywords: "admin edit dashboard manage"
     },
     {
       label: "Toggle theme",
       action: "toggleTheme",
       icon: "moon",
-      group: "Actions",
-      subtitle: "Switch light · dark · reading",
+      group: "actions",
       keywords: "theme dark light reading mode appearance"
     },
     {
-      label: "Open GitHub",
+      label: "GitHub",
       href: "https://github.com/Salutatorian",
       icon: "github",
-      group: "Actions",
-      subtitle: "Repos & source",
+      group: "actions",
       keywords: "github code repository salutatorian"
     },
     {
       label: "Book a call",
       href: "/#contact",
       icon: "calendar",
-      group: "Actions",
-      subtitle: "Jump to scheduler on home",
+      group: "actions",
       keywords: "book call schedule calendar meeting contact"
     },
     {
-      label: "Open credits",
+      label: "Credits",
       action: "openCredits",
       icon: "user",
-      group: "Actions",
-      subtitle: "Friends & shout-outs",
+      group: "actions",
       keywords: "credits friends shoutouts team"
     },
     {
       label: "Resume",
       href: "/resume.pdf",
       icon: "file",
-      group: "Links",
-      subtitle: "Download PDF",
+      group: "links",
       keywords: "resume cv download pdf"
     }
   ];
@@ -122,7 +112,7 @@
           label: (p.title || "Untitled") + " — photo",
           href: "/photos",
           icon: "image",
-          group: "Media",
+          group: "media",
           keywords: searchText,
           photoId: p.id,
           photoSrc: p.src
@@ -143,7 +133,7 @@
             label: (v.title || "Untitled") + " — video",
             href: "/videos",
             icon: "film",
-            group: "Media",
+            group: "media",
             keywords: searchText
           });
         });
@@ -200,13 +190,17 @@
       '<div class="command-palette">' +
       '  <div class="command-palette-shell">' +
       '    <div class="command-palette-header">' +
-      '      <label class="command-palette-search">' +
-      '        <span class="command-palette-search-icon">' + icons.search + '</span>' +
-      '        <input type="search" class="command-palette-input" placeholder="Search pages, tools & projects..." autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Search site" />' +
-      '        <span class="command-palette-shortcuts">' + kbdOpen + '<kbd class="command-palette-kbd-pill" aria-hidden="true">Esc</kbd></span>' +
-      '      </label>' +
+      '      <span class="command-palette-search-icon">' + icons.search + '</span>' +
+      '      <input type="search" class="command-palette-input" placeholder="Search…" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Search site" />' +
       '    </div>' +
       '    <div class="command-palette-list" role="listbox" aria-label="Results"></div>' +
+      '    <div class="command-palette-footer font-dot" aria-hidden="true">' +
+      '      <span class="command-palette-footer-hint"><span class="command-palette-kbd-pill">↑</span><span class="command-palette-kbd-pill">↓</span> move</span>' +
+      '      <span class="command-palette-footer-hint"><span class="command-palette-kbd-pill">↵</span> open</span>' +
+      '      <span class="command-palette-footer-hint"><span class="command-palette-kbd-pill">esc</span> close</span>' +
+      '      <span class="command-palette-footer-spacer"></span>' +
+      '      <span class="command-palette-footer-hint command-palette-footer-kbd">' + kbdOpen + '</span>' +
+      '    </div>' +
       '  </div>' +
       '</div>';
     document.body.appendChild(modal);
@@ -320,32 +314,23 @@
         lastGroup = it.group;
         html +=
           '<div class="command-palette-group" role="presentation">' +
-          '  <div class="command-palette-group-rule" aria-hidden="true"></div>' +
           '  <span class="command-palette-group-label font-dot">' + escapeHtml(it.group) + '</span>' +
           "</div>";
       }
       var icon = icons[it.icon] || "";
       var cls = "command-palette-item" + (i === 0 ? " selected" : "");
-      var subBlock = it.subtitle
-        ? '<span class="command-palette-sublabel">' + escapeHtml(it.subtitle) + "</span>"
-        : "";
       html +=
         '<div class="' +
         cls +
         '" data-index="' +
         i +
         '" role="option" tabindex="-1">' +
-        '<span class="command-palette-icon-badge" aria-hidden="true">' +
-        '<span class="command-palette-icon">' +
+        '<span class="command-palette-icon" aria-hidden="true">' +
         icon +
-        "</span></span>" +
-        '<span class="command-palette-text">' +
+        "</span>" +
         '<span class="command-palette-label">' +
         escapeHtml(it.label) +
         "</span>" +
-        subBlock +
-        "</span>" +
-        '<span class="command-palette-enter-hint font-dot" aria-hidden="true">↵</span>' +
         "</div>";
     });
     if (filtered.length === 0) {
@@ -354,8 +339,8 @@
         '  <div class="command-palette-empty-icon" aria-hidden="true">' +
         icons.search +
         "</div>" +
-        '  <p class="command-palette-empty-title">No matches found</p>' +
-        '  <p class="command-palette-empty-hint">Try searching pages, tools, projects, or actions.</p>' +
+        '  <p class="command-palette-empty-title">Nothing matched</p>' +
+        '  <p class="command-palette-empty-hint">Try a page name or action.</p>' +
         "</div>";
     }
     listEl.innerHTML = html;

@@ -1843,3 +1843,17 @@ auth, contact, convert, github-contributions, home-projects, photos, projects, s
 
 ### Files touched
 - `training.html`, `training.js`, `styles.css`, `SESSION_LOG.md`
+
+---
+
+## 2026-06-10 — Command palette refresh
+
+### Summary
+- Modernized search palette to match cockpit/training style: narrower glass panel, flat search bar, single-line items with left accent, footer keyboard hints.
+- Simplified labels (removed AI subtitles; **pages / actions / links** groups; **Credits**, **GitHub**, placeholder **Search…**).
+
+### Files touched
+- `command-palette.js`, `styles.css`, `SESSION_LOG.md`
+
+### Deploy
+- **Pushed** command palette refresh.
