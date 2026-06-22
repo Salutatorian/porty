@@ -123,21 +123,30 @@
     return "Long (90+ min)";
   }
 
-  function computeConsistencyCellSize(cols, chartEl) {
-    var gapPx = 3;
-    var minCell = 4;
-    var maxCell = 14;
-    var width = 0;
-    var chartMain = chartEl && chartEl.querySelector(".consistency-chart-main");
-    var wrap = chartMain && chartMain.querySelector(".consistency-wrap");
-    if (wrap && wrap.clientWidth > 0) width = wrap.clientWidth;
-    else if (chartMain && chartMain.clientWidth > 0) width = chartMain.clientWidth - 28;
-    else if (chartEl && chartEl.clientWidth > 0) width = chartEl.clientWidth - 28;
-    if (width < 120) width = Math.max(120, (window.innerWidth || 800) - 80);
-    var cellPx = Math.floor((width - (cols - 1) * gapPx) / cols);
-    cellPx = Math.max(minCell, Math.min(maxCell, cellPx));
-    if (cellPx <= 6) gapPx = 2;
-    return { cellPx: cellPx, gapPx: gapPx };
+  function applyConsistencyGridLayout(grid, monthsEl, chart, cols) {
+    var gapPx = typeof window !== "undefined" && window.innerWidth < 641 ? 3 : 5;
+    var colTemplate = "repeat(" + cols + ", minmax(0, 1fr))";
+    if (chart) {
+      chart.style.setProperty("--consistency-cols", String(cols));
+      chart.style.setProperty("--consistency-gap", gapPx + "px");
+    }
+    grid.style.gridAutoFlow = "column";
+    grid.style.gridTemplateRows = "repeat(7, minmax(0, 1fr))";
+    grid.style.gridTemplateColumns = colTemplate;
+    grid.style.width = "100%";
+    if (monthsEl) {
+      monthsEl.style.gridTemplateColumns = colTemplate;
+      monthsEl.style.width = "100%";
+    }
+  }
+
+  function syncConsistencyDowHeight(chart, grid) {
+    if (!chart || !grid) return;
+    var cell = grid.querySelector(".consistency-cell:not(.consistency-cell--outside)");
+    if (!cell) cell = grid.querySelector(".consistency-cell");
+    if (!cell) return;
+    var h = cell.getBoundingClientRect().height;
+    if (h > 0) chart.style.setProperty("--consistency-cell", h + "px");
   }
 
   function prefersReducedMotion() {
@@ -543,20 +552,11 @@
       var gridSunday = addDaysIso(startIso, -startDow);
       var totalSlots = startDow + n;
       var cols = Math.ceil(totalSlots / 7);
-      var layout = computeConsistencyCellSize(cols, chart);
-      var cellPx = layout.cellPx;
-      var gapPx = layout.gapPx;
+      applyConsistencyGridLayout(grid, monthsEl, chart, cols);
 
-      if (chart) {
-        chart.style.setProperty("--consistency-cell", cellPx + "px");
-        chart.style.setProperty("--consistency-gap", gapPx + "px");
-      }
-
-      grid.style.gridTemplateColumns = "repeat(" + cols + ", " + cellPx + "px)";
       grid.innerHTML = "";
 
       if (monthsEl) {
-        monthsEl.style.gridTemplateColumns = "repeat(" + cols + ", " + cellPx + "px)";
         monthsEl.innerHTML = "";
         var monthStarts = [];
         var lastM = -1;
@@ -625,6 +625,10 @@
           grid.appendChild(cell);
         }
       }
+
+      requestAnimationFrame(function () {
+        syncConsistencyDowHeight(chart, grid);
+      });
 
       if (chart && focusEl && !grid.dataset.behaviorWired) {
         grid.dataset.behaviorWired = "1";
@@ -820,6 +824,7 @@
     renderHero();
     renderSportCards();
     renderConsistency();
+    observeConsistencyChart();
     renderHighlights();
     destroyCharts();
     renderMainChart();
@@ -933,6 +938,22 @@
   });
 
   var consistencyResizeTimer = 0;
+  var consistencyResizeObserver = null;
+
+  function observeConsistencyChart() {
+    var chart = document.getElementById("consistency-chart");
+    if (!chart || typeof ResizeObserver === "undefined") return;
+    if (consistencyResizeObserver) consistencyResizeObserver.disconnect();
+    consistencyResizeObserver = new ResizeObserver(function () {
+      if (consistencyResizeTimer) clearTimeout(consistencyResizeTimer);
+      consistencyResizeTimer = window.setTimeout(function () {
+        consistencyResizeTimer = 0;
+        renderConsistency();
+      }, 80);
+    });
+    consistencyResizeObserver.observe(chart);
+  }
+
   window.addEventListener("resize", function () {
     if (!document.getElementById("consistency-grid")) return;
     if (consistencyResizeTimer) clearTimeout(consistencyResizeTimer);

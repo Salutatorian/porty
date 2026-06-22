@@ -1857,3 +1857,14 @@ auth, contact, convert, github-contributions, home-projects, photos, projects, s
 
 ### Deploy
 - **Pushed** command palette refresh.
+
+---
+
+## 2026-06-10 — Training heatmap full-width layout
+
+### Summary
+- Heatmap cells now use **fluid `1fr` columns** to fill the card width (removed 14px max cap that left empty margins).
+- **5px gap** between squares; **`grid-auto-flow: column`** for correct week layout; **ResizeObserver** reflows on container resize.
+
+### Files touched
+- `training.js`, `styles.css`, `SESSION_LOG.md`

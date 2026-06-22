@@ -8709,23 +8709,23 @@ html.dark .stack-card.is-active {
   display: flex;
   flex-direction: column;
   gap: 0;
-  --consistency-cell: 12px;
-  --consistency-gap: 3px;
+  --consistency-gap: 5px;
+  width: 100%;
 }
 
 @media (max-width: 640px) {
   .consistency-chart {
-    --consistency-cell: 6px;
-    --consistency-gap: 2px;
+    --consistency-gap: 3px;
   }
 }
 
 .consistency-chart-main {
   display: grid;
-  grid-template-columns: minmax(0, 1.15rem) minmax(0, 1fr);
+  grid-template-columns: 1.35rem minmax(0, 1fr);
   grid-template-rows: auto auto;
-  gap: var(--consistency-gap) 8px;
+  gap: 6px 10px;
   align-items: start;
+  width: 100%;
   max-width: 100%;
   overflow: visible;
   padding-bottom: 4px;
@@ -8744,7 +8744,7 @@ html.dark .stack-card.is-active {
   gap: var(--consistency-gap);
   margin-bottom: 0;
   width: 100%;
-  font-size: 10px;
+  font-size: clamp(10px, 0.75vw, 12px);
   letter-spacing: 0.02em;
   color: var(--text-muted);
 }
@@ -8763,7 +8763,9 @@ html.dark .stack-card.is-active {
   flex-direction: column;
   gap: var(--consistency-gap);
   align-items: center;
-  font-size: 9px;
+  align-self: stretch;
+  justify-content: space-between;
+  font-size: clamp(9px, 0.65vw, 11px);
   letter-spacing: 0.04em;
   color: var(--text-muted);
 }
@@ -8772,9 +8774,34 @@ html.dark .stack-card.is-active {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: var(--consistency-cell);
-  min-height: var(--consistency-cell);
+  flex: 1 1 0;
+  min-height: var(--consistency-cell, 12px);
   width: 100%;
+}
+
+.consistency-grid.consistency-grid--cockpit {
+  width: 100%;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--consistency-cols, 53), minmax(0, 1fr));
+  gap: var(--consistency-gap, 5px);
+}
+
+.consistency-grid--cockpit .consistency-cell {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  min-width: 0;
+  min-height: 0;
+  border-radius: 4px;
+  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+}
+
+.consistency-grid--cockpit .consistency-cell:hover {
+  transform: scale(1.1);
+  filter: brightness(1.12);
+  z-index: 1;
+  position: relative;
 }
 
 .consistency-chart-main .consistency-wrap {
@@ -8783,6 +8810,7 @@ html.dark .stack-card.is-active {
   overflow-x: visible;
   padding-bottom: 0;
   width: 100%;
+  min-width: 0;
 }
 
 .consistency-focus-hint {
@@ -8796,16 +8824,6 @@ html.dark .stack-card.is-active {
 .consistency-focus-hint strong {
   color: var(--text);
   font-weight: 600;
-}
-
-.consistency-grid--cockpit .consistency-cell {
-  border-radius: 3px;
-  transition: transform 0.15s ease, filter 0.15s ease;
-}
-
-.consistency-grid--cockpit .consistency-cell:hover {
-  transform: scale(1.25);
-  filter: brightness(1.15);
 }
 
 .consistency-grid--cockpit .consistency-cell--outside {
