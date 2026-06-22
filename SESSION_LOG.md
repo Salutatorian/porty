@@ -1793,3 +1793,26 @@ auth, contact, convert, github-contributions, home-projects, photos, projects, s
 
 ### Files touched
 - `admin/index.html`, `server.js`, `scripts/smoke-verify.mjs`, `scripts/browser-verify.mjs`, `package.json`, `SESSION_LOG.md`
+
+---
+
+## 2026-06-10 — Writing still visible in admin (deploy)
+
+### Summary
+- User still saw **Writing** on **`/admin`** because prior removal was local-only. Finished stripping dead writing JS from **`admin/index.html`**; smoke verify confirms **writing tab removed**.
+- **Committed + pushed** `f3332be` — **Remove writing from site and admin; wire projects and experience.** (27 files)
+
+### Next steps
+- Wait for Vercel deploy (~1–2 min); hard-refresh **`/admin`** (Ctrl+Shift+R). Sidebar should be: Projects → Photos → Media → Tools → Settings.
+
+---
+
+## 2026-06-10 — Photo lightbox double-click to close
+
+### Summary
+- **Bug:** Closing a photo required two clicks; background shifted from solid black to blurred between clicks.
+- **Cause:** SPA router re-injected **`photo-lightbox.js`** on each visit to **`/photos`**, stacking multiple overlays — first click removed only the top layer.
+- **Fix:** Singleton init in **`photo-lightbox.js`** (guard + **`pagechange`** rebind); skip re-load in **`app-router.js`**; close removes all overlays; one overlay-level click handler for backdrop/outside content.
+
+### Files touched
+- `photo-lightbox.js`, `app-router.js`, `SESSION_LOG.md`

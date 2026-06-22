@@ -75,7 +75,7 @@
 
   function runPageScripts(doc, pageUrl) {
     var scripts = doc.querySelectorAll("body script");
-    var skipSrcs = ["script.js", "page-ripple.js", "command-palette.js", "music-player.js", "app-router.js"];
+    var skipSrcs = ["script.js", "page-ripple.js", "command-palette.js", "music-player.js", "app-router.js", "photo-lightbox.js"];
     scripts.forEach(function (oldScript) {
       var src = oldScript.getAttribute("src");
       if (src) {
