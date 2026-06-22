@@ -96,7 +96,7 @@
       '          <h3 class="friend-card-name">&lt;blank&gt;</h3>' +
       '          <p class="friend-card-blurb">&lt;blank&gt;</p>' +
       '</article>' +
-      '<article class="friend-card friend-card--spotlight" role="listitem" tabindex="0" style="--rest-x:0px; --rest-y:0px; --rest-rot:0deg; --fan-x:380px; --fan-y:-430px; --fan-rot:0deg; --z:5; --stagger:0;">' +
+      '<article class="friend-card friend-card--spotlight friend-card--link" role="listitem" tabindex="0" data-link="https://www.linkedin.com/in/ty-cepeda/" aria-label="Ty Cepeda on LinkedIn" style="--rest-x:0px; --rest-y:0px; --rest-rot:0deg; --fan-x:380px; --fan-y:-430px; --fan-rot:0deg; --z:5; --stagger:0;">' +
       '          <div class="friend-card-avatar friend-card-avatar--photo" aria-hidden="true"><img src="/images/friends/ty.png" alt="" /></div>' +
       '          <p class="friend-card-eyebrow font-dot">day one</p>' +
       '          <h3 class="friend-card-name">Ty Cepeda</h3>' +
@@ -343,6 +343,22 @@
         },
         { passive: true }
       );
+    });
+
+    Array.prototype.forEach.call(mount.querySelectorAll(".friend-card[data-link]"), function (card) {
+      function openCardLink() {
+        var url = card.getAttribute("data-link");
+        if (!url) return;
+        window.open(url, "_blank", "noopener,noreferrer");
+      }
+      card.addEventListener("click", function () {
+        openCardLink();
+      });
+      card.addEventListener("keydown", function (e) {
+        if (e.key !== "Enter" && e.key !== " ") return;
+        e.preventDefault();
+        openCardLink();
+      });
     });
 
     if (!window.__geCreditsDeckThemeListener) {

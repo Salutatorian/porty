@@ -427,6 +427,9 @@ a:hover {
   z-index: 100;
   transition-delay: 0s;
 }
+.friend-card--link {
+  cursor: pointer;
+}
 .friend-card:focus-visible {
   outline: 2px solid rgba(216,184,102,0.72);
   outline-offset: 4px;

@@ -1816,3 +1816,19 @@ auth, contact, convert, github-contributions, home-projects, photos, projects, s
 
 ### Files touched
 - `photo-lightbox.js`, `app-router.js`, `SESSION_LOG.md`
+
+### Deploy
+- **Pushed** `f4e9afa` — Fix photo lightbox requiring two clicks to close.
+
+---
+
+## 2026-06-10 — Ty Cepeda LinkedIn on credits card
+
+### Summary
+- Ty's spotlight card in **Credits** opens **`https://www.linkedin.com/in/ty-cepeda/`** in a new tab on click (Enter/Space on keyboard too). **`data-link`** + **`friend-card--link`** pattern for future friend cards.
+
+### Files touched
+- `script.js`, `styles.css`, `SESSION_LOG.md`
+
+### Deploy
+- **Pushed** (Ty LinkedIn credits card).
