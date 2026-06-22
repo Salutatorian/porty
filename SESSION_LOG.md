@@ -1832,3 +1832,14 @@ auth, contact, convert, github-contributions, home-projects, photos, projects, s
 
 ### Deploy
 - **Pushed** (Ty LinkedIn credits card).
+
+---
+
+## 2026-06-10 — Training page copy + heatmap layout
+
+### Summary
+- Simplified training headings (hero, chart, calendar, highlights) and day labels on the heatmap.
+- **Heatmap:** scales to container width (no horizontal drag); month row uses **Jan, Feb, Mar…** spanning week columns instead of truncated `j-`/`a-` in 12px cells.
+
+### Files touched
+- `training.html`, `training.js`, `styles.css`, `SESSION_LOG.md`

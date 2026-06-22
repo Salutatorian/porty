@@ -39,8 +39,8 @@
     consistencyEnd: "",
   };
   var chartInstances = [];
-  var defaultConsistencyHint =
-    "Rows are Sun–Sat; columns are weeks. Hover or tap a square for that day’s date.";
+  var MONTH_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  var defaultConsistencyHint = "Hover a square to see that day.";
 
   // ---------------- helpers ----------------
 
@@ -116,11 +116,28 @@
   }
 
   function consistencyLevelLabel(level) {
-    if (!level) return "Rest (no logged time)";
-    if (level === 1) return "Training · light (under 20 min)";
-    if (level === 2) return "Training · moderate (20–44 min)";
-    if (level === 3) return "Training · solid (45–89 min)";
-    return "Training · long (90+ min)";
+    if (!level) return "Rest";
+    if (level === 1) return "Light (< 20 min)";
+    if (level === 2) return "Moderate (20–44 min)";
+    if (level === 3) return "Solid (45–89 min)";
+    return "Long (90+ min)";
+  }
+
+  function computeConsistencyCellSize(cols, chartEl) {
+    var gapPx = 3;
+    var minCell = 4;
+    var maxCell = 14;
+    var width = 0;
+    var chartMain = chartEl && chartEl.querySelector(".consistency-chart-main");
+    var wrap = chartMain && chartMain.querySelector(".consistency-wrap");
+    if (wrap && wrap.clientWidth > 0) width = wrap.clientWidth;
+    else if (chartMain && chartMain.clientWidth > 0) width = chartMain.clientWidth - 28;
+    else if (chartEl && chartEl.clientWidth > 0) width = chartEl.clientWidth - 28;
+    if (width < 120) width = Math.max(120, (window.innerWidth || 800) - 80);
+    var cellPx = Math.floor((width - (cols - 1) * gapPx) / cols);
+    cellPx = Math.max(minCell, Math.min(maxCell, cellPx));
+    if (cellPx <= 6) gapPx = 2;
+    return { cellPx: cellPx, gapPx: gapPx };
   }
 
   function prefersReducedMotion() {
@@ -521,18 +538,19 @@
       var n = state.consistencyDays;
       var startIso = state.consistencyStart || inferConsistencyRangeIso().start;
       var todayIso = utcTodayIso();
-      var cellPx = typeof window !== "undefined" && window.innerWidth < 641 ? 6 : 12;
-      var gapPx = cellPx <= 6 ? 2 : 3;
-
-      if (chart) {
-        chart.style.setProperty("--consistency-cell", cellPx + "px");
-        chart.style.setProperty("--consistency-gap", gapPx + "px");
-      }
 
       var startDow = utcWeekdaySun0(startIso);
       var gridSunday = addDaysIso(startIso, -startDow);
       var totalSlots = startDow + n;
       var cols = Math.ceil(totalSlots / 7);
+      var layout = computeConsistencyCellSize(cols, chart);
+      var cellPx = layout.cellPx;
+      var gapPx = layout.gapPx;
+
+      if (chart) {
+        chart.style.setProperty("--consistency-cell", cellPx + "px");
+        chart.style.setProperty("--consistency-gap", gapPx + "px");
+      }
 
       grid.style.gridTemplateColumns = "repeat(" + cols + ", " + cellPx + "px)";
       grid.innerHTML = "";
@@ -540,20 +558,24 @@
       if (monthsEl) {
         monthsEl.style.gridTemplateColumns = "repeat(" + cols + ", " + cellPx + "px)";
         monthsEl.innerHTML = "";
+        var monthStarts = [];
         var lastM = -1;
         for (var mc = 0; mc < cols; mc++) {
           var weekSunIso = addDaysIso(gridSunday, mc * 7);
           var mT = Date.parse(weekSunIso + "T12:00:00.000Z");
           var monthIdx = new Date(mT).getUTCMonth();
-          var lab = document.createElement("span");
-          lab.className = "consistency-month-label";
           if (monthIdx !== lastM) {
-            lab.textContent = new Date(mT).toLocaleDateString("en-US", {
-              month: "short",
-              timeZone: "UTC",
-            });
+            monthStarts.push({ col: mc + 1, monthIdx: monthIdx });
             lastM = monthIdx;
           }
+        }
+        for (var mi = 0; mi < monthStarts.length; mi++) {
+          var startCol = monthStarts[mi].col;
+          var endCol = mi + 1 < monthStarts.length ? monthStarts[mi + 1].col : cols + 1;
+          var lab = document.createElement("span");
+          lab.className = "consistency-month-label";
+          lab.textContent = MONTH_SHORT[monthStarts[mi].monthIdx] || "";
+          lab.style.gridColumn = startCol + " / " + endCol;
           monthsEl.appendChild(lab);
         }
       }
@@ -577,26 +599,17 @@
 
           if (inRange && dateIso === todayIso) cell.className += " consistency-cell--today";
 
-          var labelText = inRange
-            ? consistencyLevelLabel(level || 0)
-            : "Outside chart range";
+          var labelText = inRange ? consistencyLevelLabel(level || 0) : "";
 
           cell.setAttribute("data-date", dateIso);
           cell.setAttribute(
             "title",
-            formatHeatmapDay(dateIso) + " · " + (inRange ? labelText : "outside chart range")
+            formatHeatmapDay(dateIso) + (inRange ? " · " + labelText : "")
           );
 
           (function (iso, inR, trainLbl) {
             function show() {
-              if (!inR) {
-                setFocus(
-                  "<strong>" +
-                    formatHeatmapDay(iso) +
-                    "</strong> · week padding (not part of the training window)"
-                );
-                return;
-              }
+              if (!inR) return;
               var line =
                 "<strong>" +
                 formatHeatmapDay(iso) +
@@ -917,6 +930,16 @@
   window.addEventListener("themechange", function () {
     destroyCharts();
     renderMainChart();
+  });
+
+  var consistencyResizeTimer = 0;
+  window.addEventListener("resize", function () {
+    if (!document.getElementById("consistency-grid")) return;
+    if (consistencyResizeTimer) clearTimeout(consistencyResizeTimer);
+    consistencyResizeTimer = window.setTimeout(function () {
+      consistencyResizeTimer = 0;
+      renderConsistency();
+    }, 120);
   });
 
   if (document.readyState === "loading") {

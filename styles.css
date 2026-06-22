@@ -7424,9 +7424,8 @@ html.dark .media-hub-card:hover {
 }
 
 .consistency-wrap {
-  overflow-x: auto;
+  overflow-x: visible;
   padding-bottom: 4px;
-  -webkit-overflow-scrolling: touch;
 }
 
 @media (max-width: 640px) {
@@ -7440,7 +7439,7 @@ html.dark .media-hub-card:hover {
   grid-template-columns: repeat(53, 12px);
   grid-auto-rows: 12px;
   gap: 3px;
-  min-width: min-content;
+  width: 100%;
 }
 
 .consistency-cell {
@@ -8856,14 +8855,13 @@ html.dark .stack-card.is-active {
 
 .consistency-chart-main {
   display: grid;
-  grid-template-columns: minmax(0, 1.15rem) minmax(0, max-content);
+  grid-template-columns: minmax(0, 1.15rem) minmax(0, 1fr);
   grid-template-rows: auto auto;
   gap: var(--consistency-gap) 8px;
   align-items: start;
   max-width: 100%;
-  overflow-x: auto;
+  overflow: visible;
   padding-bottom: 4px;
-  -webkit-overflow-scrolling: touch;
 }
 
 .consistency-corner {
@@ -8878,10 +8876,9 @@ html.dark .stack-card.is-active {
   display: grid;
   gap: var(--consistency-gap);
   margin-bottom: 0;
-  min-width: min-content;
-  font-size: 9px;
-  letter-spacing: 0.06em;
-  text-transform: lowercase;
+  width: 100%;
+  font-size: 10px;
+  letter-spacing: 0.02em;
   color: var(--text-muted);
 }
 
@@ -8890,8 +8887,6 @@ html.dark .stack-card.is-active {
   line-height: 1.2;
   text-align: left;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .consistency-dow {
@@ -8920,6 +8915,7 @@ html.dark .stack-card.is-active {
   grid-row: 2;
   overflow-x: visible;
   padding-bottom: 0;
+  width: 100%;
 }
 
 .consistency-focus-hint {
