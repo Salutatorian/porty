@@ -346,9 +346,8 @@ export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
 
         <div className="mt-4 border-t border-neutral-200 pt-4 dark:border-neutral-800">
           <p className="text-[11px] leading-relaxed text-neutral-500">
-            Import photos from your old porty gallery (Vercel Blob / R2 index).
-            The public /media page also reads this index automatically when set
-            in Vercel as LEGACY_PHOTOS_INDEX_URL or BLOB_PHOTOS_INDEX_URL.
+            Photos load from Cloudflare R2 when R2_PUBLIC_BASE_URL is set on
+            Vercel. You can also import them into Supabase with the button below.
           </p>
           <Button
             type="button"

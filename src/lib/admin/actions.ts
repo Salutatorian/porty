@@ -11,7 +11,7 @@ import {
 } from "@/lib/admin/upload-limits";
 import {
   getLegacyPhotos,
-  getLegacyPhotosIndexUrl,
+  getLegacyPhotosIndexCandidates,
 } from "@/lib/syndication/legacy-photos";
 
 export type ProjectDraft = {
@@ -326,9 +326,9 @@ export async function uploadMusicFile(formData: FormData) {
 export async function importLegacyPhotos() {
   await requireAdmin();
 
-  if (!getLegacyPhotosIndexUrl()) {
+  if (!getLegacyPhotosIndexCandidates().length) {
     throw new Error(
-      "Set LEGACY_PHOTOS_INDEX_URL or BLOB_PHOTOS_INDEX_URL in Vercel (copy from your old porty project).",
+      "Set R2_PUBLIC_BASE_URL on Vercel (Cloudflare R2), or LEGACY_PHOTOS_INDEX_URL.",
     );
   }
 

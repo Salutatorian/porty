@@ -14,11 +14,38 @@ export type LegacyPhoto = {
   createdAt?: string;
 };
 
+const GALLERY_INDEX_PATH = "gallery/index.json";
+
+export function getLegacyPhotosIndexCandidates() {
+  const candidates: string[] = [];
+
+  const legacy = process.env.LEGACY_PHOTOS_INDEX_URL?.trim();
+  const blob = process.env.BLOB_PHOTOS_INDEX_URL?.trim();
+  if (legacy) candidates.push(legacy);
+  if (blob && blob !== legacy) candidates.push(blob);
+
+  const r2Base = process.env.R2_PUBLIC_BASE_URL?.trim().replace(/\/$/, "");
+  if (r2Base) {
+    const r2Index = `${r2Base}/${GALLERY_INDEX_PATH}`;
+    if (!candidates.includes(r2Index)) {
+      candidates.push(r2Index);
+    }
+  }
+
+  return candidates;
+}
+
 export function getLegacyPhotosIndexUrl() {
-  return (
-    process.env.LEGACY_PHOTOS_INDEX_URL ||
-    process.env.BLOB_PHOTOS_INDEX_URL ||
-    null
+  return getLegacyPhotosIndexCandidates()[0] ?? null;
+}
+
+export function isR2PhotosConfigured() {
+  return Boolean(
+    process.env.R2_PUBLIC_BASE_URL?.trim() &&
+      process.env.R2_ACCESS_KEY_ID &&
+      process.env.R2_SECRET_ACCESS_KEY &&
+      process.env.R2_BUCKET_NAME &&
+      process.env.R2_ENDPOINT,
   );
 }
 
@@ -26,11 +53,11 @@ function resolveLegacyPhotoUrl(src: string) {
   if (/^https?:\/\//i.test(src)) return src;
 
   const base =
-    process.env.R2_PUBLIC_BASE_URL ||
+    process.env.R2_PUBLIC_BASE_URL?.trim().replace(/\/$/, "") ||
     process.env.NEXT_PUBLIC_SITE_URL ||
     "https://thegreaterengine.xyz";
 
-  return new URL(src, base.endsWith("/") ? base : `${base}/`).toString();
+  return new URL(src, `${base}/`).toString();
 }
 
 export function mapLegacyPhotoToItem(
@@ -60,23 +87,42 @@ export function mapLegacyPhotoToItem(
   };
 }
 
-export async function getLegacyPhotos(): Promise<PhotoItem[]> {
-  const indexUrl = getLegacyPhotosIndexUrl();
-  if (!indexUrl) return [];
-
+async function fetchLegacyIndex(indexUrl: string) {
   const response = await fetch(indexUrl, {
     next: { revalidate: 3600 },
     signal: AbortSignal.timeout(10000),
   });
 
   if (!response.ok) {
-    throw new Error(`Legacy photo index failed: ${response.status}`);
+    throw new Error(`Legacy photo index failed (${response.status}) for ${indexUrl}`);
   }
 
   const photos = (await response.json()) as LegacyPhoto[];
-  if (!Array.isArray(photos)) return [];
+  if (!Array.isArray(photos)) {
+    throw new Error(`Legacy photo index at ${indexUrl} is not a JSON array.`);
+  }
 
   return photos
     .map((photo, index) => mapLegacyPhotoToItem(photo, index))
     .filter((photo): photo is PhotoItem => photo !== null);
+}
+
+export async function getLegacyPhotos(): Promise<PhotoItem[]> {
+  const candidates = getLegacyPhotosIndexCandidates();
+  if (candidates.length === 0) return [];
+
+  let lastError: Error | null = null;
+
+  for (const indexUrl of candidates) {
+    try {
+      const photos = await fetchLegacyIndex(indexUrl);
+      if (photos.length > 0) return photos;
+    } catch (error) {
+      lastError =
+        error instanceof Error ? error : new Error("Failed to load legacy photos");
+    }
+  }
+
+  if (lastError) throw lastError;
+  return [];
 }
