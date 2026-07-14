@@ -4,6 +4,7 @@ import * as React from "react";
 import { ImageIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
+  importLegacyPhotos,
   savePhoto,
   uploadPhotoFile,
   type PhotoDraft,
@@ -57,6 +58,7 @@ export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [message, setMessage] = React.useState<string | null>(null);
+  const [importing, setImporting] = React.useState(false);
   const progressRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
 
   const update = (patch: Partial<PhotoDraft>) => {
@@ -341,6 +343,40 @@ export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
             ))}
           </ul>
         )}
+
+        <div className="mt-4 border-t border-neutral-200 pt-4 dark:border-neutral-800">
+          <p className="text-[11px] leading-relaxed text-neutral-500">
+            Import photos from your old porty gallery (Vercel Blob / R2 index).
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-3 w-full"
+            disabled={importing || loading}
+            onClick={() => {
+              setImporting(true);
+              setMessage(null);
+              void importLegacyPhotos()
+                .then((result) => {
+                  setMessage(`Imported ${result.imported} photos from legacy storage.`);
+                  router.refresh();
+                })
+                .catch((error) => {
+                  setMessage(
+                    error instanceof Error
+                      ? error.message
+                      : "Legacy import failed.",
+                  );
+                })
+                .finally(() => {
+                  setImporting(false);
+                });
+            }}
+          >
+            {importing ? "Importing…" : "Import legacy photos"}
+          </Button>
+        </div>
       </aside>
     </div>
   );

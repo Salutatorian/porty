@@ -319,6 +319,78 @@ export async function uploadMusicFile(formData: FormData) {
   return publicUrl;
 }
 
+type LegacyPhoto = {
+  id: string;
+  src: string;
+  alt?: string;
+  title?: string;
+  meta?: string;
+  caption?: string;
+  category?: string;
+  date?: string;
+  time?: string;
+  createdAt?: string;
+};
+
+function legacyPhotoToDraft(photo: LegacyPhoto): PhotoDraft {
+  const title = photo.title?.trim() || photo.alt?.trim() || "Untitled";
+  const created = photo.createdAt ? new Date(photo.createdAt) : null;
+  const year = photo.date
+    ? String(new Date(photo.date).getFullYear())
+    : created && !Number.isNaN(created.getTime())
+      ? String(created.getFullYear())
+      : String(new Date().getFullYear());
+
+  return {
+    id: `${slugify(title)}-${photo.id}`,
+    title,
+    location: "",
+    year,
+    imageUrl: photo.src,
+    dateTaken: photo.date || photo.meta || undefined,
+    locationDetail: photo.meta || undefined,
+    description: photo.caption || undefined,
+    collection: photo.category || undefined,
+    published: true,
+  };
+}
+
+export async function importLegacyPhotos() {
+  await requireAdmin();
+
+  const indexUrl = process.env.LEGACY_PHOTOS_INDEX_URL;
+  if (!indexUrl) {
+    throw new Error(
+      "Set LEGACY_PHOTOS_INDEX_URL in Vercel (your old BLOB_PHOTOS_INDEX_URL from the porty project).",
+    );
+  }
+
+  const response = await fetch(indexUrl, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`Could not load legacy photo index (${response.status}).`);
+  }
+
+  const photos = (await response.json()) as LegacyPhoto[];
+  if (!Array.isArray(photos) || photos.length === 0) {
+    throw new Error("Legacy photo index is empty.");
+  }
+
+  let imported = 0;
+  for (const photo of photos) {
+    if (!photo.src) continue;
+    await savePhoto(legacyPhotoToDraft(photo));
+    imported += 1;
+  }
+
+  if (imported === 0) {
+    throw new Error("No photos with image URLs were found in the legacy index.");
+  }
+
+  revalidatePath("/media");
+  revalidatePath("/admin/photos");
+  return { imported };
+}
+
 export async function signOutAdmin() {
   if (ADMIN_AUTH_BYPASS) {
     redirect("/admin");
