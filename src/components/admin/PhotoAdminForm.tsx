@@ -346,8 +346,8 @@ export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
 
         <div className="mt-4 border-t border-neutral-200 pt-4 dark:border-neutral-800">
           <p className="text-[11px] leading-relaxed text-neutral-500">
-            Photos load from Cloudflare R2 when R2_PUBLIC_BASE_URL is set on
-            Vercel. You can also import them into Supabase with the button below.
+            Includes R2 legacy photos and Supabase uploads — same set as the
+            public gallery. Import copies legacy photos into Supabase for editing.
           </p>
           <Button
             type="button"

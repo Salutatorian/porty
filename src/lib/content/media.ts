@@ -141,15 +141,29 @@ export async function getPublishedMovies(): Promise<MovieItem[]> {
 }
 
 export async function getAllPhotosForAdmin() {
-  const { getAdminDb } = await import("@/lib/admin/auth");
-  const supabase = await getAdminDb();
-  const { data, error } = await supabase
-    .from("portfolio_photos")
-    .select("*")
-    .order("sort_order", { ascending: true });
+  let legacyPhotos: PhotoItem[] = [];
+  try {
+    legacyPhotos = await getLegacyPhotos();
+  } catch {
+    // Legacy gallery unavailable — continue with Supabase.
+  }
 
-  if (error) throw error;
-  return (data ?? []).map((row) => mapPhoto(row as PhotoRow));
+  try {
+    const { getAdminDb } = await import("@/lib/admin/auth");
+    const supabase = await getAdminDb();
+    const { data, error } = await supabase
+      .from("portfolio_photos")
+      .select("*")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    const supabasePhotos = (data ?? []).map((row) => mapPhoto(row as PhotoRow));
+    return mergePhotos(legacyPhotos, supabasePhotos);
+  } catch (error) {
+    if (legacyPhotos.length > 0) return legacyPhotos;
+    throw error;
+  }
 }
 
 export async function getAllBooksForAdmin() {
