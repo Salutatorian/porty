@@ -189,6 +189,20 @@ export function isStravaConfigured() {
   );
 }
 
+export function getStravaErrorMessage(error: unknown) {
+  const message = error instanceof Error ? error.message : "";
+
+  if (message.includes('"code":"Inactive"')) {
+    return "Strava marked your API app as inactive. Since mid-2026, Standard API access requires an active Strava subscription on the account that owns the app. Subscribe at strava.com, confirm the app is active at strava.com/settings/api, re-authorize to get a new refresh token, then update STRAVA_REFRESH_TOKEN in Vercel and redeploy.";
+  }
+
+  if (message.includes("token refresh failed")) {
+    return "Strava rejected the refresh token. Re-authorize your app at strava.com/settings/api and replace STRAVA_REFRESH_TOKEN in Vercel.";
+  }
+
+  return message || "Failed to load Strava training data.";
+}
+
 export async function getTrainingDashboard(range = "all") {
   const clientId = process.env.STRAVA_CLIENT_ID;
   const clientSecret = process.env.STRAVA_CLIENT_SECRET;

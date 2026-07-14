@@ -1,6 +1,7 @@
 import { BackButton } from "@/components/BackButton";
 import { TrainingLoadChart } from "@/components/training/TrainingLoadChart";
 import {
+  getStravaErrorMessage,
   getTrainingDashboard,
   isStravaConfigured,
 } from "@/lib/strava/training";
@@ -15,10 +16,7 @@ export default async function TrainingPage() {
       dashboard = await getTrainingDashboard("all");
       connected = true;
     } catch (caught) {
-      error =
-        caught instanceof Error
-          ? caught.message
-          : "Failed to load Strava training data.";
+      error = getStravaErrorMessage(caught);
     }
   }
 
