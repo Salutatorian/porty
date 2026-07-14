@@ -59,10 +59,17 @@ const dashboardCache = new Map<
 >();
 
 export function isWhoopConfigured() {
-  return Boolean(
+  const hasClient = Boolean(
     process.env.WHOOP_CLIENT_ID?.trim() &&
-      process.env.WHOOP_CLIENT_SECRET?.trim() &&
-      process.env.WHOOP_REFRESH_TOKEN?.trim(),
+      process.env.WHOOP_CLIENT_SECRET?.trim(),
+  );
+  if (!hasClient) return false;
+
+  // Token in env, or auto-sync via Supabase whoop_token table (Vercel only needs service role).
+  return Boolean(
+    process.env.WHOOP_REFRESH_TOKEN?.trim() ||
+      (process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() &&
+        process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()),
   );
 }
 
