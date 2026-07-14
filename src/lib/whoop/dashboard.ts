@@ -3,6 +3,7 @@ import {
   fetchRecoveryForCycle,
   refreshWhoopAccessToken,
 } from "@/lib/whoop/client";
+import { loadWhoopRefreshToken } from "@/lib/whoop/token-store";
 import type {
   WhoopCycleSummary,
   WhoopDashboard,
@@ -65,12 +66,42 @@ export function isWhoopConfigured() {
   );
   if (!hasClient) return false;
 
-  // Token in env, or auto-sync via Supabase whoop_token table (Vercel only needs service role).
   return Boolean(
     process.env.WHOOP_REFRESH_TOKEN?.trim() ||
       (process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() &&
         process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()),
   );
+}
+
+function whoopSetupHint() {
+  const missing: string[] = [];
+  if (!process.env.WHOOP_CLIENT_ID?.trim()) missing.push("WHOOP_CLIENT_ID");
+  if (!process.env.WHOOP_CLIENT_SECRET?.trim()) missing.push("WHOOP_CLIENT_SECRET");
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()) {
+    missing.push("NEXT_PUBLIC_SUPABASE_URL");
+  }
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+    missing.push("SUPABASE_SERVICE_ROLE_KEY");
+  }
+  if (missing.length > 0) {
+    return `Missing on Vercel: ${missing.join(", ")}. Add them in Project Settings → Environment Variables, then redeploy.`;
+  }
+  return "No WHOOP token in Supabase yet. Run npm run whoop:auth locally, load /training once, then redeploy Vercel.";
+}
+
+async function ensureWhoopReady() {
+  const clientId = process.env.WHOOP_CLIENT_ID?.trim() || "";
+  const clientSecret = process.env.WHOOP_CLIENT_SECRET?.trim() || "";
+  if (!clientId || !clientSecret) {
+    return { ok: false as const, message: whoopSetupHint() };
+  }
+
+  const token = await loadWhoopRefreshToken();
+  if (!token) {
+    return { ok: false as const, message: whoopSetupHint() };
+  }
+
+  return { ok: true as const, clientId, clientSecret };
 }
 
 function offsetStringToMinutes(offsetStr: string) {
@@ -269,14 +300,11 @@ export async function getWhoopDashboard(
     return cached.data;
   }
 
-  const clientId = process.env.WHOOP_CLIENT_ID?.trim() || "";
-  const clientSecret = process.env.WHOOP_CLIENT_SECRET?.trim() || "";
-
-  if (!isWhoopConfigured()) {
+  const setup = await ensureWhoopReady();
+  if (!setup.ok) {
     return {
       enabled: false,
-      message:
-        "Add WHOOP_CLIENT_ID, WHOOP_CLIENT_SECRET, and WHOOP_REFRESH_TOKEN (run npm run whoop:auth).",
+      message: setup.message,
       latest: null,
       series: [],
       sleep: null,
@@ -285,7 +313,10 @@ export async function getWhoopDashboard(
   }
 
   const rangeDays = RANGE_DAYS[range] || 365;
-  const accessToken = await refreshWhoopAccessToken(clientId, clientSecret);
+  const accessToken = await refreshWhoopAccessToken(
+    setup.clientId,
+    setup.clientSecret,
+  );
   const end = new Date();
   const start = new Date(end.getTime() - rangeDays * 86400000);
   const startIso = start.toISOString();

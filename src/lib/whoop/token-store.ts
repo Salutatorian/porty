@@ -53,6 +53,10 @@ export async function loadWhoopRefreshToken(): Promise<string> {
         }
       }
 
+      if (error) {
+        console.warn("[whoop] Supabase whoop_token read failed:", error.message);
+      }
+
       // Bootstrap: copy env token into Supabase on first run.
       if (fromEnv) {
         await supabase.from("whoop_token").upsert({
