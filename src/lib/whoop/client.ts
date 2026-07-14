@@ -1,6 +1,9 @@
-import fs from "node:fs";
 import https from "node:https";
-import path from "node:path";
+import { normalizeWhoopToken } from "@/lib/whoop/normalize";
+import {
+  loadWhoopRefreshToken,
+  saveWhoopRefreshToken,
+} from "@/lib/whoop/token-store";
 
 const WHOOP_TOKEN_URL = "https://api.prod.whoop.com/oauth/oauth2/token";
 const WHOOP_API_BASE = "https://api.prod.whoop.com/developer";
@@ -23,37 +26,7 @@ let whoopRefreshTokenCache = "";
 let whoopRefreshInFlight: Promise<string> | null = null;
 let whoopAccessTokenCache = { token: "", expiresAt: 0 };
 
-/** WHOOP rotates refresh_token on every refresh — persist locally so dev restarts don't break. */
-function persistRefreshTokenToEnvLocal(newToken: string, previousToken: string) {
-  if (process.env.NODE_ENV === "production") return;
-  const envPath = path.join(process.cwd(), ".env.local");
-  if (!fs.existsSync(envPath)) return;
-
-  try {
-    const txt = fs.readFileSync(envPath, "utf8");
-    const line = `WHOOP_REFRESH_TOKEN=${newToken}`;
-    const updated = txt.match(/^WHOOP_REFRESH_TOKEN=/m)
-      ? txt.replace(/^WHOOP_REFRESH_TOKEN=.*$/m, line)
-      : `${txt.replace(/\s*$/, "\n")}${line}\n`;
-    fs.writeFileSync(envPath, updated, "utf8");
-    process.env.WHOOP_REFRESH_TOKEN = newToken;
-    if (newToken !== previousToken) {
-      console.warn(
-        "[whoop] New refresh_token saved to .env.local — copy to Vercel when deploying.",
-      );
-    }
-  } catch {
-    // Non-fatal in dev.
-  }
-}
-
-export function normalizeWhoopToken(value: string | undefined) {
-  let s = String(value || "").trim();
-  if (!s) return "";
-  if (/^["'].*["']$/.test(s)) s = s.slice(1, -1).trim();
-  if (s.toLowerCase().startsWith("bearer ")) s = s.slice(7).trim();
-  return s.replace(/[\r\n]+/g, "").trim();
-}
+export { normalizeWhoopToken } from "@/lib/whoop/normalize";
 
 function resolveWhoopRedirectForRefresh() {
   let primary = normalizeWhoopToken(process.env.WHOOP_REFRESH_REDIRECT_URI);
@@ -215,8 +188,11 @@ export async function refreshWhoopAccessToken(clientId: string, clientSecret: st
   if (whoopRefreshInFlight) return whoopRefreshInFlight;
 
   whoopRefreshInFlight = (async () => {
+    const fromStored = await loadWhoopRefreshToken();
     const fromEnv = normalizeWhoopToken(process.env.WHOOP_REFRESH_TOKEN);
-    const refreshToken = normalizeWhoopToken(whoopRefreshTokenCache || fromEnv);
+    const refreshToken = normalizeWhoopToken(
+      whoopRefreshTokenCache || fromStored || fromEnv,
+    );
     if (!refreshToken) {
       throw new Error("WHOOP_REFRESH_TOKEN is empty after normalization.");
     }
@@ -253,7 +229,7 @@ export async function refreshWhoopAccessToken(clientId: string, clientSecret: st
         if (data.refresh_token) {
           const rotated = normalizeWhoopToken(data.refresh_token);
           whoopRefreshTokenCache = rotated;
-          persistRefreshTokenToEnvLocal(rotated, fromEnv);
+          await saveWhoopRefreshToken(rotated, refreshToken);
         }
         return data.access_token;
       }
