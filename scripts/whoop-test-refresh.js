@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Smoke-test WHOOP refresh with scope=offline, no redirect.
- * Loads `.env.local`. Does not print secrets.
+ * Smoke-test WHOOP refresh using the same shape as production (redirect_uri + scope).
+ * On success, writes the rotated refresh_token back into .env.local.
  *
  *   npm run whoop:test-refresh
  */
@@ -10,14 +10,14 @@ const path = require("path");
 const https = require("https");
 
 const TOKEN_URL = "https://api.prod.whoop.com/oauth/oauth2/token";
+const ENV_PATH = path.join(__dirname, "..", ".env.local");
 
 function loadEnvLocal() {
-  const envPath = path.join(__dirname, "..", ".env.local");
-  if (!fs.existsSync(envPath)) {
+  if (!fs.existsSync(ENV_PATH)) {
     console.error("Missing .env.local");
     process.exit(1);
   }
-  const txt = fs.readFileSync(envPath, "utf8").replace(/^\uFEFF/, "");
+  const txt = fs.readFileSync(ENV_PATH, "utf8").replace(/^\uFEFF/, "");
   txt.split(/\r?\n/).forEach((line) => {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith("#")) return;
@@ -37,54 +37,113 @@ function normalizeWhoopToken(value) {
   return s.replace(/[\r\n]+/g, "").trim();
 }
 
-function main() {
+function postRefresh(fields) {
+  const encoded = new URLSearchParams(fields).toString();
+  const parsed = new URL(TOKEN_URL);
+  return new Promise((resolve, reject) => {
+    const req = https.request(
+      {
+        hostname: parsed.hostname,
+        port: parsed.port ? Number(parsed.port) : 443,
+        path: parsed.pathname,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Length": Buffer.byteLength(encoded, "utf8"),
+        },
+      },
+      (res) => {
+        const chunks = [];
+        res.on("data", (c) => chunks.push(c));
+        res.on("end", () => {
+          resolve({
+            status: res.statusCode || 0,
+            body: Buffer.concat(chunks).toString("utf8"),
+          });
+        });
+      },
+    );
+    req.on("error", reject);
+    req.setTimeout(15000, () => req.destroy(new Error("timeout")));
+    req.write(encoded, "utf8");
+    req.end();
+  });
+}
+
+function saveRotatedRefreshToken(newToken) {
+  const txt = fs.readFileSync(ENV_PATH, "utf8");
+  const line = `WHOOP_REFRESH_TOKEN=${newToken}`;
+  const updated = txt.match(/^WHOOP_REFRESH_TOKEN=/m)
+    ? txt.replace(/^WHOOP_REFRESH_TOKEN=.*$/m, line)
+    : `${txt.replace(/\s*$/, "\n")}${line}\n`;
+  fs.writeFileSync(ENV_PATH, updated, "utf8");
+  console.log("\nUpdated WHOOP_REFRESH_TOKEN in .env.local (WHOOP rotates this on every refresh).");
+}
+
+async function main() {
   loadEnvLocal();
   const refreshToken = normalizeWhoopToken(process.env.WHOOP_REFRESH_TOKEN);
   const clientId = (process.env.WHOOP_CLIENT_ID || "").trim();
   const clientSecret = (process.env.WHOOP_CLIENT_SECRET || "").trim();
+  const redirectUri = normalizeWhoopToken(
+    process.env.WHOOP_REFRESH_REDIRECT_URI || process.env.WHOOP_REDIRECT_URI,
+  );
+
   if (!refreshToken || !clientId || !clientSecret) {
     console.error("Need WHOOP_REFRESH_TOKEN, WHOOP_CLIENT_ID, WHOOP_CLIENT_SECRET in .env.local");
     process.exit(1);
   }
 
-  const encoded = new URLSearchParams({
-    grant_type: "refresh_token",
-    refresh_token: refreshToken,
-    client_id: clientId,
-    client_secret: clientSecret,
-    scope: "offline",
-  }).toString();
-  const parsed = new URL(TOKEN_URL);
+  const attempts = [
+    { label: "offline + redirect_uri", scope: "offline", redirect_uri: redirectUri },
+    { label: "offline body only", scope: "offline", redirect_uri: "" },
+    { label: "minimal", scope: "", redirect_uri: "", minimal: true },
+  ];
 
-  const req = https.request(
-    {
-      hostname: parsed.hostname,
-      port: parsed.port ? Number(parsed.port) : 443,
-      path: parsed.pathname,
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Content-Length": Buffer.byteLength(encoded, "utf8"),
-      },
-    },
-    (res) => {
-      const chunks = [];
-      res.on("data", (c) => chunks.push(c));
-      res.on("end", () => {
-        const text = Buffer.concat(chunks).toString("utf8");
-        console.log("HTTP", res.statusCode);
-        console.log(text.slice(0, 400));
-        process.exit(res.statusCode >= 200 && res.statusCode < 300 ? 0 : 1);
-      });
+  let lastStatus = 0;
+  let lastBody = "";
+
+  for (const attempt of attempts) {
+    if (attempt.redirect_uri === "" && attempt.label.includes("redirect") && !redirectUri) {
+      continue;
     }
-  );
-  req.on("error", (e) => {
-    console.error(e);
-    process.exit(1);
-  });
-  req.setTimeout(15000, () => req.destroy(new Error("timeout")));
-  req.write(encoded, "utf8");
-  req.end();
+    const fields = {
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+      client_id: clientId,
+      client_secret: clientSecret,
+    };
+    if (!attempt.minimal) {
+      if (attempt.scope) fields.scope = attempt.scope;
+      if (attempt.redirect_uri) fields.redirect_uri = attempt.redirect_uri;
+    }
+
+    const res = await postRefresh(fields);
+    lastStatus = res.status;
+    lastBody = res.body;
+    console.log(`[${attempt.label}] HTTP ${res.status}`);
+
+    if (res.status >= 200 && res.status < 300) {
+      const data = JSON.parse(res.body);
+      console.log("Refresh OK.");
+      if (data.refresh_token && data.refresh_token !== refreshToken) {
+        saveRotatedRefreshToken(data.refresh_token);
+      }
+      process.exit(0);
+    }
+  }
+
+  console.log("HTTP", lastStatus);
+  console.log(lastBody.slice(0, 500));
+  if (lastStatus === 400 || lastStatus === 401) {
+    console.error(
+      "\nRefresh token is dead or mismatched. Run `npm run whoop:auth`, approve in browser, exchange the code, then update .env.local and Vercel immediately.",
+    );
+  }
+  process.exit(1);
 }
 
-main();
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
