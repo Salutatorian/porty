@@ -9,7 +9,7 @@ import Underline from "@tiptap/extension-underline";
 import StarterKit from "@tiptap/starter-kit";
 import * as React from "react";
 import { EditorToolbar } from "@/components/admin/EditorToolbar";
-import { uploadPhotoFile } from "@/lib/admin/actions";
+import { uploadPortfolioFile } from "@/lib/admin/portfolio-upload";
 
 type BlogEditorProps = {
   initialHtml?: string;
@@ -60,11 +60,8 @@ export function BlogEditor({ initialHtml = "", onChange }: BlogEditorProps) {
     event.target.value = "";
     if (!file || !editor) return;
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const url = await uploadPhotoFile(formData);
+      const url = await uploadPortfolioFile(file, "photos");
       editor.chain().focus().setImage({ src: url, alt: file.name }).run();
     } catch {
       const url = window.prompt("Image upload failed. Enter an image URL");

@@ -6,8 +6,8 @@ import { AdminUploadEmpty } from "@/components/admin/AdminUploadEmpty";
 import { useAdminUploads } from "@/components/admin/AdminUploadProvider";
 import {
   saveMusicTrack,
-  uploadMusicFile,
 } from "@/lib/admin/actions";
+import { uploadPortfolioFile } from "@/lib/admin/portfolio-upload";
 import {
   adminUploadLimitError,
   ADMIN_MAX_UPLOAD_LABEL,
@@ -63,9 +63,7 @@ export function MusicAdminUpload() {
     }, 220);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const audioUrl = await uploadMusicFile(formData);
+      const audioUrl = await uploadPortfolioFile(file, "music");
 
       clearProgressTimer();
       updateUpload(uploadId, { state: "processing", progress: 100 });

@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 import {
   importLegacyPhotos,
   savePhoto,
-  uploadPhotoFile,
   type PhotoDraft,
 } from "@/lib/admin/actions";
+import { uploadPortfolioFile } from "@/lib/admin/portfolio-upload";
 import { slugify } from "@/lib/slugify";
 import {
   adminUploadLimitError,
@@ -116,9 +116,7 @@ export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
     }, 220);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const url = await uploadPhotoFile(formData);
+      const url = await uploadPortfolioFile(file, "photos");
 
       clearProgressTimer();
       updateUpload(uploadId, { state: "processing", progress: 100 });

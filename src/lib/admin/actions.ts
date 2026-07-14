@@ -124,25 +124,28 @@ export async function deletePhoto(id: string) {
   revalidatePath("/admin/photos");
 }
 
-export async function uploadPhotoFile(formData: FormData) {
+export type PortfolioUploadFolder = "photos" | "music";
+
+export async function preparePortfolioFileUpload(input: {
+  fileName: string;
+  contentType: string;
+  fileSize: number;
+  folder: PortfolioUploadFolder;
+}) {
   await requireAdmin();
   const supabase = await getAdminDb();
-  const file = formData.get("file");
 
-  if (!(file instanceof File)) {
-    throw new Error("No file provided");
+  if (!isWithinAdminUploadLimit(input.fileSize)) {
+    throw new Error(adminUploadLimitError(input.fileName));
   }
 
-  if (!isWithinAdminUploadLimit(file.size)) {
-    throw new Error(adminUploadLimitError(file.name));
-  }
+  const defaultExt = input.folder === "music" ? "mp3" : "jpg";
+  const ext = input.fileName.split(".").pop() ?? defaultExt;
+  const path = `${input.folder}/${Date.now()}-${slugify(input.fileName.replace(/\.[^.]+$/, ""))}.${ext}`;
 
-  const ext = file.name.split(".").pop() ?? "jpg";
-  const path = `photos/${Date.now()}-${slugify(file.name.replace(/\.[^.]+$/, ""))}.${ext}`;
-
-  const { error } = await supabase.storage
+  const { data, error } = await supabase.storage
     .from("portfolio")
-    .upload(path, file, { upsert: false, contentType: file.type });
+    .createSignedUploadUrl(path);
 
   if (error) throw new Error(error.message);
 
@@ -150,7 +153,11 @@ export async function uploadPhotoFile(formData: FormData) {
     data: { publicUrl },
   } = supabase.storage.from("portfolio").getPublicUrl(path);
 
-  return publicUrl;
+  return {
+    signedUrl: data.signedUrl,
+    path,
+    publicUrl,
+  };
 }
 
 export type BookDraft = {
@@ -294,34 +301,6 @@ export async function deleteMusicTrack(id: string) {
   revalidatePath("/admin/music");
 }
 
-export async function uploadMusicFile(formData: FormData) {
-  await requireAdmin();
-  const supabase = await getAdminDb();
-  const file = formData.get("file");
-
-  if (!(file instanceof File)) {
-    throw new Error("No file provided");
-  }
-
-  if (!isWithinAdminUploadLimit(file.size)) {
-    throw new Error(adminUploadLimitError(file.name));
-  }
-
-  const ext = file.name.split(".").pop() ?? "mp3";
-  const path = `music/${Date.now()}-${slugify(file.name.replace(/\.[^.]+$/, ""))}.${ext}`;
-
-  const { error } = await supabase.storage
-    .from("portfolio")
-    .upload(path, file, { upsert: false, contentType: file.type || "audio/mpeg" });
-
-  if (error) throw new Error(error.message);
-
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from("portfolio").getPublicUrl(path);
-
-  return publicUrl;
-}
 
 export async function importLegacyPhotos() {
   await requireAdmin();
