@@ -9,7 +9,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "whoop:auth": "node scripts/whoop-exchange-code.js",
+    "whoop:test-refresh": "node scripts/whoop-test-refresh.js"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.1",
