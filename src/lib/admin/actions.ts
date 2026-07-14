@@ -6,10 +6,6 @@ import { ADMIN_AUTH_BYPASS } from "@/lib/admin/auth-bypass";
 import { getAdminDb, requireAdmin } from "@/lib/admin/auth";
 import { slugify } from "@/lib/slugify";
 import {
-  adminUploadLimitError,
-  isWithinAdminUploadLimit,
-} from "@/lib/admin/upload-limits";
-import {
   getLegacyPhotos,
   getLegacyPhotosIndexCandidates,
 } from "@/lib/syndication/legacy-photos";
@@ -133,31 +129,15 @@ export async function preparePortfolioFileUpload(input: {
   folder: PortfolioUploadFolder;
 }) {
   await requireAdmin();
-  const supabase = await getAdminDb();
+  const { createPortfolioSignedUpload } = await import(
+    "@/lib/admin/portfolio-storage"
+  );
 
-  if (!isWithinAdminUploadLimit(input.fileSize)) {
-    throw new Error(adminUploadLimitError(input.fileName));
-  }
-
-  const defaultExt = input.folder === "music" ? "mp3" : "jpg";
-  const ext = input.fileName.split(".").pop() ?? defaultExt;
-  const path = `${input.folder}/${Date.now()}-${slugify(input.fileName.replace(/\.[^.]+$/, ""))}.${ext}`;
-
-  const { data, error } = await supabase.storage
-    .from("portfolio")
-    .createSignedUploadUrl(path);
-
-  if (error) throw new Error(error.message);
-
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from("portfolio").getPublicUrl(path);
-
-  return {
-    signedUrl: data.signedUrl,
-    path,
-    publicUrl,
-  };
+  return createPortfolioSignedUpload({
+    fileName: input.fileName,
+    fileSize: input.fileSize,
+    folder: input.folder,
+  });
 }
 
 export type BookDraft = {

@@ -4,10 +4,7 @@ import * as React from "react";
 import { Music2Icon } from "lucide-react";
 import { AdminUploadEmpty } from "@/components/admin/AdminUploadEmpty";
 import { useAdminUploads } from "@/components/admin/AdminUploadProvider";
-import {
-  saveMusicTrack,
-} from "@/lib/admin/actions";
-import { uploadPortfolioFile } from "@/lib/admin/portfolio-upload";
+import { uploadPortfolioFile, saveMusicTrackViaApi } from "@/lib/admin/portfolio-upload";
 import {
   adminUploadLimitError,
   ADMIN_MAX_UPLOAD_LABEL,
@@ -69,7 +66,7 @@ export function MusicAdminUpload() {
       updateUpload(uploadId, { state: "processing", progress: 100 });
 
       const title = titleFromFilename(file.name);
-      await saveMusicTrack({
+      await saveMusicTrackViaApi({
         title,
         artist: "Joshua",
         audioUrl,
