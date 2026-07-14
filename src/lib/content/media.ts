@@ -3,6 +3,7 @@ import { BOOKS, MOVIES, PHOTOS } from "@/lib/media-items";
 import { createClient } from "@/lib/supabase/server";
 import { getGoodreadsBooks } from "@/lib/syndication/goodreads";
 import { getLetterboxdMovies } from "@/lib/syndication/letterboxd";
+import { getLegacyPhotos } from "@/lib/syndication/legacy-photos";
 
 type PhotoRow = {
   id: string;
@@ -42,11 +43,21 @@ export async function getPublishedPhotos(): Promise<PhotoItem[]> {
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: false });
 
-    if (error || !data?.length) return PHOTOS;
-    return data.map((row) => mapPhoto(row as PhotoRow));
+    if (!error && data?.length) {
+      return data.map((row) => mapPhoto(row as PhotoRow));
+    }
   } catch {
-    return PHOTOS;
+    // Fall through to legacy/static data.
   }
+
+  try {
+    const legacyPhotos = await getLegacyPhotos();
+    if (legacyPhotos.length > 0) return legacyPhotos;
+  } catch {
+    // Fall through to static demo photos.
+  }
+
+  return PHOTOS;
 }
 
 export async function getPublishedBooks(): Promise<BookItem[]> {

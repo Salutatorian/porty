@@ -347,6 +347,8 @@ export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
         <div className="mt-4 border-t border-neutral-200 pt-4 dark:border-neutral-800">
           <p className="text-[11px] leading-relaxed text-neutral-500">
             Import photos from your old porty gallery (Vercel Blob / R2 index).
+            The public /media page also reads this index automatically when set
+            in Vercel as LEGACY_PHOTOS_INDEX_URL or BLOB_PHOTOS_INDEX_URL.
           </p>
           <Button
             type="button"
