@@ -19,18 +19,15 @@ const GALLERY_INDEX_PATH = "gallery/index.json";
 export function getLegacyPhotosIndexCandidates() {
   const candidates: string[] = [];
 
-  const legacy = process.env.LEGACY_PHOTOS_INDEX_URL?.trim();
-  const blob = process.env.BLOB_PHOTOS_INDEX_URL?.trim();
-  if (legacy) candidates.push(legacy);
-  if (blob && blob !== legacy) candidates.push(blob);
-
   const r2Base = process.env.R2_PUBLIC_BASE_URL?.trim().replace(/\/$/, "");
   if (r2Base) {
-    const r2Index = `${r2Base}/${GALLERY_INDEX_PATH}`;
-    if (!candidates.includes(r2Index)) {
-      candidates.push(r2Index);
-    }
+    candidates.push(`${r2Base}/${GALLERY_INDEX_PATH}`);
   }
+
+  const legacy = process.env.LEGACY_PHOTOS_INDEX_URL?.trim();
+  const blob = process.env.BLOB_PHOTOS_INDEX_URL?.trim();
+  if (legacy && !candidates.includes(legacy)) candidates.push(legacy);
+  if (blob && !candidates.includes(blob)) candidates.push(blob);
 
   return candidates;
 }
