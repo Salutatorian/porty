@@ -256,6 +256,11 @@ export async function fetchAllWhoopRecords(
 
     if (!res.ok) {
       const t = await res.text();
+      if (res.status === 429) {
+        throw new Error(
+          `WHOOP ${path} failed (429): rate limited — wait 60s before retrying.`,
+        );
+      }
       throw new Error(`WHOOP ${path} failed (${res.status}): ${t.slice(0, 180)}`);
     }
 

@@ -41,11 +41,21 @@ type WhoopRecord = {
 
 const RANGE_DAYS: Record<string, number> = {
   "7d": 7,
+  "14d": 14,
   "1m": 30,
   "3m": 90,
   "6m": 180,
   all: 365,
 };
+
+/** Default for /training — only need ~2 weeks for the trend chart. */
+export const WHOOP_TRAINING_RANGE = "14d";
+
+const CACHE_TTL_MS = 60_000;
+const dashboardCache = new Map<
+  string,
+  { expiresAt: number; data: WhoopDashboard }
+>();
 
 export function isWhoopConfigured() {
   return Boolean(
@@ -213,7 +223,14 @@ function formatCycleSummary(c: WhoopRecord | null): WhoopCycleSummary | null {
   };
 }
 
-export async function getWhoopDashboard(range = "all"): Promise<WhoopDashboard> {
+export async function getWhoopDashboard(
+  range = WHOOP_TRAINING_RANGE,
+): Promise<WhoopDashboard> {
+  const cached = dashboardCache.get(range);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.data;
+  }
+
   const clientId = process.env.WHOOP_CLIENT_ID?.trim() || "";
   const clientSecret = process.env.WHOOP_CLIENT_SECRET?.trim() || "";
 
@@ -248,27 +265,29 @@ export async function getWhoopDashboard(range = "all"): Promise<WhoopDashboard> 
   const sortedCycles = cyclesSortedByEndDesc(typedCycles);
 
   let latestRecovery: WhoopRecoveryPoint | null = null;
-  for (const c of sortedCycles.slice(0, 10)) {
-    if (c.id == null) continue;
-    const direct = (await fetchRecoveryForCycle(
-      accessToken,
-      c.id,
-    )) as WhoopRecord | null;
-    if (
-      direct &&
-      direct.score_state === "SCORED" &&
-      direct.score &&
-      !direct.score.user_calibrating
-    ) {
-      latestRecovery = formatRecoveryRecord(direct, c);
-      break;
-    }
+  const joined = pickRecoveryForLatestCycleJoin(typedRecoveries, typedCycles);
+  if (joined) {
+    latestRecovery = formatRecoveryRecord(joined.rec, joined.cycle);
   }
+
+  // Only hit per-cycle recovery endpoint if bulk list didn't have a scored row.
   if (!latestRecovery) {
-    const joined = pickRecoveryForLatestCycleJoin(typedRecoveries, typedCycles);
-    latestRecovery = joined
-      ? formatRecoveryRecord(joined.rec, joined.cycle)
-      : null;
+    for (const c of sortedCycles.slice(0, 3)) {
+      if (c.id == null) continue;
+      const direct = (await fetchRecoveryForCycle(
+        accessToken,
+        c.id,
+      )) as WhoopRecord | null;
+      if (
+        direct &&
+        direct.score_state === "SCORED" &&
+        direct.score &&
+        !direct.score.user_calibrating
+      ) {
+        latestRecovery = formatRecoveryRecord(direct, c);
+        break;
+      }
+    }
   }
 
   const cycleForStrain =
@@ -276,7 +295,7 @@ export async function getWhoopDashboard(range = "all"): Promise<WhoopDashboard> 
       (c) => c.score_state === "SCORED" && c.score && c.score.strain != null,
     ) || null;
 
-  return {
+  const data: WhoopDashboard = {
     enabled: true,
     range,
     rangeDays,
@@ -286,9 +305,15 @@ export async function getWhoopDashboard(range = "all"): Promise<WhoopDashboard> 
     sleep: formatSleepSummary(pickLatestMainSleep(typedSleeps)),
     cycle: formatCycleSummary(cycleForStrain),
   };
+
+  dashboardCache.set(range, { expiresAt: Date.now() + CACHE_TTL_MS, data });
+  return data;
 }
 
 export function getWhoopErrorMessage(error: unknown) {
-  if (error instanceof Error) return error.message;
-  return "Failed to load WHOOP data.";
+  const message = error instanceof Error ? error.message : "";
+  if (message.includes("(429)")) {
+    return "WHOOP rate limit hit (too many requests). Wait a minute, avoid refreshing repeatedly in dev, then try again.";
+  }
+  return message || "Failed to load WHOOP data.";
 }

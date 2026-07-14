@@ -4,6 +4,7 @@ import {
   getWhoopDashboard,
   getWhoopErrorMessage,
   isWhoopConfigured,
+  WHOOP_TRAINING_RANGE,
 } from "@/lib/whoop/dashboard";
 
 export const dynamic = "force-dynamic";
@@ -14,7 +15,7 @@ export default async function TrainingPage() {
   let dashboard: Awaited<ReturnType<typeof getWhoopDashboard>>;
 
   try {
-    dashboard = await getWhoopDashboard("all");
+    dashboard = await getWhoopDashboard(WHOOP_TRAINING_RANGE);
   } catch (caught) {
     error = getWhoopErrorMessage(caught);
     dashboard = {
