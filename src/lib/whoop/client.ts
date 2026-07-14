@@ -1,4 +1,6 @@
+import fs from "node:fs";
 import https from "node:https";
+import path from "node:path";
 
 const WHOOP_TOKEN_URL = "https://api.prod.whoop.com/oauth/oauth2/token";
 const WHOOP_API_BASE = "https://api.prod.whoop.com/developer";
@@ -19,6 +21,30 @@ const WHOOP_REFRESH_REDIRECT_FALLBACKS = [
 
 let whoopRefreshTokenCache = "";
 let whoopRefreshInFlight: Promise<string> | null = null;
+
+/** WHOOP rotates refresh_token on every refresh — persist locally so dev restarts don't break. */
+function persistRefreshTokenToEnvLocal(newToken: string, previousToken: string) {
+  if (process.env.NODE_ENV === "production") return;
+  const envPath = path.join(process.cwd(), ".env.local");
+  if (!fs.existsSync(envPath)) return;
+
+  try {
+    const txt = fs.readFileSync(envPath, "utf8");
+    const line = `WHOOP_REFRESH_TOKEN=${newToken}`;
+    const updated = txt.match(/^WHOOP_REFRESH_TOKEN=/m)
+      ? txt.replace(/^WHOOP_REFRESH_TOKEN=.*$/m, line)
+      : `${txt.replace(/\s*$/, "\n")}${line}\n`;
+    fs.writeFileSync(envPath, updated, "utf8");
+    process.env.WHOOP_REFRESH_TOKEN = newToken;
+    if (newToken !== previousToken) {
+      console.warn(
+        "[whoop] New refresh_token saved to .env.local — copy to Vercel when deploying.",
+      );
+    }
+  } catch {
+    // Non-fatal in dev.
+  }
+}
 
 export function normalizeWhoopToken(value: string | undefined) {
   let s = String(value || "").trim();
@@ -209,7 +235,9 @@ export async function refreshWhoopAccessToken(clientId: string, clientSecret: st
           throw new Error("WHOOP token response missing access_token.");
         }
         if (data.refresh_token) {
-          whoopRefreshTokenCache = normalizeWhoopToken(data.refresh_token);
+          const rotated = normalizeWhoopToken(data.refresh_token);
+          whoopRefreshTokenCache = rotated;
+          persistRefreshTokenToEnvLocal(rotated, fromEnv);
         }
         return data.access_token;
       }
