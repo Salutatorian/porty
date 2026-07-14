@@ -26,7 +26,7 @@ export function MoviesPageContent({
         id: movie.title,
         image: movie.poster,
         title: movie.title,
-        meta: `${movie.year} · ${movie.status}`,
+        meta: [movie.year, movie.status].filter(Boolean).join(" · "),
       }))}
     />
   );

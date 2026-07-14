@@ -1,6 +1,8 @@
 import type { PhotoItem, BookItem, MovieItem } from "@/lib/media-items";
 import { BOOKS, MOVIES, PHOTOS } from "@/lib/media-items";
 import { createClient } from "@/lib/supabase/server";
+import { getGoodreadsBooks } from "@/lib/syndication/goodreads";
+import { getLetterboxdMovies } from "@/lib/syndication/letterboxd";
 
 type PhotoRow = {
   id: string;
@@ -49,6 +51,13 @@ export async function getPublishedPhotos(): Promise<PhotoItem[]> {
 
 export async function getPublishedBooks(): Promise<BookItem[]> {
   try {
+    const books = await getGoodreadsBooks();
+    if (books.length > 0) return books;
+  } catch {
+    // Fall through to Supabase/static data.
+  }
+
+  try {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("portfolio_books")
@@ -70,6 +79,13 @@ export async function getPublishedBooks(): Promise<BookItem[]> {
 }
 
 export async function getPublishedMovies(): Promise<MovieItem[]> {
+  try {
+    const movies = await getLetterboxdMovies();
+    if (movies.length > 0) return movies;
+  } catch {
+    // Fall through to Supabase/static data.
+  }
+
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
