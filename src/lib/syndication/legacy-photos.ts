@@ -86,7 +86,7 @@ export function mapLegacyPhotoToItem(
 
 async function fetchLegacyIndex(indexUrl: string) {
   const response = await fetch(indexUrl, {
-    next: { revalidate: 3600 },
+    cache: "no-store",
     signal: AbortSignal.timeout(10000),
   });
 

@@ -33,7 +33,32 @@ function mapPhoto(row: PhotoRow): PhotoItem {
   };
 }
 
+function mergePhotos(...groups: PhotoItem[][]) {
+  const photos: PhotoItem[] = [];
+  const seen = new Set<string>();
+
+  for (const group of groups) {
+    for (const photo of group) {
+      const key = photo.id || photo.image;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      photos.push(photo);
+    }
+  }
+
+  return photos;
+}
+
 export async function getPublishedPhotos(): Promise<PhotoItem[]> {
+  let legacyPhotos: PhotoItem[] = [];
+  let supabasePhotos: PhotoItem[] = [];
+
+  try {
+    legacyPhotos = await getLegacyPhotos();
+  } catch {
+    // Legacy gallery unavailable — continue with Supabase/demo fallback.
+  }
+
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -44,18 +69,14 @@ export async function getPublishedPhotos(): Promise<PhotoItem[]> {
       .order("created_at", { ascending: false });
 
     if (!error && data?.length) {
-      return data.map((row) => mapPhoto(row as PhotoRow));
+      supabasePhotos = data.map((row) => mapPhoto(row as PhotoRow));
     }
   } catch {
-    // Fall through to legacy/static data.
+    // Supabase unavailable — legacy/demo fallback still applies.
   }
 
-  try {
-    const legacyPhotos = await getLegacyPhotos();
-    if (legacyPhotos.length > 0) return legacyPhotos;
-  } catch {
-    // Fall through to static demo photos.
-  }
+  const merged = mergePhotos(legacyPhotos, supabasePhotos);
+  if (merged.length > 0) return merged;
 
   return PHOTOS;
 }
