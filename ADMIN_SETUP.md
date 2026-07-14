@@ -9,6 +9,10 @@ Copy `.env.local.example` to `.env.local` and fill in:
 - `SUPABASE_SERVICE_ROLE_KEY` (Supabase Dashboard → Settings → API → service_role)
 - `ADMIN_EMAIL` (your login email)
 
+### Vercel
+
+Add the same four variables in **Vercel → Project → Settings → Environment Variables** for Production. Without the Supabase URL and anon key, the deployed site can fail in middleware or fall back to demo content only.
+
 ## 2. Create your admin user
 
 In Supabase Dashboard → Authentication → Users → Add user:
