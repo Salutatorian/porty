@@ -30,6 +30,7 @@ type WhoopScore = {
 type WhoopRecord = {
   id?: number | string;
   cycle_id?: number | string;
+  start?: string;
   score_state?: string;
   score?: WhoopScore;
   end?: string;
@@ -73,11 +74,46 @@ function offsetStringToMinutes(offsetStr: string) {
 }
 
 function wakeYmdFromCycle(cycle: WhoopRecord) {
-  if (!cycle.end) return "";
-  const utcMs = Date.parse(cycle.end);
+  // WHOOP cycles begin at wake — use start, not end (end is the *next* wake).
+  const anchor = cycle.start || cycle.end;
+  if (!anchor) return "";
+  const utcMs = Date.parse(anchor);
   if (Number.isNaN(utcMs)) return "";
   const offMin = offsetStringToMinutes(cycle.timezone_offset || "");
   return new Date(utcMs + offMin * 60000).toISOString().slice(0, 10);
+}
+
+function cycleStartTime(cycle: WhoopRecord) {
+  const anchor = cycle.start || cycle.end || cycle.updated_at || "";
+  const t = Date.parse(anchor);
+  return Number.isNaN(t) ? 0 : t;
+}
+
+function cyclesSortedByStartDesc(cycles: WhoopRecord[]) {
+  return cycles
+    .filter((c) => c.start || c.end)
+    .sort((a, b) => cycleStartTime(b) - cycleStartTime(a));
+}
+
+/** Today's in-progress cycle — strain updates live like the WHOOP app home screen. */
+function pickCurrentCycle(cycles: WhoopRecord[]) {
+  const byStart = cyclesSortedByStartDesc(cycles);
+  const inProgress = byStart.find(
+    (c) =>
+      c.score_state !== "SCORED" &&
+      c.score &&
+      c.score.strain != null,
+  );
+  if (inProgress) return inProgress;
+
+  const withStrain = byStart.find((c) => c.score?.strain != null);
+  return withStrain ?? byStart[0] ?? null;
+}
+
+function cyclesSortedByEndDesc(cycles: WhoopRecord[]) {
+  return cycles
+    .filter((c) => c.end && c.score_state === "SCORED")
+    .sort((a, b) => Date.parse(b.end!) - Date.parse(a.end!));
 }
 
 function formatRecoveryRecord(
@@ -102,12 +138,6 @@ function formatRecoveryRecord(
   };
 }
 
-function cyclesSortedByEndDesc(cycles: WhoopRecord[]) {
-  return cycles
-    .filter((c) => c.end && c.score_state === "SCORED")
-    .sort((a, b) => Date.parse(b.end!) - Date.parse(a.end!));
-}
-
 function pickRecoveryForLatestCycleJoin(
   recoveries: WhoopRecord[],
   cycles: WhoopRecord[],
@@ -126,9 +156,7 @@ function pickRecoveryForLatestCycleJoin(
   scored.sort((a, b) => {
     const ca = cycleById.get(a.cycle_id!);
     const cb = cycleById.get(b.cycle_id!);
-    const ta = ca?.end ? Date.parse(ca.end) : 0;
-    const tb = cb?.end ? Date.parse(cb.end) : 0;
-    return tb - ta;
+    return cycleStartTime(cb || {}) - cycleStartTime(ca || {});
   });
   const top = scored[0];
   if (!top) return null;
@@ -153,9 +181,11 @@ function buildRecoverySeries(
       ? wakeYmdFromCycle(c)
       : (r.updated_at || r.created_at || "").slice(0, 10);
     if (!day || day.length < 10) continue;
-    const t = c?.end
-      ? Date.parse(c.end)
-      : Date.parse(r.updated_at || r.created_at || "");
+    const t = c?.start
+      ? Date.parse(c.start)
+      : c?.end
+        ? Date.parse(c.end)
+        : Date.parse(r.updated_at || r.created_at || "");
     if (Number.isNaN(t)) continue;
     const prev = byDay.get(day);
     if (!prev || t > prev.t) {
@@ -213,8 +243,9 @@ function formatSleepSummary(s: WhoopRecord | null): WhoopSleepSummary | null {
 
 function formatCycleSummary(c: WhoopRecord | null): WhoopCycleSummary | null {
   if (!c?.score || c.score.strain == null) return null;
+  const day = wakeYmdFromCycle(c) || (c.updated_at || "").slice(0, 10);
   return {
-    day: (c.end || "").slice(0, 10) || (c.updated_at || "").slice(0, 10),
+    day,
     strain: Math.round(c.score.strain * 10) / 10,
     avgHr:
       c.score.average_heart_rate != null
@@ -262,38 +293,36 @@ export async function getWhoopDashboard(
   const typedRecoveries = recoveries as WhoopRecord[];
   const typedSleeps = sleeps as WhoopRecord[];
   const typedCycles = cycles as WhoopRecord[];
-  const sortedCycles = cyclesSortedByEndDesc(typedCycles);
+  const cyclesByStart = cyclesSortedByStartDesc(typedCycles);
 
   let latestRecovery: WhoopRecoveryPoint | null = null;
-  const joined = pickRecoveryForLatestCycleJoin(typedRecoveries, typedCycles);
-  if (joined) {
-    latestRecovery = formatRecoveryRecord(joined.rec, joined.cycle);
-  }
 
-  // Only hit per-cycle recovery endpoint if bulk list didn't have a scored row.
-  if (!latestRecovery) {
-    for (const c of sortedCycles.slice(0, 3)) {
-      if (c.id == null) continue;
-      const direct = (await fetchRecoveryForCycle(
-        accessToken,
-        c.id,
-      )) as WhoopRecord | null;
-      if (
-        direct &&
-        direct.score_state === "SCORED" &&
-        direct.score &&
-        !direct.score.user_calibrating
-      ) {
-        latestRecovery = formatRecoveryRecord(direct, c);
-        break;
-      }
+  // Prefer recovery on the current wake cycle (often still in progress — not SCORED on cycle).
+  for (const c of cyclesByStart.slice(0, 3)) {
+    if (c.id == null) continue;
+    const direct = (await fetchRecoveryForCycle(
+      accessToken,
+      c.id,
+    )) as WhoopRecord | null;
+    if (
+      direct &&
+      direct.score_state === "SCORED" &&
+      direct.score &&
+      !direct.score.user_calibrating
+    ) {
+      latestRecovery = formatRecoveryRecord(direct, c);
+      break;
     }
   }
 
-  const cycleForStrain =
-    sortedCycles.find(
-      (c) => c.score_state === "SCORED" && c.score && c.score.strain != null,
-    ) || null;
+  if (!latestRecovery) {
+    const joined = pickRecoveryForLatestCycleJoin(typedRecoveries, typedCycles);
+    latestRecovery = joined
+      ? formatRecoveryRecord(joined.rec, joined.cycle)
+      : null;
+  }
+
+  const cycleForStrain = pickCurrentCycle(typedCycles);
 
   const data: WhoopDashboard = {
     enabled: true,
