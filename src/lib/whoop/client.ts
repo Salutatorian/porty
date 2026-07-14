@@ -21,6 +21,7 @@ const WHOOP_REFRESH_REDIRECT_FALLBACKS = [
 
 let whoopRefreshTokenCache = "";
 let whoopRefreshInFlight: Promise<string> | null = null;
+let whoopAccessTokenCache = { token: "", expiresAt: 0 };
 
 /** WHOOP rotates refresh_token on every refresh — persist locally so dev restarts don't break. */
 function persistRefreshTokenToEnvLocal(newToken: string, previousToken: string) {
@@ -203,6 +204,14 @@ function whoopRefreshAttemptList(redirectUriRaw: string) {
 }
 
 export async function refreshWhoopAccessToken(clientId: string, clientSecret: string) {
+  // Access tokens last ~1h. Reuse them so we don't rotate the refresh_token on every page view.
+  if (
+    whoopAccessTokenCache.token &&
+    whoopAccessTokenCache.expiresAt > Date.now() + 120_000
+  ) {
+    return whoopAccessTokenCache.token;
+  }
+
   if (whoopRefreshInFlight) return whoopRefreshInFlight;
 
   whoopRefreshInFlight = (async () => {
@@ -230,10 +239,17 @@ export async function refreshWhoopAccessToken(clientId: string, clientSecret: st
         const data = JSON.parse(res.text) as {
           access_token?: string;
           refresh_token?: string;
+          expires_in?: number;
         };
         if (!data.access_token) {
           throw new Error("WHOOP token response missing access_token.");
         }
+        const expiresIn =
+          typeof data.expires_in === "number" ? data.expires_in : 3600;
+        whoopAccessTokenCache = {
+          token: data.access_token,
+          expiresAt: Date.now() + expiresIn * 1000,
+        };
         if (data.refresh_token) {
           const rotated = normalizeWhoopToken(data.refresh_token);
           whoopRefreshTokenCache = rotated;
