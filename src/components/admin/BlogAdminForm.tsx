@@ -44,10 +44,15 @@ function postToDraft(post: AdminBlogPost): BlogDraft {
 export function BlogAdminForm({ posts }: BlogAdminFormProps) {
   const router = useRouter();
   const { requestDelete, dialog } = useAdminConfirmDelete();
+  const [postList, setPostList] = React.useState(posts);
   const [draft, setDraft] = React.useState<BlogDraft>(emptyDraft);
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
   const [message, setMessage] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    setPostList(posts);
+  }, [posts]);
 
   const fieldClass =
     "mt-1 w-full rounded-lg border border-foreground/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-foreground/25";
@@ -94,6 +99,7 @@ export function BlogAdminForm({ posts }: BlogAdminFormProps) {
 
     try {
       await deleteBlog(id);
+      setPostList((current) => current.filter((post) => post.id !== id));
       startNew();
       setMessage("Blog post deleted.");
       router.refresh();
@@ -135,12 +141,12 @@ export function BlogAdminForm({ posts }: BlogAdminFormProps) {
         </div>
 
         <div className="max-h-[70vh] space-y-1 overflow-y-auto rounded-xl border border-foreground/10 p-2">
-          {posts.length === 0 ? (
+          {postList.length === 0 ? (
             <p className="px-2 py-3 text-[12px] text-foreground/45">
               No posts yet.
             </p>
           ) : (
-            posts.map((post) => (
+            postList.map((post) => (
               <button
                 key={post.id}
                 type="button"
