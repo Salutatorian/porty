@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
+import { Pause, Play, SkipBack, SkipForward, Volume2, VolumeX, Music2 } from "lucide-react";
 import type { MusicTrack } from "@/lib/music";
 
 interface HoverMusicPlayerProps {
@@ -185,7 +185,7 @@ export function HoverMusicPlayer({ tracks }: HoverMusicPlayerProps) {
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
       animate={{
-        height: expanded ? 72 : 48,
+        height: expanded ? 80 : 48,
       }}
       transition={{
         type: "spring",
@@ -278,6 +278,27 @@ export function HoverMusicPlayer({ tracks }: HoverMusicPlayerProps) {
             <SkipForward className="size-3.5" />
           </motion.button>
         </div>
+
+        <motion.div
+          animate={{
+            width: expanded ? 48 : 0,
+            opacity: expanded ? 1 : 0,
+          }}
+          transition={{ duration: 0.18 }}
+          className="hidden shrink-0 overflow-hidden rounded-md sm:block"
+        >
+          {track.cover ? (
+            <img
+              src={track.cover}
+              alt=""
+              className="size-12 rounded-md object-cover shadow-sm"
+            />
+          ) : (
+            <div className="flex size-12 items-center justify-center rounded-md bg-foreground/8 text-foreground/35 dark:bg-white/10 dark:text-white/35">
+              <Music2 className="size-4" />
+            </div>
+          )}
+        </motion.div>
 
         <motion.div
           animate={{

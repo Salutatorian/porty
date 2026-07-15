@@ -105,9 +105,11 @@ export async function deletePhotoViaApi(id: string) {
 }
 
 export async function saveMusicTrackViaApi(input: {
+  id?: string;
   title: string;
   artist: string;
   audioUrl: string;
+  coverUrl?: string;
   published?: boolean;
   sortOrder?: number;
 }) {

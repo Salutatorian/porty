@@ -14,8 +14,10 @@ export async function POST(request: Request) {
     title?: string;
     artist?: string;
     audioUrl?: string;
+    coverUrl?: string;
     published?: boolean;
     sortOrder?: number;
+    id?: string;
   };
 
   try {
@@ -27,6 +29,7 @@ export async function POST(request: Request) {
   const title = body.title?.trim();
   const audioUrl = body.audioUrl?.trim();
   const artist = body.artist?.trim() ?? "";
+  const coverUrl = body.coverUrl?.trim() || null;
 
   if (!title || !audioUrl) {
     return NextResponse.json(
@@ -37,13 +40,14 @@ export async function POST(request: Request) {
 
   try {
     const supabase = createAdminClient();
-    const id = slugify(title);
+    const id = body.id?.trim() || slugify(title);
 
     const { error } = await supabase.from("portfolio_music").upsert({
       id,
       title,
       artist,
       audio_url: audioUrl,
+      cover_url: coverUrl,
       sort_order: body.sortOrder ?? 0,
       published: body.published ?? true,
       updated_at: new Date().toISOString(),
@@ -56,7 +60,7 @@ export async function POST(request: Request) {
     revalidatePath("/");
     revalidatePath("/admin/music");
 
-    return NextResponse.json({ id, title, artist, audioUrl });
+    return NextResponse.json({ id, title, artist, audioUrl, coverUrl });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to save track";

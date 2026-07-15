@@ -33,6 +33,7 @@ const emptyDraft: MusicTrackDraft = {
   title: "",
   artist: "",
   audioUrl: "",
+  coverUrl: "",
   published: true,
 };
 
@@ -46,6 +47,7 @@ function trackToDraft(track: AdminMusicTrack): MusicTrackDraft {
     title: track.title,
     artist: track.artist,
     audioUrl: track.audioUrl,
+    coverUrl: track.coverUrl ?? "",
     sortOrder: track.sortOrder,
     published: track.published,
   };
@@ -125,6 +127,7 @@ export function MusicAdminForm({ tracks }: MusicAdminFormProps) {
         title: result.title,
         artist: "",
         audioUrl,
+        coverUrl: "",
         published: true,
       });
       setMessage(`"${title}" uploaded. Set the artist name and save.`);
@@ -152,6 +155,26 @@ export function MusicAdminForm({ tracks }: MusicAdminFormProps) {
     }
   };
 
+  const uploadCover = async (file: File) => {
+    if (!isWithinAdminUploadLimit(file.size)) {
+      setMessage(adminUploadLimitError(file.name));
+      return;
+    }
+
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      const { publicUrl } = await uploadPortfolioFile(file, "photos");
+      update({ coverUrl: publicUrl });
+      setMessage("Cover art uploaded. Save track to apply.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Cover upload failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!draft.id || !draft.audioUrl) return;
@@ -164,6 +187,7 @@ export function MusicAdminForm({ tracks }: MusicAdminFormProps) {
         ...draft,
         title: draft.title.trim(),
         artist: draft.artist.trim(),
+        coverUrl: draft.coverUrl?.trim() || undefined,
       });
       setMessage("Track saved.");
       router.refresh();
@@ -189,7 +213,14 @@ export function MusicAdminForm({ tracks }: MusicAdminFormProps) {
     setMessage(null);
 
     try {
-      await deleteMusicTrack(id);
+      if (track?.isLegacy) {
+        await saveMusicTrack({
+          ...trackToDraft(track),
+          published: false,
+        });
+      } else {
+        await deleteMusicTrack(id);
+      }
       if (selectedId === id) {
         setSelectedId(null);
         setDraft(emptyDraft);
@@ -261,6 +292,51 @@ export function MusicAdminForm({ tracks }: MusicAdminFormProps) {
               />
             </label>
 
+            <div className="space-y-2">
+              <p className="text-[12px] text-foreground/50">Cover art</p>
+              <div className="flex items-center gap-3">
+                {draft.coverUrl ? (
+                  <img
+                    src={draft.coverUrl}
+                    alt=""
+                    className="size-16 rounded-lg border border-foreground/10 object-cover"
+                  />
+                ) : (
+                  <div className="flex size-16 items-center justify-center rounded-lg border border-dashed border-foreground/15 bg-foreground/[0.03] text-foreground/30">
+                    <Music2Icon className="size-5" />
+                  </div>
+                )}
+                <label className="inline-flex">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    disabled={loading}
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) void uploadCover(file);
+                      event.currentTarget.value = "";
+                    }}
+                  />
+                  <span className="cursor-pointer rounded-lg border border-foreground/10 px-3 py-2 text-[12px] text-foreground/70 hover:bg-foreground/[0.03]">
+                    {draft.coverUrl ? "Replace cover" : "Upload cover"}
+                  </span>
+                </label>
+                {draft.coverUrl ? (
+                  <button
+                    type="button"
+                    className="text-[12px] text-foreground/45 underline-offset-2 hover:underline"
+                    onClick={() => update({ coverUrl: "" })}
+                  >
+                    Remove
+                  </button>
+                ) : null}
+              </div>
+              <p className="text-[11px] text-foreground/40">
+                Shown in the music player when you hover, Spotify-style.
+              </p>
+            </div>
+
             <ButtonGroup>
               <Button type="submit" disabled={loading || !draft.title.trim()}>
                 Save track
@@ -330,14 +406,32 @@ export function MusicAdminForm({ tracks }: MusicAdminFormProps) {
                   <button
                     type="button"
                     onClick={() => selectTrack(track)}
-                    className="min-w-0 flex-1 px-1 py-0.5 text-left"
+                    className="flex min-w-0 flex-1 items-center gap-2 px-1 py-0.5 text-left"
                   >
-                    <p className="truncate text-[12px] font-medium text-neutral-800 dark:text-neutral-200">
-                      {track.title || "Untitled"}
-                    </p>
-                    <p className="mt-1 truncate text-[11px] text-neutral-500">
-                      {track.artist.trim() || "No artist set"}
-                    </p>
+                    {track.coverUrl ? (
+                      <img
+                        src={track.coverUrl}
+                        alt=""
+                        className="size-8 shrink-0 rounded object-cover"
+                      />
+                    ) : (
+                      <div className="flex size-8 shrink-0 items-center justify-center rounded bg-neutral-100 text-neutral-400 dark:bg-neutral-800">
+                        <Music2Icon className="size-3.5" />
+                      </div>
+                    )}
+                    <span className="min-w-0">
+                      <p className="truncate text-[12px] font-medium text-neutral-800 dark:text-neutral-200">
+                        {track.title || "Untitled"}
+                        {track.isLegacy ? (
+                          <span className="ml-1.5 text-[10px] font-normal text-neutral-400">
+                            legacy
+                          </span>
+                        ) : null}
+                      </p>
+                      <p className="mt-1 truncate text-[11px] text-neutral-500">
+                        {track.artist.trim() || "No artist set"}
+                      </p>
+                    </span>
                   </button>
                   <button
                     type="button"

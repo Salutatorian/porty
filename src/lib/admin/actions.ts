@@ -246,6 +246,7 @@ export type MusicTrackDraft = {
   title: string;
   artist: string;
   audioUrl: string;
+  coverUrl?: string;
   published: boolean;
   sortOrder?: number;
 };
@@ -260,6 +261,7 @@ export async function saveMusicTrack(draft: MusicTrackDraft) {
     title: draft.title,
     artist: draft.artist,
     audio_url: draft.audioUrl,
+    cover_url: draft.coverUrl?.trim() || null,
     sort_order: draft.sortOrder ?? 0,
     published: draft.published,
     updated_at: new Date().toISOString(),
