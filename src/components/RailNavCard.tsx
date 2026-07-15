@@ -37,8 +37,9 @@ export function RailNavCard({
     >
       <Link
         href={href}
+        prefetch
         draggable={false}
-        className="group block outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-4 dark:focus-visible:ring-white/20"
+        className="group block shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-4 dark:focus-visible:ring-white/20"
       >
         <CardCover
           image={image}
