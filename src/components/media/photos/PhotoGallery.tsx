@@ -31,21 +31,34 @@ export function PhotoGallery({ photos }: PhotoGalleryProps) {
 
   return (
     <>
+      <div className="flex flex-col gap-4 sm:hidden">
+        {photos.map((photo, index) => (
+          <PhotoGalleryItem
+            key={photo.id}
+            photo={photo}
+            index={index}
+            layoutClassName=""
+            variant="mobile"
+            onOpen={(selected) => open(selected.id)}
+          />
+        ))}
+      </div>
+
       <div
         className="
-          grid grid-cols-2 auto-rows-[8px] grid-flow-dense
-          gap-1.5 sm:grid-cols-4 sm:gap-2 lg:grid-cols-6
+          hidden auto-rows-[8px] grid-flow-dense
+          gap-2 sm:grid sm:grid-cols-4 lg:grid-cols-6
         "
       >
-          {photos.map((photo, index) => (
-            <PhotoGalleryItem
-              key={photo.id}
-              photo={photo}
-              index={index}
-              layoutClassName={layoutClassNames[index] ?? ""}
-              onOpen={(selected) => open(selected.id)}
-            />
-          ))}
+        {photos.map((photo, index) => (
+          <PhotoGalleryItem
+            key={photo.id}
+            photo={photo}
+            index={index}
+            layoutClassName={layoutClassNames[index] ?? ""}
+            onOpen={(selected) => open(selected.id)}
+          />
+        ))}
       </div>
 
       {isOpen ? (

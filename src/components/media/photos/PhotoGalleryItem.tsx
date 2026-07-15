@@ -9,6 +9,7 @@ type PhotoGalleryItemProps = {
   index: number;
   layoutClassName: string;
   onOpen: (photo: PhotoItem) => void;
+  variant?: "mobile" | "grid";
 };
 
 export function PhotoGalleryItem({
@@ -16,8 +17,10 @@ export function PhotoGalleryItem({
   index,
   layoutClassName,
   onOpen,
+  variant = "grid",
 }: PhotoGalleryItemProps) {
   const reduceMotion = useReducedMotion();
+  const isMobileFeed = variant === "mobile";
 
   return (
     <motion.button
@@ -38,8 +41,10 @@ export function PhotoGalleryItem({
         "transition-shadow duration-300",
         "hover:shadow-[0_12px_35px_rgba(0,0,0,0.14)]",
         "dark:border-neutral-200 dark:bg-neutral-100",
-        "sm:border-[4px]",
-        layoutClassName,
+        isMobileFeed
+          ? "aspect-[4/5] w-full"
+          : "sm:border-[4px]",
+        !isMobileFeed && layoutClassName,
       )}
     >
       <img

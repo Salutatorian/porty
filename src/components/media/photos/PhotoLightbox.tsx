@@ -44,6 +44,7 @@ export function PhotoLightbox({
   const reduceMotion = useReducedMotion();
   const touchStartX = React.useRef<number | null>(null);
   const zoomAreaRef = React.useRef<HTMLDivElement>(null);
+  const viewRef = React.useRef<PhotoViewState>(defaultViewState);
   const dragRef = React.useRef<{
     active: boolean;
     startX: number;
@@ -54,44 +55,51 @@ export function PhotoLightbox({
   const [view, setView] = React.useState<PhotoViewState>(defaultViewState);
   const [isDragging, setIsDragging] = React.useState(false);
 
+  const updateView = React.useCallback((next: PhotoViewState) => {
+    viewRef.current = next;
+    setView(next);
+  }, []);
+
   React.useEffect(() => {
+    viewRef.current = defaultViewState;
     setView(defaultViewState);
   }, [photo?.id]);
 
   React.useEffect(() => {
-    const element = zoomAreaRef.current;
-    if (!photo || !element) return;
+    if (!photo) return;
 
     const onWheel = (event: WheelEvent) => {
       if (!window.matchMedia("(pointer: fine)").matches) return;
 
       event.preventDefault();
-      event.stopPropagation();
 
-      setView((current) => {
-        const factor = event.deltaY < 0 ? 1.08 : 1 / 1.08;
-        const nextZoom = clampZoom(current.zoom * factor);
+      const element = zoomAreaRef.current;
+      if (!element) return;
 
-        if (nextZoom <= MIN_ZOOM) {
-          return defaultViewState;
-        }
+      const current = viewRef.current;
+      const factor = event.deltaY < 0 ? 1.1 : 1 / 1.1;
+      const nextZoom = clampZoom(current.zoom * factor);
 
-        const rect = element.getBoundingClientRect();
-        const pointerX = event.clientX - rect.left - rect.width / 2;
-        const pointerY = event.clientY - rect.top - rect.height / 2;
-        const ratio = nextZoom / current.zoom;
+      if (nextZoom <= MIN_ZOOM) {
+        updateView(defaultViewState);
+        return;
+      }
 
-        return {
-          zoom: nextZoom,
-          panX: pointerX - (pointerX - current.panX) * ratio,
-          panY: pointerY - (pointerY - current.panY) * ratio,
-        };
+      const rect = element.getBoundingClientRect();
+      const pointerX = event.clientX - rect.left - rect.width / 2;
+      const pointerY = event.clientY - rect.top - rect.height / 2;
+      const ratio = nextZoom / current.zoom;
+
+      updateView({
+        zoom: nextZoom,
+        panX: pointerX - (pointerX - current.panX) * ratio,
+        panY: pointerY - (pointerY - current.panY) * ratio,
       });
     };
 
-    element.addEventListener("wheel", onWheel, { passive: false });
-    return () => element.removeEventListener("wheel", onWheel);
-  }, [photo]);
+    window.addEventListener("wheel", onWheel, { passive: false });
+    return () => window.removeEventListener("wheel", onWheel);
+  }, [photo, updateView]);
 
   const onTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
     if (view.zoom > MIN_ZOOM) return;
@@ -137,11 +145,11 @@ export function PhotoLightbox({
     const drag = dragRef.current;
     if (!drag?.active) return;
 
-    setView((current) => ({
-      ...current,
+    updateView({
+      ...viewRef.current,
       panX: drag.panX + event.clientX - drag.startX,
       panY: drag.panY + event.clientY - drag.startY,
-    }));
+    });
   };
 
   const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -154,7 +162,7 @@ export function PhotoLightbox({
   };
 
   const resetView = () => {
-    setView(defaultViewState);
+    updateView(defaultViewState);
   };
 
   return (
@@ -190,31 +198,35 @@ export function PhotoLightbox({
                   duration: reduceMotion ? 0 : 0.28,
                   ease: [0.22, 1, 0.36, 1],
                 }}
-                style={{
-                  transform: `translate3d(${view.panX}px, ${view.panY}px, 0) scale(${view.zoom})`,
-                  transition: isDragging ? "none" : "transform 0.08s ease-out",
-                }}
-                className={
-                  view.zoom > MIN_ZOOM
-                    ? "cursor-grab touch-none active:cursor-grabbing"
-                    : "cursor-zoom-in"
-                }
-                onClick={(event) => event.stopPropagation()}
-                onDoubleClick={(event) => {
-                  event.stopPropagation();
-                  resetView();
-                }}
-                onPointerDown={onPointerDown}
-                onPointerMove={onPointerMove}
-                onPointerUp={endDrag}
-                onPointerCancel={endDrag}
+                className="flex items-center justify-center"
               >
-                <img
-                  src={photo.image}
-                  alt={photo.title}
-                  className="max-h-[min(72vh,900px)] max-w-full object-contain shadow-[0_24px_80px_rgba(0,0,0,0.45)]"
-                  draggable={false}
-                />
+                <div
+                  style={{
+                    transform: `translate3d(${view.panX}px, ${view.panY}px, 0) scale(${view.zoom})`,
+                    transition: isDragging ? "none" : "transform 0.08s ease-out",
+                  }}
+                  className={
+                    view.zoom > MIN_ZOOM
+                      ? "cursor-grab touch-none active:cursor-grabbing"
+                      : "cursor-zoom-in"
+                  }
+                  onClick={(event) => event.stopPropagation()}
+                  onDoubleClick={(event) => {
+                    event.stopPropagation();
+                    resetView();
+                  }}
+                  onPointerDown={onPointerDown}
+                  onPointerMove={onPointerMove}
+                  onPointerUp={endDrag}
+                  onPointerCancel={endDrag}
+                >
+                  <img
+                    src={photo.image}
+                    alt={photo.title}
+                    className="max-h-[min(72vh,900px)] max-w-[min(96vw,1200px)] object-contain shadow-[0_24px_80px_rgba(0,0,0,0.45)]"
+                    draggable={false}
+                  />
+                </div>
               </motion.div>
 
               {view.zoom <= MIN_ZOOM ? (
