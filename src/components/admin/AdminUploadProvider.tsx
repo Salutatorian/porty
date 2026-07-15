@@ -9,6 +9,8 @@ export type AdminUploadState =
   | "error"
   | "done";
 
+export type AdminUploadOperation = "upload" | "delete";
+
 export type AdminUploadItem = {
   id: string;
   fileName: string;
@@ -16,6 +18,7 @@ export type AdminUploadItem = {
   mimeType: string;
   previewUrl?: string;
   kind: "image" | "audio" | "file";
+  operation?: AdminUploadOperation;
   state: AdminUploadState;
   progress: number;
   error?: string;

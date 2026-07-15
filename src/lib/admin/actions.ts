@@ -111,10 +111,10 @@ export async function savePhoto(draft: PhotoDraft) {
   revalidatePath("/admin/photos");
 }
 
-export async function deletePhoto(id: string) {
+export async function deletePhoto(id: string, imageUrl?: string) {
   await requireAdmin();
   const { deletePhotoRecord } = await import("@/lib/admin/portfolio-storage");
-  await deletePhotoRecord(id);
+  await deletePhotoRecord(id, imageUrl);
   revalidatePath("/media");
   revalidatePath("/admin/photos");
 }

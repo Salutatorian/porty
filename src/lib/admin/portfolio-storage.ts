@@ -71,7 +71,7 @@ export async function deletePortfolioStorageObject(publicUrl: string) {
   await deletePortfolioStoragePath(path);
 }
 
-export async function deletePhotoRecord(id: string) {
+export async function deletePhotoRecord(id: string, imageUrl?: string) {
   const supabase = createAdminClient();
 
   const { data: photo, error: readError } = await supabase
@@ -81,6 +81,8 @@ export async function deletePhotoRecord(id: string) {
     .maybeSingle();
 
   if (readError) throw new Error(readError.message);
+
+  const resolvedImageUrl = photo?.image_url ?? imageUrl?.trim() ?? undefined;
 
   if (photo) {
     const { error } = await supabase.from("portfolio_photos").delete().eq("id", id);
@@ -96,5 +98,5 @@ export async function deletePhotoRecord(id: string) {
   }
 
   const { suppressPhotoId } = await import("@/lib/content/photo-suppressions");
-  await suppressPhotoId(id);
+  await suppressPhotoId(id, resolvedImageUrl);
 }

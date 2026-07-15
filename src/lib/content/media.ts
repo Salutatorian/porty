@@ -2,7 +2,7 @@ import type { PhotoItem, BookItem, MovieItem } from "@/lib/media-items";
 import { BOOKS, MOVIES, PHOTOS } from "@/lib/media-items";
 import {
   filterSuppressedPhotos,
-  getSuppressedPhotoIds,
+  getSuppressedPhotoKeys,
 } from "@/lib/content/photo-suppressions";
 import { createClient } from "@/lib/supabase/server";
 import { getGoodreadsBooks } from "@/lib/syndication/goodreads";
@@ -56,12 +56,12 @@ function mergePhotos(...groups: PhotoItem[][]) {
 export async function getPublishedPhotos(): Promise<PhotoItem[]> {
   let legacyPhotos: PhotoItem[] = [];
   let supabasePhotos: PhotoItem[] = [];
-  const suppressedIds = await getSuppressedPhotoIds();
+  const suppressed = await getSuppressedPhotoKeys();
 
   try {
     legacyPhotos = filterSuppressedPhotos(
       await getLegacyPhotos(),
-      suppressedIds,
+      suppressed,
     );
   } catch {
     // Legacy gallery unavailable — continue with Supabase/demo fallback.
@@ -79,7 +79,7 @@ export async function getPublishedPhotos(): Promise<PhotoItem[]> {
     if (!error && data?.length) {
       supabasePhotos = filterSuppressedPhotos(
         data.map((row) => mapPhoto(row as PhotoRow)),
-        suppressedIds,
+        suppressed,
       );
     }
   } catch {
@@ -153,12 +153,12 @@ export async function getPublishedMovies(): Promise<MovieItem[]> {
 
 export async function getAllPhotosForAdmin() {
   let legacyPhotos: PhotoItem[] = [];
-  const suppressedIds = await getSuppressedPhotoIds();
+  const suppressed = await getSuppressedPhotoKeys();
 
   try {
     legacyPhotos = filterSuppressedPhotos(
       await getLegacyPhotos(),
-      suppressedIds,
+      suppressed,
     );
   } catch {
     // Legacy gallery unavailable — continue with Supabase.
@@ -176,7 +176,7 @@ export async function getAllPhotosForAdmin() {
     if (error) throw error;
     const supabasePhotos = filterSuppressedPhotos(
       (data ?? []).map((row) => mapPhoto(row as PhotoRow)),
-      suppressedIds,
+      suppressed,
     );
     return mergePhotos(legacyPhotos, supabasePhotos);
   } catch (error) {

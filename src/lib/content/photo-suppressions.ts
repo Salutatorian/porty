@@ -1,24 +1,42 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
 
-export async function getSuppressedPhotoIds(): Promise<Set<string>> {
+export type SuppressedPhotoKeys = {
+  ids: Set<string>;
+  images: Set<string>;
+};
+
+export async function getSuppressedPhotoKeys(): Promise<SuppressedPhotoKeys> {
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const { data, error } = await supabase
       .from("portfolio_photo_suppressions")
-      .select("id");
+      .select("id, image_url");
 
-    if (error) return new Set();
-    return new Set((data ?? []).map((row) => row.id));
-  } catch {
-    return new Set();
+    if (error) {
+      console.warn("[photos] Failed to load suppressions:", error.message);
+      return { ids: new Set(), images: new Set() };
+    }
+
+    const ids = new Set<string>();
+    const images = new Set<string>();
+
+    for (const row of data ?? []) {
+      if (row.id) ids.add(row.id);
+      if (row.image_url) images.add(row.image_url);
+    }
+
+    return { ids, images };
+  } catch (error) {
+    console.warn("[photos] Failed to load suppressions:", error);
+    return { ids: new Set(), images: new Set() };
   }
 }
 
-export async function suppressPhotoId(id: string) {
+export async function suppressPhotoId(id: string, imageUrl?: string) {
   const supabase = createAdminClient();
   const { error } = await supabase.from("portfolio_photo_suppressions").upsert({
     id,
+    image_url: imageUrl?.trim() || null,
     created_at: new Date().toISOString(),
   });
 
@@ -27,8 +45,15 @@ export async function suppressPhotoId(id: string) {
 
 export function filterSuppressedPhotos<T extends { id: string; image?: string }>(
   photos: T[],
-  suppressedIds: Set<string>,
+  suppressed: SuppressedPhotoKeys,
 ) {
-  if (suppressedIds.size === 0) return photos;
-  return photos.filter((photo) => !suppressedIds.has(photo.id));
+  if (suppressed.ids.size === 0 && suppressed.images.size === 0) {
+    return photos;
+  }
+
+  return photos.filter(
+    (photo) =>
+      !suppressed.ids.has(photo.id) &&
+      !(photo.image && suppressed.images.has(photo.image)),
+  );
 }

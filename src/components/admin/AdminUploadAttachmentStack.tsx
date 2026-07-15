@@ -27,6 +27,21 @@ function formatFileSize(bytes: number) {
 }
 
 function descriptionFor(item: AdminUploadItem) {
+  const isDelete = item.operation === "delete";
+
+  if (isDelete) {
+    if (item.state === "processing") {
+      return "Deleting photo…";
+    }
+    if (item.state === "error") {
+      return item.error ?? "Delete failed. Try again.";
+    }
+    if (item.state === "done") {
+      return "Deleted";
+    }
+    return "Ready to delete";
+  }
+
   if (item.state === "idle") {
     return "Ready to upload";
   }
@@ -43,7 +58,7 @@ function descriptionFor(item: AdminUploadItem) {
 }
 
 function mediaFor(item: AdminUploadItem) {
-  if (item.state === "uploading") {
+  if (item.state === "uploading" || (item.operation === "delete" && item.state === "processing")) {
     return <Spinner />;
   }
 
@@ -103,7 +118,7 @@ export function AdminUploadAttachmentStack() {
           <AttachmentActions>
             {item.state === "error" && item.onRetry ? (
               <AttachmentAction
-                aria-label={`Retry ${item.fileName}`}
+                aria-label={`Retry ${item.operation === "delete" ? "delete" : "upload"} for ${item.fileName}`}
                 onClick={item.onRetry}
               >
                 <RefreshCwIcon />

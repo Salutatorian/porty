@@ -4,11 +4,12 @@ import * as React from "react";
 import { ImageIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
+  deletePhoto,
   importLegacyPhotos,
   savePhoto,
   type PhotoDraft,
 } from "@/lib/admin/actions";
-import { uploadPortfolioFile, discardPhotoUpload, deletePhotoViaApi } from "@/lib/admin/portfolio-upload";
+import { uploadPortfolioFile, discardPhotoUpload } from "@/lib/admin/portfolio-upload";
 import { slugify } from "@/lib/slugify";
 import {
   adminUploadLimitError,
@@ -206,6 +207,20 @@ export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
       return;
     }
 
+    const attachmentId = crypto.randomUUID();
+
+    addUpload({
+      id: attachmentId,
+      fileName: label,
+      previewUrl: photo?.image,
+      fileSize: 0,
+      mimeType: "image/jpeg",
+      kind: "image",
+      operation: "delete",
+      state: "processing",
+      progress: 100,
+    });
+
     setLoading(true);
     setMessage(null);
 
@@ -213,15 +228,25 @@ export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
       if (selectedId === id) {
         await clearPendingUpload();
       }
-      await deletePhotoViaApi(id);
+      await deletePhoto(id, photo?.image);
+      updateUpload(attachmentId, { state: "done" });
       if (selectedId === id) {
         setSelectedId(null);
         setDraft(emptyDraft);
       }
-      setMessage("Photo deleted.");
       router.refresh();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Delete failed");
+      const errorMessage =
+        error instanceof Error ? error.message : "Delete failed";
+      updateUpload(attachmentId, {
+        state: "error",
+        error: errorMessage,
+        onRetry: () => {
+          removeUpload(attachmentId);
+          void onDeletePhoto(id);
+        },
+      });
+      setMessage(errorMessage);
     } finally {
       setLoading(false);
     }
