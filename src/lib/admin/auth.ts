@@ -1,6 +1,7 @@
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { ADMIN_AUTH_BYPASS } from "@/lib/admin/auth-bypass";
 
 function getBypassAdminUser(): User {
@@ -19,19 +20,27 @@ export async function getAdminUser() {
     return getBypassAdminUser();
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user?.email) return null;
-
-  const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
-  if (!adminEmail || user.email.toLowerCase() !== adminEmail) {
+  if (!isSupabaseConfigured()) {
     return null;
   }
 
-  return user;
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user?.email) return null;
+
+    const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
+    if (!adminEmail || user.email.toLowerCase() !== adminEmail) {
+      return null;
+    }
+
+    return user;
+  } catch {
+    return null;
+  }
 }
 
 export async function requireAdmin() {
