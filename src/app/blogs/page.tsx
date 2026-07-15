@@ -1,12 +1,6 @@
-import Link from "next/link";
 import { BackButton } from "@/components/BackButton";
+import { BlogPostCard } from "@/components/blog/BlogPostCard";
 import { getPublishedBlogs } from "@/lib/content/blogs";
-
-const PLACEHOLDER_POSTS = [
-  "On building tools that stay out of the way",
-  "Notes from a quiet redesign",
-  "What I want from AI-assisted writing",
-];
 
 export default async function BlogsPage() {
   const posts = await getPublishedBlogs();
@@ -22,26 +16,15 @@ export default async function BlogsPage() {
           </h1>
         </header>
 
-        <ul className="mt-14 space-y-4">
-          {(posts.length > 0 ? posts : PLACEHOLDER_POSTS.map((title) => ({ slug: "", title }))).map(
-            (post) => (
-              <li key={post.title}>
-                {post.slug ? (
-                  <Link
-                    href={`/blogs/${post.slug}`}
-                    className="text-[14px] text-foreground/70 transition hover:text-foreground"
-                  >
-                    {post.title}
-                  </Link>
-                ) : (
-                  <span className="text-[14px] text-foreground/55 before:mr-2 before:text-foreground/25 before:content-['—']">
-                    {post.title}
-                  </span>
-                )}
-              </li>
-            ),
+        <section className="mt-10 space-y-4">
+          {posts.length > 0 ? (
+            posts.map((post) => <BlogPostCard key={post.id} post={post} />)
+          ) : (
+            <p className="text-[14px] text-foreground/50 dark:text-white/45">
+              No posts yet.
+            </p>
           )}
-        </ul>
+        </section>
       </div>
     </main>
   );

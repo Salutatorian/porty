@@ -210,11 +210,31 @@ export type BlogDraft = {
   contentJson: object;
   contentHtml: string;
   status: "draft" | "published";
+  isFeatured?: boolean;
 };
 
 export async function saveBlog(draft: BlogDraft) {
   await requireAdmin();
   const supabase = await getAdminDb();
+
+  let publishedAt: string | null =
+    draft.status === "published" ? new Date().toISOString() : null;
+
+  if (draft.id) {
+    const { data: existing } = await supabase
+      .from("portfolio_blogs")
+      .select("published_at, status")
+      .eq("id", draft.id)
+      .maybeSingle();
+
+    if (existing?.published_at && draft.status === "published") {
+      publishedAt = existing.published_at;
+    } else if (draft.status === "published" && existing?.status !== "published") {
+      publishedAt = new Date().toISOString();
+    } else if (draft.status === "draft") {
+      publishedAt = null;
+    }
+  }
 
   const row = {
     id: draft.id,
@@ -225,8 +245,8 @@ export async function saveBlog(draft: BlogDraft) {
     content_json: draft.contentJson,
     content_html: draft.contentHtml,
     status: draft.status,
-    published_at:
-      draft.status === "published" ? new Date().toISOString() : null,
+    is_featured: draft.isFeatured ?? false,
+    published_at: publishedAt,
     updated_at: new Date().toISOString(),
   };
 
@@ -238,6 +258,15 @@ export async function saveBlog(draft: BlogDraft) {
 
   revalidatePath("/blogs");
   revalidatePath(`/blogs/${row.slug}`);
+  revalidatePath("/admin/blogs");
+}
+
+export async function deleteBlog(id: string) {
+  await requireAdmin();
+  const supabase = await getAdminDb();
+  const { error } = await supabase.from("portfolio_blogs").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/blogs");
   revalidatePath("/admin/blogs");
 }
 

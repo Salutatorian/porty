@@ -223,8 +223,9 @@ export function HoverMusicPlayer({ tracks }: HoverMusicPlayerProps) {
         onEnded={() => goNext()}
       />
 
-      <div className="mx-auto flex h-full w-full max-w-[920px] items-center gap-3 px-6 sm:gap-4 sm:px-8">
-        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+      <div className="mx-auto flex h-full w-full max-w-[920px] items-center gap-2.5 px-4 sm:gap-3 sm:px-6">
+        <div className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-2.5">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <motion.button
             type="button"
             onClick={goPrevious}
@@ -277,46 +278,39 @@ export function HoverMusicPlayer({ tracks }: HoverMusicPlayerProps) {
           >
             <SkipForward className="size-3.5" />
           </motion.button>
+          </div>
+
+          <motion.div
+            animate={{
+              maxWidth: expanded ? 180 : 0,
+              opacity: expanded ? 1 : 0,
+            }}
+            transition={{ duration: 0.18 }}
+            className="hidden min-w-0 items-center gap-2.5 overflow-hidden sm:flex"
+          >
+            {track.cover ? (
+              <img
+                src={track.cover}
+                alt=""
+                className="size-11 shrink-0 rounded-md object-cover shadow-sm"
+              />
+            ) : (
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-md bg-foreground/8 text-foreground/35 dark:bg-white/10 dark:text-white/35">
+                <Music2 className="size-4" />
+              </div>
+            )}
+            <div className="min-w-0">
+              <p className="truncate text-[13px] font-medium leading-tight">
+                {track.title}
+              </p>
+              <p className="truncate text-[11px] leading-tight text-foreground/45 dark:text-white/40">
+                {track.artist}
+              </p>
+            </div>
+          </motion.div>
         </div>
 
-        <motion.div
-          animate={{
-            width: expanded ? 48 : 0,
-            opacity: expanded ? 1 : 0,
-          }}
-          transition={{ duration: 0.18 }}
-          className="hidden shrink-0 overflow-hidden rounded-md sm:block"
-        >
-          {track.cover ? (
-            <img
-              src={track.cover}
-              alt=""
-              className="size-12 rounded-md object-cover shadow-sm"
-            />
-          ) : (
-            <div className="flex size-12 items-center justify-center rounded-md bg-foreground/8 text-foreground/35 dark:bg-white/10 dark:text-white/35">
-              <Music2 className="size-4" />
-            </div>
-          )}
-        </motion.div>
-
-        <motion.div
-          animate={{
-            width: expanded ? 148 : 0,
-            opacity: expanded ? 1 : 0,
-          }}
-          transition={{ duration: 0.18 }}
-          className="hidden shrink-0 overflow-hidden sm:block"
-        >
-          <p className="truncate text-[13px] font-medium leading-tight">
-            {track.title}
-          </p>
-          <p className="truncate text-[11px] leading-tight text-foreground/45 dark:text-white/40">
-            {track.artist}
-          </p>
-        </motion.div>
-
-        <div className="flex min-w-0 flex-1 items-center gap-2.5 sm:gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-2.5">
           <span className="w-9 shrink-0 tabular-nums text-[10px] text-foreground/50 dark:text-white/55">
             {formatTime(currentTime)}
           </span>
