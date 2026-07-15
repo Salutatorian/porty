@@ -60,7 +60,7 @@ export function MusicAdminUpload() {
     }, 220);
 
     try {
-      const audioUrl = await uploadPortfolioFile(file, "music");
+      const { publicUrl: audioUrl } = await uploadPortfolioFile(file, "music");
 
       clearProgressTimer();
       updateUpload(uploadId, { state: "processing", progress: 100 });

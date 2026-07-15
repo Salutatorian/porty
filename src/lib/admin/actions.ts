@@ -113,9 +113,8 @@ export async function savePhoto(draft: PhotoDraft) {
 
 export async function deletePhoto(id: string) {
   await requireAdmin();
-  const supabase = await getAdminDb();
-  const { error } = await supabase.from("portfolio_photos").delete().eq("id", id);
-  if (error) throw new Error(error.message);
+  const { deletePhotoRecord } = await import("@/lib/admin/portfolio-storage");
+  await deletePhotoRecord(id);
   revalidatePath("/media");
   revalidatePath("/admin/photos");
 }

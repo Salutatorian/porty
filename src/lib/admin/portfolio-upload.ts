@@ -5,7 +5,13 @@ export type PortfolioUploadFolder = "photos" | "music";
 type PrepareUploadResponse = {
   signedUrl: string;
   publicUrl: string;
+  path: string;
   error?: string;
+};
+
+export type PortfolioUploadResult = {
+  publicUrl: string;
+  storagePath: string;
 };
 
 async function readApiError(response: Response, fallback: string) {
@@ -42,7 +48,7 @@ export async function uploadPortfolioFile(
     );
   }
 
-  const { signedUrl, publicUrl } =
+  const { signedUrl, publicUrl, path } =
     (await prepareResponse.json()) as PrepareUploadResponse;
 
   const uploadResponse = await fetch(signedUrl, {
@@ -62,7 +68,32 @@ export async function uploadPortfolioFile(
     );
   }
 
-  return publicUrl;
+  return { publicUrl, storagePath: path };
+}
+
+export async function discardPhotoUpload(storagePath: string) {
+  const response = await fetch("/api/admin/photos/discard", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ storagePath }),
+  });
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response, "Failed to discard upload"));
+  }
+}
+
+export async function deletePhotoViaApi(id: string) {
+  const response = await fetch(
+    `/api/admin/photos?id=${encodeURIComponent(id)}`,
+    { method: "DELETE" },
+  );
+
+  if (!response.ok) {
+    throw new Error(await readApiError(response, "Failed to delete photo"));
+  }
+
+  return response.json();
 }
 
 export async function saveMusicTrackViaApi(input: {

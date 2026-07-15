@@ -44,3 +44,52 @@ export async function createPortfolioSignedUpload(input: {
     publicUrl,
   };
 }
+
+export function getPortfolioStoragePathFromPublicUrl(
+  publicUrl: string,
+): string | null {
+  try {
+    const url = new URL(publicUrl);
+    const marker = "/storage/v1/object/public/portfolio/";
+    const index = url.pathname.indexOf(marker);
+    if (index === -1) return null;
+    return decodeURIComponent(url.pathname.slice(index + marker.length));
+  } catch {
+    return null;
+  }
+}
+
+export async function deletePortfolioStoragePath(path: string) {
+  const supabase = createAdminClient();
+  const { error } = await supabase.storage.from("portfolio").remove([path]);
+  if (error) throw new Error(error.message);
+}
+
+export async function deletePortfolioStorageObject(publicUrl: string) {
+  const path = getPortfolioStoragePathFromPublicUrl(publicUrl);
+  if (!path) return;
+  await deletePortfolioStoragePath(path);
+}
+
+export async function deletePhotoRecord(id: string) {
+  const supabase = createAdminClient();
+
+  const { data: photo, error: readError } = await supabase
+    .from("portfolio_photos")
+    .select("image_url")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (readError) throw new Error(readError.message);
+
+  const { error } = await supabase.from("portfolio_photos").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+
+  if (photo?.image_url) {
+    try {
+      await deletePortfolioStorageObject(photo.image_url);
+    } catch {
+      // Legacy or external URLs are left untouched.
+    }
+  }
+}

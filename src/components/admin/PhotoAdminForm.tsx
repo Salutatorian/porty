@@ -8,7 +8,7 @@ import {
   savePhoto,
   type PhotoDraft,
 } from "@/lib/admin/actions";
-import { uploadPortfolioFile } from "@/lib/admin/portfolio-upload";
+import { uploadPortfolioFile, discardPhotoUpload, deletePhotoViaApi } from "@/lib/admin/portfolio-upload";
 import { slugify } from "@/lib/slugify";
 import {
   adminUploadLimitError,
@@ -60,6 +60,21 @@ export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
   const [message, setMessage] = React.useState<string | null>(null);
   const [importing, setImporting] = React.useState(false);
   const progressRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+  const pendingUploadRef = React.useRef<{ publicUrl: string; storagePath: string } | null>(
+    null,
+  );
+
+  const clearPendingUpload = React.useCallback(async () => {
+    const pending = pendingUploadRef.current;
+    pendingUploadRef.current = null;
+    if (!pending) return;
+
+    try {
+      await discardPhotoUpload(pending.storagePath);
+    } catch {
+      // Best-effort cleanup for abandoned uploads.
+    }
+  }, []);
 
   const update = (patch: Partial<PhotoDraft>) => {
     setDraft((current) => ({ ...current, ...patch }));
@@ -73,12 +88,14 @@ export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
   };
 
   const startNewPhoto = () => {
+    void clearPendingUpload();
     setSelectedId(null);
     setDraft(emptyDraft);
     setMessage(null);
   };
 
   const selectPhoto = (photo: PhotoItem) => {
+    void clearPendingUpload();
     setSelectedId(photo.id);
     setDraft(photoToDraft(photo));
     setMessage(null);
@@ -116,12 +133,15 @@ export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
     }, 220);
 
     try {
-      const url = await uploadPortfolioFile(file, "photos");
+      await clearPendingUpload();
+
+      const { publicUrl, storagePath } = await uploadPortfolioFile(file, "photos");
+      pendingUploadRef.current = { publicUrl, storagePath };
 
       clearProgressTimer();
       updateUpload(uploadId, { state: "processing", progress: 100 });
 
-      setDraft({ ...emptyDraft, imageUrl: url });
+      setDraft({ ...emptyDraft, imageUrl: publicUrl });
       setMessage("Photo uploaded. Add a title and description, then save.");
 
       window.setTimeout(() => {
@@ -149,8 +169,9 @@ export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
   React.useEffect(() => {
     return () => {
       clearProgressTimer();
+      void clearPendingUpload();
     };
-  }, []);
+  }, [clearPendingUpload]);
 
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -163,11 +184,44 @@ export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
         ...draft,
         id: savedId,
       });
+      pendingUploadRef.current = null;
       setSelectedId(savedId);
       setMessage("Photo saved.");
       router.refresh();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Save failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onDeletePhoto = async (photoId?: string) => {
+    const id = photoId ?? selectedId;
+    if (!id) return;
+
+    const photo = photos.find((item) => item.id === id);
+    const label = photo?.title?.trim() || "this photo";
+
+    if (!window.confirm(`Delete "${label}"? This cannot be undone.`)) {
+      return;
+    }
+
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      if (selectedId === id) {
+        await clearPendingUpload();
+      }
+      await deletePhotoViaApi(id);
+      if (selectedId === id) {
+        setSelectedId(null);
+        setDraft(emptyDraft);
+      }
+      setMessage("Photo deleted.");
+      router.refresh();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Delete failed");
     } finally {
       setLoading(false);
     }
@@ -286,6 +340,19 @@ export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
                 >
                   Upload another
                 </Button>
+                {selectedId ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={loading}
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => {
+                      void onDeletePhoto();
+                    }}
+                  >
+                    Delete photo
+                  </Button>
+                ) : null}
               </ButtonGroup>
 
               {message ? (
@@ -320,23 +387,38 @@ export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
           <ul className="mt-3 space-y-2">
             {photos.map((photo) => (
               <li key={photo.id}>
-                <button
-                  type="button"
-                  onClick={() => selectPhoto(photo)}
+                <div
                   className={cn(
-                    "w-full rounded-lg border px-3 py-2.5 text-left transition-colors",
+                    "flex items-start gap-2 rounded-lg border px-2 py-2 transition-colors",
                     selectedId === photo.id
                       ? "border-neutral-300 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900"
                       : "border-transparent hover:border-neutral-200 hover:bg-neutral-50 dark:hover:border-neutral-800 dark:hover:bg-neutral-900/60",
                   )}
                 >
-                  <p className="truncate text-[12px] font-medium text-neutral-800 dark:text-neutral-200">
-                    {photo.title || "Untitled"}
-                  </p>
-                  <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-neutral-500">
-                    {photo.description?.trim() || "No description yet"}
-                  </p>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => selectPhoto(photo)}
+                    className="min-w-0 flex-1 px-1 py-0.5 text-left"
+                  >
+                    <p className="truncate text-[12px] font-medium text-neutral-800 dark:text-neutral-200">
+                      {photo.title || "Untitled"}
+                    </p>
+                    <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-neutral-500">
+                      {photo.description?.trim() || "No description yet"}
+                    </p>
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={`Delete ${photo.title || "photo"}`}
+                    disabled={loading}
+                    onClick={() => {
+                      void onDeletePhoto(photo.id);
+                    }}
+                    className="shrink-0 rounded-md px-2 py-1 text-[11px] text-neutral-400 hover:bg-neutral-100 hover:text-destructive dark:hover:bg-neutral-800"
+                  >
+                    Delete
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

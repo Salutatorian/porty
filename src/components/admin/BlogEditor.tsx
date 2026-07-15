@@ -61,7 +61,7 @@ export function BlogEditor({ initialHtml = "", onChange }: BlogEditorProps) {
     if (!file || !editor) return;
 
     try {
-      const url = await uploadPortfolioFile(file, "photos");
+      const { publicUrl: url } = await uploadPortfolioFile(file, "photos");
       editor.chain().focus().setImage({ src: url, alt: file.name }).run();
     } catch {
       const url = window.prompt("Image upload failed. Enter an image URL");
