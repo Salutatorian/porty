@@ -6,8 +6,8 @@ import { ShimmeringText } from "@/components/unlumen-ui/shimmering-text";
 
 export function PortfolioIntro() {
   return (
-    <div className="mx-auto max-w-[560px] text-center">
-      <p className="text-[15px]">
+    <div className="mx-auto max-w-5xl text-center">
+      <p className="text-[60px] leading-[1.15]">
         <ShimmeringText
           text="Dear Visitor,"
           duration={2.5}
@@ -18,7 +18,7 @@ export function PortfolioIntro() {
         />
       </p>
 
-      <p className="mx-auto mt-7 max-w-[500px] text-[15px] leading-[1.6] text-foreground/50">
+      <p className="mx-auto mt-10 max-w-4xl text-[60px] leading-[1.5] text-foreground/50">
         <FastScrambleText
           text="I'm Joshua, a software engineer based in the Northern Mariana Islands. I build thoughtful digital products, useful tools, and personal projects across software, design, and data."
           delay={150}
