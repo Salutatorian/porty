@@ -76,7 +76,6 @@ export async function POST(request: Request, context: RouteContext) {
     return NextResponse.json({
       count: current.count,
       liked: true,
-      alreadyLiked: true,
     });
   }
 
@@ -93,7 +92,6 @@ export async function POST(request: Request, context: RouteContext) {
       return NextResponse.json({
         count: state.count,
         liked: true,
-        alreadyLiked: true,
       });
     }
 
@@ -103,6 +101,40 @@ export async function POST(request: Request, context: RouteContext) {
   return NextResponse.json({
     count: current.count + 1,
     liked: true,
-    alreadyLiked: false,
+  });
+}
+
+export async function DELETE(_request: Request, context: RouteContext) {
+  const { slug } = await context.params;
+  const blog = await getPublishedBlog(slug);
+  if (!blog) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  const visitorId = await getOrCreateVisitorId();
+  const visitorKey = hashVisitorKey(visitorId, blog.id);
+  const current = await getKudosState(blog.id, visitorId);
+
+  if (!current.liked) {
+    return NextResponse.json({
+      count: current.count,
+      liked: false,
+    });
+  }
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("portfolio_blog_likes")
+    .delete()
+    .eq("blog_id", blog.id)
+    .eq("visitor_key", visitorKey);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({
+    count: Math.max(0, current.count - 1),
+    liked: false,
   });
 }

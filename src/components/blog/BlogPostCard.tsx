@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Star } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { BlogKudosButton } from "@/components/blog/BlogKudosButton";
+import { BlogKudosCount } from "@/components/blog/BlogKudosCount";
 import { BLOG_AUTHOR, formatBlogDate } from "@/lib/blog-utils";
 import type { BlogPost } from "@/lib/content/blogs";
 
@@ -64,11 +64,7 @@ export function BlogPostCard({ post }: BlogPostCardProps) {
 
         <div className="mt-5 flex items-center justify-between gap-4 border-t border-border pt-4">
           <div className="flex items-center gap-3">
-            <BlogKudosButton
-              slug={post.slug}
-              initialCount={post.kudosCount}
-              compact
-            />
+            <BlogKudosCount count={post.kudosCount} compact />
             {post.isFeatured ? (
               <span
                 className="inline-flex items-center gap-1 text-[12px] text-amber-600 dark:text-amber-400"

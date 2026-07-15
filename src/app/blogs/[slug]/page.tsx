@@ -52,8 +52,15 @@ export default async function BlogPostPage({ params }: Props) {
               {post.subtitle}
             </p>
           ) : null}
+        </header>
 
-          <div className="mt-6 flex items-center gap-3">
+        <article
+          className="prose prose-neutral mt-10 max-w-none dark:prose-invert prose-p:text-[18px] prose-p:leading-[1.8] prose-img:rounded-sm"
+          dangerouslySetInnerHTML={{ __html: post.contentHtml }}
+        />
+
+        <footer className="mt-12 flex flex-col gap-3 border-t border-black/[0.08] pt-8 dark:border-white/[0.08] sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
             <BlogKudosButton slug={post.slug} initialCount={post.kudosCount} />
             {post.isFeatured ? (
               <span className="inline-flex items-center gap-1.5 text-[13px] text-amber-600 dark:text-amber-400">
@@ -62,21 +69,9 @@ export default async function BlogPostPage({ params }: Props) {
               </span>
             ) : null}
           </div>
-        </header>
-
-        <article
-          className="prose prose-neutral mt-10 max-w-none dark:prose-invert prose-p:text-[18px] prose-p:leading-[1.8] prose-img:rounded-sm"
-          dangerouslySetInnerHTML={{ __html: post.contentHtml }}
-        />
-
-        <footer className="mt-12 flex items-center gap-4 border-t border-black/[0.08] pt-8 dark:border-white/[0.08]">
-          {post.isFeatured ? (
-            <span className="inline-flex items-center gap-1.5 text-[13px] text-amber-600 dark:text-amber-400">
-              <Star className="size-4 fill-current" />
-              Featured
-            </span>
-          ) : null}
-          <BlogKudosButton slug={post.slug} initialCount={post.kudosCount} />
+          <p className="text-[12px] text-foreground/45 dark:text-white/40">
+            Tap again to undo your kudos
+          </p>
         </footer>
       </div>
     </main>

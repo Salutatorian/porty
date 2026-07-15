@@ -47,22 +47,21 @@ export function BlogKudosButton({
     };
   }, [slug, initialCount]);
 
-  const onKudos = async (event: React.MouseEvent<HTMLButtonElement>) => {
+  const onToggle = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
-
-    if (loading || liked) return;
+    if (loading) return;
 
     setLoading(true);
     try {
       const response = await fetch(`/api/blogs/${slug}/kudos`, {
-        method: "POST",
+        method: liked ? "DELETE" : "POST",
       });
       const data = await response.json();
       if (!response.ok) return;
 
-      setCount(data.count ?? count + 1);
-      setLiked(true);
+      setCount(data.count ?? count);
+      setLiked(Boolean(data.liked));
     } finally {
       setLoading(false);
     }
@@ -73,19 +72,19 @@ export function BlogKudosButton({
   return (
     <button
       type="button"
-      onClick={onKudos}
-      disabled={loading || liked}
+      onClick={onToggle}
+      disabled={loading}
       aria-pressed={liked}
-      aria-label={liked ? "You gave kudos" : "Give kudos"}
+      aria-label={liked ? "Remove your kudos" : "Give kudos"}
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full border bg-background font-medium shadow-sm transition",
         compact
           ? "px-2.5 py-1 text-[12px]"
           : "px-3 py-1.5 text-[13px]",
         liked
-          ? "border-amber-500/50 bg-amber-50 text-amber-700 dark:border-amber-400/40 dark:bg-amber-500/10 dark:text-amber-300"
+          ? "border-amber-500/50 bg-amber-50 text-amber-700 hover:border-amber-600/60 hover:bg-amber-100 dark:border-amber-400/40 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:bg-amber-500/15"
           : "border-border text-foreground hover:border-foreground/25 hover:bg-muted dark:text-white dark:hover:border-white/25",
-        (loading || liked) && "cursor-default",
+        loading && "cursor-wait opacity-70",
         className,
       )}
     >
