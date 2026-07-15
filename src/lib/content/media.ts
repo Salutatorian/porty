@@ -1,5 +1,9 @@
 import type { PhotoItem, BookItem, MovieItem } from "@/lib/media-items";
 import { BOOKS, MOVIES, PHOTOS } from "@/lib/media-items";
+import {
+  filterSuppressedPhotos,
+  getSuppressedPhotoIds,
+} from "@/lib/content/photo-suppressions";
 import { createClient } from "@/lib/supabase/server";
 import { getGoodreadsBooks } from "@/lib/syndication/goodreads";
 import { getLetterboxdMovies } from "@/lib/syndication/letterboxd";
@@ -52,9 +56,13 @@ function mergePhotos(...groups: PhotoItem[][]) {
 export async function getPublishedPhotos(): Promise<PhotoItem[]> {
   let legacyPhotos: PhotoItem[] = [];
   let supabasePhotos: PhotoItem[] = [];
+  const suppressedIds = await getSuppressedPhotoIds();
 
   try {
-    legacyPhotos = await getLegacyPhotos();
+    legacyPhotos = filterSuppressedPhotos(
+      await getLegacyPhotos(),
+      suppressedIds,
+    );
   } catch {
     // Legacy gallery unavailable — continue with Supabase/demo fallback.
   }
@@ -69,7 +77,10 @@ export async function getPublishedPhotos(): Promise<PhotoItem[]> {
       .order("created_at", { ascending: false });
 
     if (!error && data?.length) {
-      supabasePhotos = data.map((row) => mapPhoto(row as PhotoRow));
+      supabasePhotos = filterSuppressedPhotos(
+        data.map((row) => mapPhoto(row as PhotoRow)),
+        suppressedIds,
+      );
     }
   } catch {
     // Supabase unavailable — legacy/demo fallback still applies.
@@ -142,8 +153,13 @@ export async function getPublishedMovies(): Promise<MovieItem[]> {
 
 export async function getAllPhotosForAdmin() {
   let legacyPhotos: PhotoItem[] = [];
+  const suppressedIds = await getSuppressedPhotoIds();
+
   try {
-    legacyPhotos = await getLegacyPhotos();
+    legacyPhotos = filterSuppressedPhotos(
+      await getLegacyPhotos(),
+      suppressedIds,
+    );
   } catch {
     // Legacy gallery unavailable — continue with Supabase.
   }
@@ -158,7 +174,10 @@ export async function getAllPhotosForAdmin() {
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    const supabasePhotos = (data ?? []).map((row) => mapPhoto(row as PhotoRow));
+    const supabasePhotos = filterSuppressedPhotos(
+      (data ?? []).map((row) => mapPhoto(row as PhotoRow)),
+      suppressedIds,
+    );
     return mergePhotos(legacyPhotos, supabasePhotos);
   } catch (error) {
     if (legacyPhotos.length > 0) return legacyPhotos;

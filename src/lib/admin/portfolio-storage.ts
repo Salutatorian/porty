@@ -82,14 +82,19 @@ export async function deletePhotoRecord(id: string) {
 
   if (readError) throw new Error(readError.message);
 
-  const { error } = await supabase.from("portfolio_photos").delete().eq("id", id);
-  if (error) throw new Error(error.message);
+  if (photo) {
+    const { error } = await supabase.from("portfolio_photos").delete().eq("id", id);
+    if (error) throw new Error(error.message);
 
-  if (photo?.image_url) {
-    try {
-      await deletePortfolioStorageObject(photo.image_url);
-    } catch {
-      // Legacy or external URLs are left untouched.
+    if (photo.image_url) {
+      try {
+        await deletePortfolioStorageObject(photo.image_url);
+      } catch {
+        // Legacy or external URLs are left untouched.
+      }
     }
   }
+
+  const { suppressPhotoId } = await import("@/lib/content/photo-suppressions");
+  await suppressPhotoId(id);
 }

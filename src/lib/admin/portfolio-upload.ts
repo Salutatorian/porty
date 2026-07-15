@@ -84,10 +84,18 @@ export async function discardPhotoUpload(storagePath: string) {
 }
 
 export async function deletePhotoViaApi(id: string) {
-  const response = await fetch(
+  let response = await fetch(
     `/api/admin/photos?id=${encodeURIComponent(id)}`,
     { method: "DELETE" },
   );
+
+  if (response.status === 405 || response.status === 404) {
+    response = await fetch("/api/admin/photos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+  }
 
   if (!response.ok) {
     throw new Error(await readApiError(response, "Failed to delete photo"));
