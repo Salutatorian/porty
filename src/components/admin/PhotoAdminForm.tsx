@@ -56,6 +56,7 @@ function photoToDraft(photo: PhotoItem): PhotoDraft {
 export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
   const router = useRouter();
   const { requestDelete, dialog } = useAdminConfirmDelete();
+  const [photoList, setPhotoList] = React.useState(photos);
   const { addUpload, updateUpload, removeUpload } = useAdminUploads();
   const [draft, setDraft] = React.useState<PhotoDraft>(emptyDraft);
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
@@ -66,6 +67,10 @@ export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
   const pendingUploadRef = React.useRef<{ publicUrl: string; storagePath: string } | null>(
     null,
   );
+
+  React.useEffect(() => {
+    setPhotoList(photos);
+  }, [photos]);
 
   const clearPendingUpload = React.useCallback(async () => {
     const pending = pendingUploadRef.current;
@@ -227,6 +232,7 @@ export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
         await clearPendingUpload();
       }
       await deletePhoto(id, photo?.image);
+      setPhotoList((current) => current.filter((item) => item.id !== id));
       updateUpload(attachmentId, { state: "done" });
       if (selectedId === id) {
         setSelectedId(null);
@@ -261,7 +267,8 @@ export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
       title: "Delete photo?",
       itemName: label,
       hasAttachments: Boolean(photo?.image),
-      attachmentLabel: "photo",
+      attachmentLabel: "photo file",
+      description: `This will permanently delete "${label}", remove it from the database, and delete the image from storage.`,
       onConfirm: () => performDeletePhoto(id),
     });
   };
@@ -426,7 +433,7 @@ export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
           </p>
         ) : (
           <ul className="mt-3 space-y-2">
-            {photos.map((photo) => (
+            {photoList.map((photo) => (
               <li key={photo.id}>
                 <div
                   className={cn(

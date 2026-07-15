@@ -54,8 +54,8 @@ export function AdminConfirmDeleteDialog({
   };
 
   const warning = hasAttachments
-    ? `This will permanently delete "${itemName}" and its ${attachmentLabel}.`
-    : `This will permanently delete "${itemName}".`;
+    ? `This will permanently delete "${itemName}", remove it from the database, and delete its ${attachmentLabel} from storage.`
+    : `This will permanently delete "${itemName}" and remove it from the database.`;
 
   return (
     <Dialog.Root open={open} onOpenChange={(next) => !loading && onOpenChange(next)}>
@@ -78,6 +78,11 @@ export function AdminConfirmDeleteDialog({
           </Dialog.Title>
           <Dialog.Description className="mt-2 text-sm leading-relaxed text-muted-foreground">
             {description ?? warning}
+            {!description && hasAttachments ? (
+              <span className="mt-1 block">
+                Uploaded files in this item will also be removed from storage.
+              </span>
+            ) : null}
             <span className="mt-1 block">This cannot be undone.</span>
           </Dialog.Description>
 

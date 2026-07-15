@@ -71,6 +71,30 @@ export async function deletePortfolioStorageObject(publicUrl: string) {
   await deletePortfolioStoragePath(path);
 }
 
+export function extractStorageUrlsFromHtml(html: string) {
+  const urls = new Set<string>();
+  const pattern = /<(?:img|source)[^>]+src=["']([^"']+)["']/gi;
+
+  for (const match of html.matchAll(pattern)) {
+    const url = match[1]?.trim();
+    if (url) urls.add(url);
+  }
+
+  return [...urls];
+}
+
+export async function deletePortfolioStorageObjects(publicUrls: string[]) {
+  const uniqueUrls = [...new Set(publicUrls.map((url) => url.trim()).filter(Boolean))];
+
+  for (const url of uniqueUrls) {
+    try {
+      await deletePortfolioStorageObject(url);
+    } catch {
+      // Skip legacy or external URLs that are not in portfolio storage.
+    }
+  }
+}
+
 export async function deletePhotoRecord(id: string, imageUrl?: string) {
   const supabase = createAdminClient();
 

@@ -121,7 +121,10 @@ export function BlogAdminForm({ posts }: BlogAdminFormProps) {
       title: "Delete blog post?",
       itemName: label,
       hasAttachments: hasImages,
-      attachmentLabel: "images",
+      attachmentLabel: "uploaded images",
+      description: hasImages
+        ? `This will permanently delete "${label}", remove it from the database, and delete all images embedded in the post from storage.`
+        : undefined,
       onConfirm: () => performDelete(draft.id!),
     });
   };

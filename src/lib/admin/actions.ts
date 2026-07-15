@@ -63,12 +63,34 @@ export async function saveProject(draft: ProjectDraft) {
 export async function deleteProject(slug: string) {
   await requireAdmin();
   const supabase = await getAdminDb();
+
+  const { data: project, error: readError } = await supabase
+    .from("portfolio_projects")
+    .select("image_url")
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (readError) throw new Error(readError.message);
+
   const { error } = await supabase
     .from("portfolio_projects")
     .delete()
     .eq("slug", slug);
   if (error) throw new Error(error.message);
+
+  if (project?.image_url) {
+    const { deletePortfolioStorageObject } = await import(
+      "@/lib/admin/portfolio-storage"
+    );
+    try {
+      await deletePortfolioStorageObject(project.image_url);
+    } catch {
+      // Ignore external image URLs.
+    }
+  }
+
   revalidatePath("/projects");
+  revalidatePath(`/projects/${slug}`);
   revalidatePath("/admin/projects");
 }
 
@@ -259,9 +281,29 @@ export async function saveBlog(draft: BlogDraft) {
 export async function deleteBlog(id: string) {
   await requireAdmin();
   const supabase = await getAdminDb();
+
+  const { data: blog, error: readError } = await supabase
+    .from("portfolio_blogs")
+    .select("content_html, slug")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (readError) throw new Error(readError.message);
+  if (!blog) return;
+
   const { error } = await supabase.from("portfolio_blogs").delete().eq("id", id);
   if (error) throw new Error(error.message);
+
+  const {
+    deletePortfolioStorageObjects,
+    extractStorageUrlsFromHtml,
+  } = await import("@/lib/admin/portfolio-storage");
+  await deletePortfolioStorageObjects(
+    extractStorageUrlsFromHtml(blog.content_html ?? ""),
+  );
+
   revalidatePath("/blogs");
+  revalidatePath(`/blogs/${blog.slug}`);
   revalidatePath("/admin/blogs");
 }
 
@@ -300,8 +342,33 @@ export async function saveMusicTrack(draft: MusicTrackDraft) {
 export async function deleteMusicTrack(id: string) {
   await requireAdmin();
   const supabase = await getAdminDb();
+
+  const { data: track, error: readError } = await supabase
+    .from("portfolio_music")
+    .select("audio_url, cover_url")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (readError) throw new Error(readError.message);
+
   const { error } = await supabase.from("portfolio_music").delete().eq("id", id);
   if (error) throw new Error(error.message);
+
+  if (track) {
+    const { deletePortfolioStorageObject } = await import(
+      "@/lib/admin/portfolio-storage"
+    );
+
+    for (const fileUrl of [track.audio_url, track.cover_url]) {
+      if (!fileUrl) continue;
+      try {
+        await deletePortfolioStorageObject(fileUrl);
+      } catch {
+        // Ignore legacy public audio paths and external URLs.
+      }
+    }
+  }
+
   revalidatePath("/");
   revalidatePath("/admin/music");
 }

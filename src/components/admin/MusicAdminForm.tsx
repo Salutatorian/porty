@@ -77,6 +77,7 @@ function trackToDraft(track: AdminMusicTrack): MusicTrackDraft {
 export function MusicAdminForm({ tracks }: MusicAdminFormProps) {
   const router = useRouter();
   const { requestDelete, dialog } = useAdminConfirmDelete();
+  const [trackList, setTrackList] = React.useState(tracks);
   const { addUpload, updateUpload } = useAdminUploads();
   const [draft, setDraft] = React.useState<MusicTrackDraft>(emptyDraft);
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
@@ -84,6 +85,10 @@ export function MusicAdminForm({ tracks }: MusicAdminFormProps) {
   const [message, setMessage] = React.useState<string | null>(null);
   const progressRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
   const coverProgressRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+
+  React.useEffect(() => {
+    setTrackList(tracks);
+  }, [tracks]);
 
   const clearProgressTimer = () => {
     if (progressRef.current) {
@@ -290,6 +295,7 @@ export function MusicAdminForm({ tracks }: MusicAdminFormProps) {
       } else {
         await deleteMusicTrack(id);
       }
+      setTrackList((current) => current.filter((item) => item.id !== id));
       if (selectedId === id) {
         setSelectedId(null);
         setDraft(emptyDraft);
@@ -317,6 +323,9 @@ export function MusicAdminForm({ tracks }: MusicAdminFormProps) {
       itemName: label,
       hasAttachments,
       attachmentLabel: "audio and cover files",
+      description: track?.isLegacy
+        ? `This will hide "${label}" from the site. Built-in legacy audio files in /public cannot be removed from storage.`
+        : `This will permanently delete "${label}", remove it from the database, and delete its audio and cover files from storage.`,
       onConfirm: () => performDeleteTrack(id),
     });
   };
@@ -518,7 +527,7 @@ export function MusicAdminForm({ tracks }: MusicAdminFormProps) {
           </p>
         ) : (
           <ul className="mt-3 space-y-2">
-            {tracks.map((track) => (
+            {trackList.map((track) => (
               <li key={track.id}>
                 <div
                   className={cn(
