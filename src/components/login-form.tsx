@@ -4,6 +4,7 @@ import * as React from "react";
 import { useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { getPublicSiteUrl } from "@/lib/site-url";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -70,13 +71,17 @@ export function LoginForm({
     setError(null);
 
     const supabase = createClient();
-    const redirectTo = new URL("/auth/callback", window.location.origin);
+    const siteUrl = getPublicSiteUrl(window.location.origin);
+    const redirectTo = new URL("/auth/callback", siteUrl);
     redirectTo.searchParams.set("next", nextPath);
 
     const { error: signInError } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: redirectTo.toString(),
+        queryParams: {
+          prompt: "select_account",
+        },
       },
     });
 

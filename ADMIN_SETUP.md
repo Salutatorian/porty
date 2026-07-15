@@ -6,8 +6,21 @@ Copy `env.example` to `.env.local` and fill in:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_SITE_URL` (production: `https://thegreaterengine.xyz`)
 - `SUPABASE_SERVICE_ROLE_KEY` (Supabase Dashboard → Settings → API → service_role)
 - `ADMIN_EMAIL` (your login email)
+
+### Supabase redirect URLs (required for Google login)
+
+This portfolio shares a Supabase project with [Papernhớ](https://www.papernho.com/). Papernhớ may be the **Site URL**, but you must also allow the portfolio callback or OAuth will send you back to Papernhớ after sign-in.
+
+In [Supabase → Authentication → URL Configuration](https://supabase.com/dashboard/project/wiqllmjrzmnrsqcgixoz/auth/url-configuration), add these **Redirect URLs**:
+
+- `https://thegreaterengine.xyz/**`
+- `http://localhost:3000/**`
+- `https://*-salutatorians-projects.vercel.app/**`
+
+Keep Papernhớ URLs in the list too (e.g. `https://www.papernho.com/**`). See [Supabase redirect URL docs](https://supabase.com/docs/guides/auth/redirect-urls).
 
 ### Vercel
 
