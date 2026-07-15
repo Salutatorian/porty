@@ -2,15 +2,17 @@
 
 import { Availability } from "@/components/Availability";
 import { FastScrambleText } from "@/components/FastScrambleText";
+import { ShimmeringText } from "@/components/unlumen-ui/shimmering-text";
+
 export function PortfolioIntro() {
   return (
     <div className="mx-auto max-w-[560px] text-center">
       <p className="text-[15px]">
-        <FastScrambleText
+        <ShimmeringText
           text="Dear Visitor,"
-          duration={400}
-          className="font-semibold text-foreground"
-          scrambledClassName="font-semibold text-foreground/20"
+          duration={2.5}
+          repeatDelay={0.75}
+          className="font-semibold [--base-color:var(--foreground)] [--shimmer-color:#38bdf8] dark:[--base-color:#ffffff]"
         />
       </p>
 
