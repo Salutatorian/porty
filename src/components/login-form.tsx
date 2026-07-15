@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -43,12 +43,10 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
-  const [loading, setLoading] = React.useState(false);
   const [googleLoading, setGoogleLoading] = React.useState(false);
 
   React.useEffect(() => {
@@ -62,26 +60,9 @@ export function LoginForm({
 
   const nextPath = searchParams.get("next") ?? "/admin";
 
-  const onSubmit = async (event: React.FormEvent) => {
+  const onSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    setLoading(false);
-
-    if (signInError) {
-      setError(signInError.message);
-      return;
-    }
-
-    router.push(nextPath);
-    router.refresh();
+    setError("Sign in with Google to continue.");
   };
 
   const onGoogleSignIn = async () => {
@@ -127,7 +108,6 @@ export function LoginForm({
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   aria-invalid={error ? true : undefined}
-                  required
                 />
               </div>
               <div className="grid gap-2">
@@ -140,7 +120,6 @@ export function LoginForm({
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   aria-invalid={error ? true : undefined}
-                  required
                 />
               </div>
 
@@ -150,8 +129,8 @@ export function LoginForm({
                 </p>
               ) : null}
 
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Signing in…" : "Sign in"}
+              <Button type="submit" className="w-full" disabled>
+                Sign in
               </Button>
 
               <div className="relative">
