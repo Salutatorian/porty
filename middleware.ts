@@ -1,4 +1,4 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { ADMIN_AUTH_BYPASS } from "@/lib/admin/auth-bypass";
 import {
@@ -37,6 +37,22 @@ function isAdminEmail(email: string | undefined) {
   return Boolean(adminEmail && email.toLowerCase() === adminEmail);
 }
 
+function withPathnameHeader(request: NextRequest) {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+  return requestHeaders;
+}
+
+function applyAdminResponseHeaders(
+  request: NextRequest,
+  response: NextResponse,
+) {
+  if (request.nextUrl.pathname.startsWith("/admin")) {
+    response.headers.set("Cache-Control", "no-store, must-revalidate");
+  }
+  return response;
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -57,7 +73,10 @@ export async function middleware(request: NextRequest) {
   if (legacyRedirects[pathname]) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = legacyRedirects[pathname];
-    return NextResponse.redirect(redirectUrl);
+    return applyAdminResponseHeaders(
+      request,
+      NextResponse.redirect(redirectUrl),
+    );
   }
 
   if (
@@ -71,11 +90,20 @@ export async function middleware(request: NextRequest) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = "/admin/login";
       loginUrl.searchParams.set("next", pathname);
-      return NextResponse.redirect(loginUrl);
+      return applyAdminResponseHeaders(
+        request,
+        NextResponse.redirect(loginUrl),
+      );
     }
   }
 
-  return updateSession(request);
+  const requestWithPathname = new NextRequest(request.url, {
+    headers: withPathnameHeader(request),
+    method: request.method,
+  });
+
+  const response = await updateSession(requestWithPathname);
+  return applyAdminResponseHeaders(request, response);
 }
 
 export const config = {

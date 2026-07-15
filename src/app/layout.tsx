@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
-import { BottomMusicPlayerShell } from "@/components/BottomMusicPlayerShell";
-import { SiteChrome } from "@/components/SiteChrome";
-import { SiteFooter } from "@/components/SiteFooter";
+import { SiteExtras } from "@/components/SiteExtras";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
@@ -27,10 +25,7 @@ export default function RootLayout({
       <body className="min-h-dvh pb-28 font-sans antialiased">
         <ThemeProvider>
           {children}
-          <SiteChrome>
-            <SiteFooter />
-            <BottomMusicPlayerShell />
-          </SiteChrome>
+          <SiteExtras />
         </ThemeProvider>
       </body>
     </html>

@@ -5,6 +5,8 @@ import { ADMIN_AUTH_BYPASS } from "@/lib/admin/auth-bypass";
 import { getAdminUser } from "@/lib/admin/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminLoginPage() {
   if (ADMIN_AUTH_BYPASS) redirect("/admin");
 
