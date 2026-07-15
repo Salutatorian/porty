@@ -28,6 +28,26 @@ function titleFromFilename(name: string) {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+function getImageFromClipboard(data: DataTransfer | null) {
+  if (!data) return null;
+
+  for (const item of data.items) {
+    if (item.kind === "file" && item.type.startsWith("image/")) {
+      const file = item.getAsFile();
+      if (file) return file;
+    }
+  }
+
+  return null;
+}
+
+function normalizeCoverFile(file: File) {
+  if (file.name?.trim()) return file;
+
+  const extension = file.type.split("/")[1] || "png";
+  return new File([file], `pasted-cover.${extension}`, { type: file.type });
+}
+
 const emptyDraft: MusicTrackDraft = {
   id: "",
   title: "",
@@ -61,11 +81,19 @@ export function MusicAdminForm({ tracks }: MusicAdminFormProps) {
   const [loading, setLoading] = React.useState(false);
   const [message, setMessage] = React.useState<string | null>(null);
   const progressRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+  const coverProgressRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
 
   const clearProgressTimer = () => {
     if (progressRef.current) {
       clearInterval(progressRef.current);
       progressRef.current = null;
+    }
+  };
+
+  const clearCoverProgressTimer = () => {
+    if (coverProgressRef.current) {
+      clearInterval(coverProgressRef.current);
+      coverProgressRef.current = null;
     }
   };
 
@@ -155,25 +183,69 @@ export function MusicAdminForm({ tracks }: MusicAdminFormProps) {
     }
   };
 
-  const uploadCover = async (file: File) => {
-    if (!isWithinAdminUploadLimit(file.size)) {
-      setMessage(adminUploadLimitError(file.name));
-      return;
-    }
+  const uploadCover = React.useCallback(
+    async (file: File) => {
+      const imageFile = normalizeCoverFile(file);
 
-    setLoading(true);
-    setMessage(null);
+      if (!isWithinAdminUploadLimit(imageFile.size)) {
+        setMessage(adminUploadLimitError(imageFile.name));
+        return;
+      }
 
-    try {
-      const { publicUrl } = await uploadPortfolioFile(file, "photos");
-      update({ coverUrl: publicUrl });
-      setMessage("Cover art uploaded. Save track to apply.");
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Cover upload failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+      const uploadId = crypto.randomUUID();
+      const previewUrl = URL.createObjectURL(imageFile);
+
+      addUpload({
+        id: uploadId,
+        fileName: imageFile.name,
+        previewUrl,
+        fileSize: imageFile.size,
+        mimeType: imageFile.type || "image/jpeg",
+        kind: "image",
+        state: "uploading",
+        progress: 0,
+      });
+
+      setLoading(true);
+      setMessage(null);
+      clearCoverProgressTimer();
+
+      let progress = 0;
+      coverProgressRef.current = setInterval(() => {
+        progress = Math.min(92, progress + Math.random() * 14 + 4);
+        updateUpload(uploadId, { progress });
+      }, 220);
+
+      try {
+        const { publicUrl } = await uploadPortfolioFile(imageFile, "photos");
+
+        clearCoverProgressTimer();
+        updateUpload(uploadId, { state: "processing", progress: 100 });
+        setDraft((current) => ({ ...current, coverUrl: publicUrl }));
+        setMessage("Cover art uploaded. Save track to apply.");
+
+        window.setTimeout(() => {
+          updateUpload(uploadId, { state: "done", progress: 100 });
+        }, 350);
+      } catch (error) {
+        clearCoverProgressTimer();
+        const errorMessage =
+          error instanceof Error ? error.message : "Cover upload failed";
+        setMessage(errorMessage);
+        updateUpload(uploadId, {
+          state: "error",
+          progress: 0,
+          error: errorMessage,
+          onRetry: () => {
+            void uploadCover(file);
+          },
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [addUpload, updateUpload],
+  );
 
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -235,8 +307,33 @@ export function MusicAdminForm({ tracks }: MusicAdminFormProps) {
   };
 
   React.useEffect(() => {
+    if (!selectedId) return;
+
+    const onPaste = (event: ClipboardEvent) => {
+      const target = event.target;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        (target instanceof HTMLElement && target.isContentEditable)
+      ) {
+        return;
+      }
+
+      const imageFile = getImageFromClipboard(event.clipboardData);
+      if (!imageFile) return;
+
+      event.preventDefault();
+      void uploadCover(imageFile);
+    };
+
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  }, [selectedId, uploadCover]);
+
+  React.useEffect(() => {
     return () => {
       clearProgressTimer();
+      clearCoverProgressTimer();
     };
   }, []);
 
@@ -292,7 +389,17 @@ export function MusicAdminForm({ tracks }: MusicAdminFormProps) {
               />
             </label>
 
-            <div className="space-y-2">
+            <div
+              className="space-y-2 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-foreground/15"
+              tabIndex={0}
+              onPaste={(event) => {
+                const imageFile = getImageFromClipboard(event.clipboardData);
+                if (!imageFile) return;
+
+                event.preventDefault();
+                void uploadCover(imageFile);
+              }}
+            >
               <p className="text-[12px] text-foreground/50">Cover art</p>
               <div className="flex items-center gap-3">
                 {draft.coverUrl ? (
@@ -333,7 +440,8 @@ export function MusicAdminForm({ tracks }: MusicAdminFormProps) {
                 ) : null}
               </div>
               <p className="text-[11px] text-foreground/40">
-                Shown in the music player when you hover, Spotify-style.
+                Upload a file, or copy an image and press Ctrl+V / Cmd+V. Shown in
+                the music player when you hover.
               </p>
             </div>
 
