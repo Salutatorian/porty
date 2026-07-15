@@ -19,7 +19,7 @@ const emptyDraft: BlogDraft = {
   excerpt: "",
   contentJson: {},
   contentHtml: "",
-  status: "draft",
+  status: "published",
   isFeatured: false,
 };
 
@@ -77,8 +77,9 @@ export function BlogAdminForm({ posts }: BlogAdminFormProps) {
       await saveBlog({
         ...draft,
         slug: draft.slug || slugify(draft.title),
+        status: "published",
       });
-      setMessage("Blog post saved.");
+      setMessage("Blog post published.");
       router.refresh();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Save failed");
@@ -160,9 +161,6 @@ export function BlogAdminForm({ posts }: BlogAdminFormProps) {
                   <span className="block truncate text-[13px] font-medium">
                     {post.title}
                   </span>
-                  <span className="block truncate text-[11px] capitalize text-foreground/45">
-                    {post.status}
-                  </span>
                 </span>
               </button>
             ))
@@ -224,35 +222,19 @@ export function BlogAdminForm({ posts }: BlogAdminFormProps) {
           }
         />
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="block text-[12px] text-foreground/50">
-            Status
-            <select
-              className={fieldClass}
-              value={draft.status}
-              onChange={(e) =>
-                update({ status: e.target.value as "draft" | "published" })
-              }
-            >
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-            </select>
-          </label>
-
-          <label className="flex items-end gap-2 pb-2 text-[12px] text-foreground/50">
-            <input
-              type="checkbox"
-              checked={draft.isFeatured ?? false}
-              onChange={(e) => update({ isFeatured: e.target.checked })}
-              className="size-4 rounded border-foreground/20"
-            />
-            Star / pin to top
-          </label>
-        </div>
+        <label className="flex items-center gap-2 text-[12px] text-foreground/50">
+          <input
+            type="checkbox"
+            checked={draft.isFeatured ?? false}
+            onChange={(e) => update({ isFeatured: e.target.checked })}
+            className="size-4 rounded border-foreground/20"
+          />
+          Star / pin to top
+        </label>
 
         <ButtonGroup>
           <Button type="submit" disabled={loading}>
-            {loading ? "Saving..." : "Save post"}
+            {loading ? "Publishing..." : "Publish post"}
           </Button>
           {draft.id ? (
             <Button

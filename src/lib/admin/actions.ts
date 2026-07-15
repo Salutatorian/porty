@@ -217,22 +217,17 @@ export async function saveBlog(draft: BlogDraft) {
   await requireAdmin();
   const supabase = await getAdminDb();
 
-  let publishedAt: string | null =
-    draft.status === "published" ? new Date().toISOString() : null;
+  let publishedAt = new Date().toISOString();
 
   if (draft.id) {
     const { data: existing } = await supabase
       .from("portfolio_blogs")
-      .select("published_at, status")
+      .select("published_at")
       .eq("id", draft.id)
       .maybeSingle();
 
-    if (existing?.published_at && draft.status === "published") {
+    if (existing?.published_at) {
       publishedAt = existing.published_at;
-    } else if (draft.status === "published" && existing?.status !== "published") {
-      publishedAt = new Date().toISOString();
-    } else if (draft.status === "draft") {
-      publishedAt = null;
     }
   }
 
@@ -244,7 +239,7 @@ export async function saveBlog(draft: BlogDraft) {
     excerpt: draft.excerpt ?? null,
     content_json: draft.contentJson,
     content_html: draft.contentHtml,
-    status: draft.status,
+    status: "published",
     is_featured: draft.isFeatured ?? false,
     published_at: publishedAt,
     updated_at: new Date().toISOString(),
