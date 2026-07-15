@@ -1,0 +1,16 @@
+---
+description: Automatically commit and push code changes after completing work
+alwaysApply: true
+---
+
+# Auto push after changes
+
+When you finish implementing a task that modifies the codebase:
+
+1. **Commit and push without being asked** — do not wait for the user to say "push".
+2. **Scope** — only commit files related to the work. Never commit `.env.local`, secrets, or local test artifacts (e.g. `test-tiny.jpg`, `admin-photos.html`).
+3. **Message** — write a clear commit message focused on why the change was made.
+4. **Confirm briefly** — tell the user the commit hash after pushing; no need to ask permission first.
+5. **Skip push only when** — the user explicitly says not to push, there are no code changes, or push fails (report the error and what to fix).
+
+Default branch is `main`; push to `origin/main` unless the user uses another workflow.
