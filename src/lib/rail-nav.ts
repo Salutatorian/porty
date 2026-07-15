@@ -6,6 +6,7 @@ export type RailNavItem = {
   imageAlt?: string;
   color?: string;
   highlightOnHover?: boolean;
+  prefetch?: boolean;
 };
 
 export const PROJECTS_NAV: RailNavItem = {
@@ -36,4 +37,5 @@ export const TRAINING_NAV: RailNavItem = {
   href: "/training",
   title: "Training",
   cta: "View activity ↗",
+  prefetch: false,
 };

@@ -3,6 +3,7 @@ import {
   fetchRecoveryForCycle,
   refreshWhoopAccessToken,
 } from "@/lib/whoop/client";
+import { WHOOP_TRAINING_RANGE } from "@/lib/whoop/constants";
 import { loadWhoopRefreshToken } from "@/lib/whoop/token-store";
 import type {
   WhoopCycleSummary,
@@ -51,7 +52,7 @@ const RANGE_DAYS: Record<string, number> = {
 };
 
 /** Default for /training — only need ~2 weeks for the trend chart. */
-export const WHOOP_TRAINING_RANGE = "14d";
+export { WHOOP_TRAINING_RANGE } from "@/lib/whoop/constants";
 
 const CACHE_TTL_MS = 60_000;
 const dashboardCache = new Map<

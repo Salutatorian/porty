@@ -1,10 +1,6 @@
-import { Suspense } from "react";
 import { BackButton } from "@/components/BackButton";
-import { WhoopPanel } from "@/components/training/whoop-panel";
-import { WhoopSkeleton } from "@/components/training/whoop-skeleton";
+import { WhoopPanelClient } from "@/components/training/whoop-panel-client";
 import { isWhoopConfigured } from "@/lib/whoop/dashboard";
-
-export const dynamic = "force-dynamic";
 
 export default function TrainingPage() {
   return (
@@ -19,9 +15,7 @@ export default function TrainingPage() {
         </header>
 
         <div className="mt-14">
-          <Suspense fallback={<WhoopSkeleton />}>
-            <WhoopPanel />
-          </Suspense>
+          <WhoopPanelClient />
         </div>
 
         {!isWhoopConfigured() ? (
