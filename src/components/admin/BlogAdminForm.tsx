@@ -4,6 +4,7 @@ import * as React from "react";
 import { Star, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { BlogEditor } from "@/components/admin/BlogEditor";
+import { useAdminConfirmDelete } from "@/components/admin/AdminConfirmDeleteDialog";
 import { deleteBlog, saveBlog, type BlogDraft } from "@/lib/admin/actions";
 import type { AdminBlogPost } from "@/lib/content/blogs";
 import { slugify } from "@/lib/slugify";
@@ -42,6 +43,7 @@ function postToDraft(post: AdminBlogPost): BlogDraft {
 
 export function BlogAdminForm({ posts }: BlogAdminFormProps) {
   const router = useRouter();
+  const { requestDelete, dialog } = useAdminConfirmDelete();
   const [draft, setDraft] = React.useState<BlogDraft>(emptyDraft);
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
   const [message, setMessage] = React.useState<string | null>(null);
@@ -85,27 +87,42 @@ export function BlogAdminForm({ posts }: BlogAdminFormProps) {
     }
   };
 
-  const onDelete = async () => {
-    if (!draft.id) return;
-    if (!window.confirm("Delete this blog post?")) return;
-
+  const performDelete = async (id: string) => {
     setLoading(true);
     setMessage(null);
 
     try {
-      await deleteBlog(draft.id);
+      await deleteBlog(id);
       startNew();
       setMessage("Blog post deleted.");
       router.refresh();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Delete failed");
+      throw error;
     } finally {
       setLoading(false);
     }
   };
 
+  const onDelete = () => {
+    if (!draft.id) return;
+
+    const label = draft.title.trim() || "this blog post";
+    const hasImages = /<img\s/i.test(draft.contentHtml);
+
+    requestDelete({
+      title: "Delete blog post?",
+      itemName: label,
+      hasAttachments: hasImages,
+      attachmentLabel: "images",
+      onConfirm: () => performDelete(draft.id!),
+    });
+  };
+
   return (
-    <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+    <>
+      {dialog}
+      <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
       <aside className="space-y-2">
         <div className="flex items-center justify-between gap-2">
           <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-foreground/45">
@@ -255,5 +272,6 @@ export function BlogAdminForm({ posts }: BlogAdminFormProps) {
         ) : null}
       </form>
     </div>
+    </>
   );
 }

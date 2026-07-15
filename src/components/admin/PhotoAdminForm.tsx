@@ -18,6 +18,7 @@ import {
 } from "@/lib/admin/upload-limits";
 import type { PhotoItem } from "@/lib/media-items";
 import { AdminUploadEmpty } from "@/components/admin/AdminUploadEmpty";
+import { useAdminConfirmDelete } from "@/components/admin/AdminConfirmDeleteDialog";
 import { useAdminUploads } from "@/components/admin/AdminUploadProvider";
 import { DatePickerInput } from "@/components/ui/date-picker-input";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,7 @@ function photoToDraft(photo: PhotoItem): PhotoDraft {
 
 export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
   const router = useRouter();
+  const { requestDelete, dialog } = useAdminConfirmDelete();
   const { addUpload, updateUpload, removeUpload } = useAdminUploads();
   const [draft, setDraft] = React.useState<PhotoDraft>(emptyDraft);
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
@@ -196,16 +198,12 @@ export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
     }
   };
 
-  const onDeletePhoto = async (photoId?: string) => {
+  const performDeletePhoto = async (photoId?: string) => {
     const id = photoId ?? selectedId;
     if (!id) return;
 
     const photo = photos.find((item) => item.id === id);
     const label = photo?.title?.trim() || "this photo";
-
-    if (!window.confirm(`Delete "${label}"? This cannot be undone.`)) {
-      return;
-    }
 
     const attachmentId = crypto.randomUUID();
 
@@ -252,11 +250,29 @@ export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
     }
   };
 
+  const onDeletePhoto = (photoId?: string) => {
+    const id = photoId ?? selectedId;
+    if (!id) return;
+
+    const photo = photos.find((item) => item.id === id);
+    const label = photo?.title?.trim() || "this photo";
+
+    requestDelete({
+      title: "Delete photo?",
+      itemName: label,
+      hasAttachments: Boolean(photo?.image),
+      attachmentLabel: "photo",
+      onConfirm: () => performDeletePhoto(id),
+    });
+  };
+
   const fieldClass =
     "mt-1 w-full rounded-lg border border-foreground/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-foreground/25";
 
   return (
-    <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_280px]">
+    <>
+      {dialog}
+      <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_280px]">
       <div>
         {!draft.imageUrl ? (
           <AdminUploadEmpty
@@ -485,5 +501,6 @@ export function PhotoAdminForm({ photos }: PhotoAdminFormProps) {
         </div>
       </aside>
     </div>
+    </>
   );
 }

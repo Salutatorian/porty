@@ -11,6 +11,7 @@ import {
 import { uploadPortfolioFile, saveMusicTrackViaApi } from "@/lib/admin/portfolio-upload";
 import type { AdminMusicTrack } from "@/lib/content/music";
 import { AdminUploadEmpty } from "@/components/admin/AdminUploadEmpty";
+import { useAdminConfirmDelete } from "@/components/admin/AdminConfirmDeleteDialog";
 import { useAdminUploads } from "@/components/admin/AdminUploadProvider";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
@@ -75,6 +76,7 @@ function trackToDraft(track: AdminMusicTrack): MusicTrackDraft {
 
 export function MusicAdminForm({ tracks }: MusicAdminFormProps) {
   const router = useRouter();
+  const { requestDelete, dialog } = useAdminConfirmDelete();
   const { addUpload, updateUpload } = useAdminUploads();
   const [draft, setDraft] = React.useState<MusicTrackDraft>(emptyDraft);
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
@@ -270,16 +272,11 @@ export function MusicAdminForm({ tracks }: MusicAdminFormProps) {
     }
   };
 
-  const onDeleteTrack = async (trackId?: string) => {
+  const performDeleteTrack = async (trackId?: string) => {
     const id = trackId ?? selectedId;
     if (!id) return;
 
     const track = tracks.find((item) => item.id === id);
-    const label = track?.title?.trim() || "this track";
-
-    if (!window.confirm(`Delete "${label}"? This cannot be undone.`)) {
-      return;
-    }
 
     setLoading(true);
     setMessage(null);
@@ -301,9 +298,27 @@ export function MusicAdminForm({ tracks }: MusicAdminFormProps) {
       router.refresh();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Delete failed");
+      throw error;
     } finally {
       setLoading(false);
     }
+  };
+
+  const onDeleteTrack = (trackId?: string) => {
+    const id = trackId ?? selectedId;
+    if (!id) return;
+
+    const track = tracks.find((item) => item.id === id);
+    const label = track?.title?.trim() || "this track";
+    const hasAttachments = Boolean(track?.audioUrl || track?.coverUrl);
+
+    requestDelete({
+      title: "Delete track?",
+      itemName: label,
+      hasAttachments,
+      attachmentLabel: "audio and cover files",
+      onConfirm: () => performDeleteTrack(id),
+    });
   };
 
   React.useEffect(() => {
@@ -341,7 +356,9 @@ export function MusicAdminForm({ tracks }: MusicAdminFormProps) {
     "mt-1 w-full rounded-lg border border-foreground/10 bg-transparent px-3 py-2 text-sm outline-none focus:border-foreground/25";
 
   return (
-    <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_280px]">
+    <>
+      {dialog}
+      <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_280px]">
       <div>
         {!selectedId ? (
           <AdminUploadEmpty
@@ -559,5 +576,6 @@ export function MusicAdminForm({ tracks }: MusicAdminFormProps) {
         )}
       </aside>
     </div>
+    </>
   );
 }
