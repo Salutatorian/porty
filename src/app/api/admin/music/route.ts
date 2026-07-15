@@ -25,12 +25,12 @@ export async function POST(request: Request) {
   }
 
   const title = body.title?.trim();
-  const artist = body.artist?.trim();
   const audioUrl = body.audioUrl?.trim();
+  const artist = body.artist?.trim() ?? "";
 
-  if (!title || !artist || !audioUrl) {
+  if (!title || !audioUrl) {
     return NextResponse.json(
-      { error: "title, artist, and audioUrl are required" },
+      { error: "title and audioUrl are required" },
       { status: 400 },
     );
   }

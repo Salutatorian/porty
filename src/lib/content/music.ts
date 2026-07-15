@@ -8,14 +8,52 @@ type MusicRow = {
   artist: string;
   audio_url: string;
   sort_order: number;
+  published: boolean;
+};
+
+export type AdminMusicTrack = {
+  id: string;
+  title: string;
+  artist: string;
+  audioUrl: string;
+  sortOrder: number;
+  published: boolean;
 };
 
 function mapTrack(row: MusicRow): MusicTrack {
   return {
     src: row.audio_url,
     title: row.title,
-    artist: row.artist,
+    artist: row.artist.trim() || "Unknown artist",
   };
+}
+
+function mapAdminTrack(row: MusicRow): AdminMusicTrack {
+  return {
+    id: row.id,
+    title: row.title,
+    artist: row.artist,
+    audioUrl: row.audio_url,
+    sortOrder: row.sort_order,
+    published: row.published,
+  };
+}
+
+export async function getAllMusicForAdmin(): Promise<AdminMusicTrack[]> {
+  try {
+    const { getAdminDb } = await import("@/lib/admin/auth");
+    const supabase = await getAdminDb();
+    const { data, error } = await supabase
+      .from("portfolio_music")
+      .select("id, title, artist, audio_url, sort_order, published")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return (data ?? []).map((row) => mapAdminTrack(row as MusicRow));
+  } catch {
+    return [];
+  }
 }
 
 export async function getPublishedMusicTracks(): Promise<MusicTrack[]> {

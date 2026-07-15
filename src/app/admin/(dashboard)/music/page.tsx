@@ -1,14 +1,17 @@
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { MusicAdminUpload } from "@/components/admin/MusicAdminUpload";
+import { MusicAdminForm } from "@/components/admin/MusicAdminForm";
+import { getAllMusicForAdmin } from "@/lib/content/music";
 
-export default function AdminMusicPage() {
+export default async function AdminMusicPage() {
+  const tracks = await getAllMusicForAdmin();
+
   return (
     <div>
       <AdminPageHeader
         title="Music player"
         description="Upload audio, set metadata, and control the bottom music player."
       />
-      <MusicAdminUpload />
+      <MusicAdminForm tracks={tracks} />
     </div>
   );
 }
