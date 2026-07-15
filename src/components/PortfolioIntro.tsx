@@ -12,7 +12,7 @@ export function PortfolioIntro() {
           text="Dear Visitor,"
           duration={2.5}
           repeatDelay={0.75}
-          className="font-semibold [--base-color:var(--foreground)] [--shimmer-color:#38bdf8] dark:[--base-color:#ffffff]"
+          className="font-semibold [--base-color:var(--foreground)] [--shimmer-color:#737373] dark:[--base-color:#ffffff] dark:[--shimmer-color:#525252]"
         />
       </p>
 
