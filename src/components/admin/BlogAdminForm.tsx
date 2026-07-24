@@ -79,11 +79,24 @@ export function BlogAdminForm({ posts }: BlogAdminFormProps) {
     setMessage(null);
 
     try {
-      await saveBlog({
+      const result = await saveBlog({
         ...draft,
         slug: draft.slug || slugify(draft.title),
         status: "published",
       });
+
+      if (!result.ok) {
+        setMessage(result.error);
+        return;
+      }
+
+      setSelectedId(result.id);
+      setDraft((current) => ({
+        ...current,
+        id: result.id,
+        slug: result.slug,
+        status: "published",
+      }));
       setMessage("Blog post published.");
       router.refresh();
     } catch (error) {

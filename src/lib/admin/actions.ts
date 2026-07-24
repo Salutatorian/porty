@@ -235,7 +235,11 @@ export type BlogDraft = {
   isFeatured?: boolean;
 };
 
-export async function saveBlog(draft: BlogDraft) {
+export type SaveBlogResult =
+  | { ok: true; id: string; slug: string }
+  | { ok: false; error: string };
+
+export async function saveBlog(draft: BlogDraft): Promise<SaveBlogResult> {
   await requireAdmin();
   const supabase = await getAdminDb();
 
@@ -253,29 +257,48 @@ export async function saveBlog(draft: BlogDraft) {
     }
   }
 
+  const slug = draft.slug || slugify(draft.title);
   const row = {
-    id: draft.id,
-    slug: draft.slug || slugify(draft.title),
+    slug,
     title: draft.title,
     subtitle: draft.subtitle ?? null,
     excerpt: draft.excerpt ?? null,
     content_json: draft.contentJson,
     content_html: draft.contentHtml,
-    status: "published",
+    status: "published" as const,
     is_featured: draft.isFeatured ?? false,
     published_at: publishedAt,
     updated_at: new Date().toISOString(),
   };
 
-  const { error } = draft.id
-    ? await supabase.from("portfolio_blogs").update(row).eq("id", draft.id)
-    : await supabase.from("portfolio_blogs").insert(row);
+  const { data, error } = draft.id
+    ? await supabase
+        .from("portfolio_blogs")
+        .update(row)
+        .eq("id", draft.id)
+        .select("id, slug")
+        .single()
+    : await supabase
+        .from("portfolio_blogs")
+        .insert(row)
+        .select("id, slug")
+        .single();
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    if (error.code === "23505") {
+      return {
+        ok: false,
+        error: `A post with the slug "${slug}" already exists. Change the slug or edit the existing post.`,
+      };
+    }
+    return { ok: false, error: error.message };
+  }
 
   revalidatePath("/blogs");
-  revalidatePath(`/blogs/${row.slug}`);
+  revalidatePath(`/blogs/${slug}`);
   revalidatePath("/admin/blogs");
+
+  return { ok: true, id: data.id, slug: data.slug };
 }
 
 export async function deleteBlog(id: string) {
